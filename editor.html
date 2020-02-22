@@ -18,7 +18,7 @@
 		<div id="topBar" class="header">
 			<span class="smallText">
 				<a href="https://bitbucket.org/coderpatsy/kgsaveedit">Kittens Game Save Editor</a> by <a href="https://coderpatsy.bitbucket.io/">patsy</a>, with help from Guest93,
-				for <a href="http://bloodrizer.ru/games/kittens/">Kittens Game</a> version <span id="gameVersionSpan">1.4.7.0.a</span>
+				for <a href="http://bloodrizer.ru/games/kittens/">Kittens Game</a> version <span id="gameVersionSpan">1.4.7.0.a (&gamma;)</span>
 				by <a href="http://bloodrizer.ru/">bloodrizer</a>
 			</span>
 
@@ -39,8 +39,13 @@
 
 		<div id="editContainer">
 			<div id="importBlock" class="lightbox hidden">
-				Save Import<br>
-				<textarea id="importSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea><br>
+				Save Import
+				<br>
+				<input id="importSaveFile" type="file" accept=".txt,text/plain" class="hidden">
+				<input id="importSaveFileSubmit" type="button" value="Import file">
+				<br><br>
+				<textarea id="importSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+				<br>
 				<input id="importLoadButton" type="button" value="Load">
 				<input id="importCancel" type="button" value="Cancel">
 				<span id="importDevSpan"></span>
@@ -48,8 +53,14 @@
 			</div>
 
 			<div id="exportBlock" class="lightbox hidden">
-				Save Export<br>
-				<textarea id="exportSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea><br>
+				Save Export
+				<br>
+				<input id="exportSaveFileSimple" type="button" value="Export file (simple name)">
+				<input id="exportSaveFileFull" type="button" value="Export file (full name)">
+				<a id="download-link" target="_blank" class="hidden"></a>
+				<br><br>
+				<textarea id="exportSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+				<br>
 				<input id="exportCancel" type="button" value="OK">
 			</div>
 
@@ -148,6 +159,7 @@
 
 					on(dojo.byId("showImport"), "click", function () {
 						game._toggleLightbox("importBlock");
+						dojo.byId("importSaveFile").value = "";
 						dojo.addClass("importError", "hidden");
 
 						var area = dojo.byId("importSaveArea");
@@ -155,21 +167,48 @@
 						area.focus();
 					});
 
-					on(dojo.byId("importLoadButton"), "click", function () {
-						var data = dojo.byId("importSaveArea").value;
-
-						if (!(/\S/.test(data)) || !window.confirm($I("save.msg.confirm"))) {
+					function importData(data) {
+						if (!(/\S/.test(data)) || !window.confirm($I("save.import.confirmation.msg"))) {
 							return;
 						}
 						var success = gamePage.importSave(data);
 
 						if (success === "ERROR") {
 							dojo.removeClass("importError", "hidden");
+
 						} else if (success) {
+							dojo.byId("importSaveFile").value = "";
 							dojo.byId("importSaveArea").value = "";
 							dojo.addClass("importBlock", "hidden");
 							dojo.addClass("importError", "hidden");
 						}
+						return success;
+					}
+
+					on(dojo.byId("importSaveFile"), "change", function () {
+						var file = this.files[0];
+						if (!file || file.type !== "text/plain") {
+							return;
+						}
+
+						var reader = new FileReader();
+						reader.onload = function (ev) {
+							var data = ev.target.result;
+							var success = importData(data);
+							if (!success || success === "ERROR") {
+								dojo.byId("importSaveFile").value = "";
+							}
+						};
+						reader.readAsText(file, "utf-8");
+					});
+
+					on(dojo.byId("importSaveFileSubmit"), "click", function () {
+						dojo.byId("importSaveFile").click();
+					});
+
+					on(dojo.byId("importLoadButton"), "click", function () {
+						var data = dojo.byId("importSaveArea").value;
+						importData(data);
 					});
 
 					on(dojo.byId("importCancel"), "click", function () {
@@ -183,6 +222,14 @@
 						var area = dojo.byId("exportSaveArea");
 						area.value = gamePage.exportSave(true);
 						area.select();
+					});
+
+					on(dojo.byId("exportSaveFileSimple"), "click", function () {
+						game.exportToFile(false);
+					});
+
+					on(dojo.byId("exportSaveFileFull"), "click", function () {
+						game.exportToFile(true);
 					});
 
 					on(dojo.byId("exportCancel"), "click", function () {

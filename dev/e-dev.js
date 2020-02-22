@@ -89,6 +89,7 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 		}
 
 		var negatedKittens = [];
+		var cappedKittens = [];
 		var extraDataKittens = [];
 
 		//remove isSenator, trait.title, and negative job experience wipes from the delta for cleaner output
@@ -97,9 +98,16 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 			var newKittens = {};
 			var key;
 
+			var extraDataKeys = ["engineerSpeciality", "isLeader", "isSenator"];
+
 			for (var index in delta.village.kittens) {
 				var deltaKitten = delta.village.kittens[index];
-				if (index === "_t" || (!deltaKitten.skills && !deltaKitten.isSenator && (!deltaKitten.trait || !deltaKitten.trait.title))) {
+
+				var extraDataMatches = extraDataKeys.filter(function (key) {
+					return deltaKitten.hasOwnProperty(key);
+				});
+
+				if (index === "_t" || (!deltaKitten.skills && !extraDataMatches.length && (!deltaKitten.trait || !deltaKitten.trait.title))) {
 					newKittens[index] = deltaKitten;
 					continue;
 				}
@@ -109,18 +117,23 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 
 				for (var i = deltaKittenKeys.length - 1; i >= 0; i--) {
 					key = deltaKittenKeys[i];
-					if (key !== "skills" && key !== "isSenator" && (key !== "trait" || deltaKitten.trait.name)) {
+					if (key !== "skills" && (key !== "trait" || deltaKitten.trait.name) && extraDataMatches.indexOf(key) === -1) {
 						keepKitten = true;
 						break;
 					}
 				}
 
 				var kittenNegated = false;
+				var kittenCapped = false;
 				var keptSkills = {};
 				for (key in deltaKitten.skills) {
 					var skill = deltaKitten.skills[key];
 					if (skill.length === 3 && skill[0] <= 0 && skill[1] === 0 && skill[2] === 0) {
 						kittenNegated = true;
+
+					} else if (skill.length === 2 && skill[0] > this.game.village.maxJobSkill && skill[1] === this.game.village.maxJobSkill) {
+						kittenCapped = true;
+
 					} else {
 						keptSkills[key] = skill;
 						keepKitten = true;
@@ -128,6 +141,9 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 				}
 				if (kittenNegated) {
 					negatedKittens.push(index);
+				}
+				if (kittenCapped) {
+					cappedKittens.push(index);
 				}
 
 				var kittenTraitTitle = false;
@@ -143,7 +159,7 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 					}
 				}
 
-				if (kittenTraitTitle || deltaKitten.isSenator) {
+				if (kittenTraitTitle || extraDataMatches.length > 0) {
 					extraDataKittens.push(index);
 				}
 
@@ -158,7 +174,7 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 							if (!$.isEmptyObject(keptTrait)) {
 								clone[keepKey] = keptTrait;
 							}
-						} else if (key !== "isSenator") {
+						} else if (extraDataMatches.indexOf(index) === -1) {
 							clone[keepKey] = deltaKitten[keepKey];
 						}
 					}
@@ -184,6 +200,11 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 		if (negatedKittens.length > 0) {
 			summaryHTML.push(negatedKittens.length + " kittens had non-positive job experience values wiped.");
 			console.log("negatedKittens indeces: " + negatedKittens.join(", "));
+		}
+
+		if (cappedKittens.length > 0) {
+			summaryHTML.push(cappedKittens.length + " kittens had skills capped.");
+			console.log("negatedKittens indeces: " + cappedKittens.join(", "));
 		}
 
 		if (extraDataKittens.length > 0) {

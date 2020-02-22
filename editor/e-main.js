@@ -599,7 +599,7 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"gflopsConsumption": {
-				type: "fixed"
+				type: "perTick"
 			},
 
 			"hashrate": {
@@ -785,6 +785,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			value = ele.parseFn(value);
 		}
 		value = Math.max(value, num(ele.minValue));
+		if (isFinite(ele.maxValue)) {
+			value = Math.min(value, ele.maxValue);
+		}
 		return value || 0;
 	},
 
@@ -826,6 +829,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value = ele.parseFn(value);
 			}
 			value = Math.max(value, num(ele.minValue));
+			if (isFinite(ele.maxValue)) {
+				value = Math.min(value, ele.maxValue);
+			}
 
 			if (value !== ele.parsedValue) {
 				ele.parsedValue = value;
@@ -2342,6 +2348,23 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return saveData;
 	},
 
+	exportToFile: function (withFullName) {
+		var $link = $("#download-link");
+
+		var save = this.exportSave(true);
+		var blob = new Blob([save], {type: "text/plain"});
+		$link.attr("href", window.URL.createObjectURL(blob));
+
+		var filename = "Kittens Game";
+		if (withFullName) {
+			filename += " - Run " + (this.stats.getStat("totalResets").val + 1) +
+				" - " + $I("calendar.year.full", [this.calendar.year, this.calendar.getSeasonTitle(this.calendar.season), Math.floor(this.calendar.day)]);
+		}
+		$link.attr("download", filename + " - Edit.txt");
+
+		$link.get(0).dispatchEvent(new MouseEvent("click"));
+	},
+
 	migrateSave: function (save) {
 		if (isNaN(save.saveVersion)) {
 			save.saveVersion = 1;
@@ -2909,16 +2932,28 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		this.callMethods(this.managers, "update");
 
-		var energyProd = this.getEffect("energyProduction") * (1 + this.getEffect("energyProductionRatio"));
+		var energyRatio = 1 + this.getEffect("energyProductionRatio");
+		var energyProd = this.getEffect("energyProduction") * energyRatio;
+		var energyWinterProd = energyProd;
 		var energyCons = this.getEffect("energyConsumption");
 
-		//recalculate because some building.action()s are directly dependant on energy
-		//the game can get away with not doing this because it ticks
+		var currentSeason = this.calendar.season;
+		var solarFarm = this.bld.get("pasture");
+		var calculateEnergyProduction = solarFarm.get("calculateEnergyProduction");
+		if (currentSeason != 3 && calculateEnergyProduction) {
+			var energyLoss = calculateEnergyProduction(this, currentSeason) - calculateEnergyProduction(this, 3);
+			energyWinterProd -= solarFarm.get("on") * energyLoss * energyRatio;
+		}
+
+		// recalculate because some building.action()s are directly dependant on energy
+		// the game doesn't have to worry about this because it ticks
 		if (
 			energyProd !== this.resPool.energyProd ||
+			energyWinterProd !== this.resPool.energyWinterProd ||
 			energyCons !== this.resPool.energyCons
 		) {
 			this.resPool.energyProd = energyProd;
+			this.resPool.energyWinterProd = energyWinterProd;
 			this.resPool.energyCons = energyCons;
 
 			this.bld.invalidateCachedEffects();

@@ -10,6 +10,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 	resourcesByName: null,
 
 	energyProd: 0,
+	energyWinterProd: 0,
 	energyCons: 0,
 
 	isLocked: false,
@@ -52,14 +53,14 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			calculatePerTick: true
 		}, {
 			name: "uranium",
-			color: "#4EA24E",
+			color: "#4ea24e",
 			tags: {
 				baseMetal: true
 			},
 			calculatePerTick: true
 		}, {
 			name: "unobtainium",
-			color: "#A00000",
+			color: "#a00000",
 			tags: {
 				baseMetal: true
 			},
@@ -67,21 +68,21 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "antimatter",
 			transient: true,
-			color: "#5A0EDE"
+			color: "#5a0ede"
 		}, {
 			name: "manpower",
 			transient: true,
-			color: "#DBA901",
+			color: "#dba901",
 			calculatePerTick: true
 		}, {
 			name: "science",
 			transient: true,
-			color: "#01A9DB",
+			color: "#01a9db",
 			calculatePerTick: true
 		}, {
 			name: "culture",
 			transient: true,
-			color: "#DF01D7",
+			color: "#df01d7",
 			calculatePerTick: true
 		}, {
 			name: "faith",
@@ -121,7 +122,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "starchart",
 			transient: true,
-			color: "#9A2EFE",
+			color: "#9a2efe",
 			calculatePerTick: true
 		}, {
 			name: "temporalFlux",
@@ -171,7 +172,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "necrocorn",
 			type: "rare",
-			color: "#E00000"
+			color: "#e00000"
 		}, {
 			name: "tears",
 			type: "rare"
@@ -187,7 +188,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			}
 		}, {
 			name: "paragon",
-			color: "#6141CD",
+			color: "#6141cd",
 			relockIfZero: true,
 			inputClass: "integerInput abbrInput"
 		}, {
@@ -196,7 +197,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			inputClass: "integerInput abbrInput"
 		}, {
 			name: "timeCrystal",
-			color: "#14CD61"
+			color: "#14cd61"
 		}, {
 			name: "sorrow",
 			visible: false,
@@ -208,50 +209,66 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "relic",
 			type: "exotic",
-			color: "#5A0EDE",
+			color: "#fa0ede",
 			style: {
-				"textShadow": "1px 0px 10px #9A2EFE",
-				"animation": "neon1 1.5s ease-in-out infinite alternate"
+				"-webkit-animation": "neon-purple 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-purple 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-purple 1.5s ease-in-out infinite alternate",
+				animation:           "neon-purple 1.5s ease-in-out infinite alternate"
 			}
 		}, {
 			name: "void",
 			type: "exotic",
-			color: "#5A0EDE",
+			color: "#fa0ede",
 			style: {
-				"textShadow": "1px 0px 10px #9A2EFE",
-				"animation": "neon1 1.5s ease-in-out infinite alternate"
+				"-webkit-animation": "neon-purple 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-purple 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-purple 1.5s ease-in-out infinite alternate",
+				animation:           "neon-purple 1.5s ease-in-out infinite alternate"
 			},
 			inputClass: "integerInput abbrInput"
 		}, {
 			name: "elderBox",
 			description: true,
 			type: "exotic",
-			color: "#FA0EDE",
+			color: "#fa0ede",
 			style: {
-				"textShadow": "1px 0px 10px #FA2E9E",
-				"animation": "neon1 1.5s ease-in-out infinite alternate"
+				"-webkit-animation": "neon-pink 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-pink 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
+				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
 			},
 			relockIfZero: true
 		}, {
 			name: "wrappingPaper",
 			type: "exotic",
-			color: "#FA0EDE",
+			color: "#fa0ede",
 			style: {
-				"textShadow": "1px 0px 10px #FA2E9E",
-				"animation": "neon1 1.5s ease-in-out infinite alternate"
+				"-webkit-animation": "neon-pink 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-pink 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
+				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
 			}
 		}, {
 			name: "blackcoin",
 			type: "exotic",
-			color: "gold"
+			color: "gold",
+			style: {
+				"-webkit-animation": "neon-gold 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-gold 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-gold 1.5s ease-in-out infinite alternate",
+				animation:           "neon-gold 1.5s ease-in-out infinite alternate"
+			}
 		}, {
 			name: "bloodstone",
 			type: "exotic",
 			craftable: true,
 			color: "red",
 			style: {
-				textShadow: "1px 0px 10px red",
-				animation: "neon1 1.5s ease-in-out infinite alternate"
+				"-webkit-animation": "neon-red 1.5s ease-in-out infinite alternate",
+				"-moz-animation":    "neon-red 1.5s ease-in-out infinite alternate",
+				"-o-animation":      "neon-red 1.5s ease-in-out infinite alternate",
+				animation:           "neon-red 1.5s ease-in-out infinite alternate"
 			}
 		}, {
 			name: "beam",
@@ -285,16 +302,16 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "scaffold",
 			craftable: true,
-			color: "#FF7F50"
+			color: "#ff7f50"
 		}, {
 			name: "ship",
 			craftable: true,
-			color: "#FF571A",
+			color: "#ff571a",
 			upgrades: {buildings: ["harbor"]}
 		}, {
 			name: "tanker",
 			craftable: true,
-			color: "#CF4F20",
+			color: "#cf4f20",
 			upgrades: {buildings: ["harbor"]}
 		}, {
 			name: "kerosene",
@@ -303,25 +320,25 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "parchment",
 			craftable: true,
-			color: "#DF01D7"
+			color: "#df01d7"
 		}, {
 			name: "manuscript",
 			craftable: true,
-			color: "#01A9DB",
+			color: "#01a9db",
 			calculatePerTick: true
 		}, {
 			name: "compedium",
 			craftable: true,
-			color: "#01A9DB"
+			color: "#01a9db"
 		}, {
 			name: "blueprint",
 			transient: true,
 			craftable: true,
-			color: "#01A9DB"
+			color: "#01a9db"
 		}, {
 			name: "thorium", //divinite
 			craftable: true,
-			color: "#4EA24E",
+			color: "#4ea24e",
 			calculatePerTick: true
 		}, {
 			name: "megalith",
@@ -399,6 +416,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 	update: function () {
 		this.game.callMethods(this.resources, "update");
 
+		// handled in main.js
 		// this.energyProd = this.game.getEffect("energyProduction") * (1 + game.getEffect("energyProductionRatio"));
 		// this.energyCons = this.game.getEffect("energyConsumption");
 	},
@@ -768,6 +786,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 
 		dojo.toggleClass(this.valueNode, "blaze", value === 420);
 		dojo.toggleClass(this.valueNode, "hail", value === 666);
+		dojo.toggleClass(this.valueNode, "pray", value === 777);
 
 		this.perTickCached = 0;
 		if (this.calculatePerTick) {

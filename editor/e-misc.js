@@ -167,11 +167,11 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	],
 
 	cycleYearColors: [
-		"#A00000",
-		"#DBA901",
-		"#14CD61",
-		"#01A9DB",
-		"#9A2EFE"
+		"#a00000",
+		"#dba901",
+		"#14cd61",
+		"#01a9db",
+		"#9a2efe"
 	],
 
 	cycles: [
@@ -456,6 +456,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 
 		on(self.seasonNode, "change", function () {
 			self.season = self.seasonNode.selectedIndex;
+			game.calculateAllEffects();
 			game.update();
 		});
 
@@ -1209,7 +1210,8 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarEnergy", classes.KGSaveEdit.u
 		var energy = resPool.energyProd - resPool.energyCons;
 		this.container.innerHTML = "&#9889;&nbsp;" + this.game.getDisplayValueExt(energy) + "Wt";
 
-		dojo.toggleClass(this.container, "green", energy >= 0);
+		dojo.toggleClass(this.container, "green", energy >= 0 && resPool.energyWinterProd >= resPool.energyCons);
+		dojo.toggleClass(this.container, "coral", energy >= 0 && resPool.energyWinterProd < resPool.energyCons);
 		dojo.toggleClass(this.container, "red", energy < 0);
 	},
 
@@ -1223,12 +1225,12 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarEnergy", classes.KGSaveEdit.u
 		var penalty = "";
 		if (energy < 0) {
 			var delta = this.game.resPool.getEnergyDelta();
-			penalty = "<br><br>Production modifier: <span style='color:red;'>-" + Math.floor((1 - delta) * 100) + "%</span>";
+			penalty = '<br><br>Production modifier: <span class="red">-' + Math.floor((1 - delta) * 100) + "%</span>";
 		}
 
-		tooltip.innerHTML = "Production: <span style='color:green;'>" +
+		tooltip.innerHTML = 'Production: <span class="green">' +
 			this.game.getDisplayValueExt(resPool.energyProd, true, false) +
-			"Wt</span>" + "<br>Consumption: <span style='color:#D00000;'>-" +
+			"Wt</span>" + '<br>Consumption: <span style="color:#d00000;">-' +
 			this.game.getDisplayValueExt(resPool.energyCons) +
 			"Wt</span>" + penalty;
 	}

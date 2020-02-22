@@ -55,23 +55,25 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					//do nothing
 
 				} else if (self.stage === 1) {
-					var effects = {
-						"energyProduction": 2
+					stageMeta.effects = {
+						"energyProduction": self.calculateEnergyProduction(game, game.calendar.season)
 					};
-					effects["energyProduction"] *= 1 + game.getEffect("solarFarmRatio");
-					if (game.calendar.season === 3) {
-						effects["energyProduction"] *= 0.75;
-					} else if (game.calendar.season === 1) {
-						effects["energyProduction"] /= 0.75;
-					}
-
-					var seasonRatio = game.getEffect("solarFarmSeasonRatio");
-					if ((game.calendar.season == 3 && seasonRatio == 1) || (game.calendar.season != 1 && seasonRatio == 2)) {
-						effects["energyProduction"] *= (1 + 0.15 * seasonRatio);
-					}
-
-					stageMeta.effects = effects;
 				}
+			},
+			calculateEnergyProduction: function (game, season) {
+				var energyProduction = 2 * (1 + game.getEffect("solarFarmRatio"));
+				if (season == 3) {
+					energyProduction *= 0.75;
+				} else if (season == 1) {
+					energyProduction /= 0.75;
+				}
+
+				var seasonRatio = game.getEffect("solarFarmSeasonRatio");
+				if ((season == 3 && seasonRatio == 1) || (season != 1 && seasonRatio == 2)) {
+					energyProduction *= (1 + 0.15 * seasonRatio);
+				}
+
+				return energyProduction;
 			}
 		}, {
 			name: "aqueduct",

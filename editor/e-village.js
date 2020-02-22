@@ -122,11 +122,13 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	happiness: 1,
 	catnipPerKitten: -0.85,
 
-	kittens: null, //current kittens
-	generatedKittens: null, //generated kittens
-	censusKittens: null, //subset of kittens, used for census
-	censusPage: 1, //current census page
-	censusPageMax: 1, //highest census page
+	maxJobSkill: 20001, // kittens' skill cap, for late game save compression
+
+	kittens: null, // current kittens
+	generatedKittens: null, // generated kittens
+	censusKittens: null, // subset of kittens, used for census
+	censusPage: 1, // current census page
+	censusPageMax: 1, // highest census page
 	kittensPerPage: 10,
 
 	selectedKittens: null,
@@ -561,6 +563,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			massEditJob.controlNode = dojo.place(dojo.clone(cbox), tr.children[0]);
 			massEditJob.expNode = this.game._createInput({class: "expEdit"},
 				tr.children[2], null, null, "first", true);
+			massEditJob.expNode.maxValue = self.maxJobSkill;
 			massEditJob.expNode.handler = dojo.hitch(massEditJob, handle);
 
 			massEditJob.skillNode = tr.children[2].children[1];
@@ -1843,6 +1846,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			editJob.titleBlock = tr.children[0];
 			editJob.expNode = game._createInput({class: "expEdit"},
 				tr.children[1], null, null, null, true);
+			editJob.expNode.maxValue = village.maxJobSkill;
 			editJob.expNode.handler = dojo.hitch(editJob, handle);
 
 			editJob.skillNode = tr.children[2].children[0];
@@ -2026,6 +2030,11 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		var saveKitten = this.game.filterMetaObj(this, ["name", "surname", "trait",
 			"age", "skills", "exp", "job", "engineerSpeciality", "rank", "isLeader"]);
 
+		if (!forEdit) {
+			saveKitten.engineerSpeciality = saveKitten.engineerSpeciality || undefined;
+			saveKitten.isLeader = saveKitten.isLeader || undefined;
+		}
+
 		saveKitten.trait = {name: saveKitten.trait.name}; //still in filter above to preserve order
 
 		if (!saveKitten.name && !saveKitten.surname) {
@@ -2048,7 +2057,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			for (var job in saveKitten.skills) {
 				var skill = saveKitten.skills[job];
 				if (this.village.getJob(job) && (saveKitten.job === job || skill > 0)) {
-					newSkills[job] = Math.max(num(skill), 0);
+					newSkills[job] = Math.min(Math.max(num(skill), 0), this.village.maxJobSkill);
 				}
 			}
 		}
