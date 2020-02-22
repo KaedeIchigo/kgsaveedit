@@ -1354,6 +1354,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		this.freeKittensSpan.textContent = this.getFreeKittens() + " / " + this.getKittens();
 		this.game.callMethods(this.jobs, "update");
 
+		this.map.update();
+
 		this.updateHappines();
 		this.updateResourceProduction();
 	},

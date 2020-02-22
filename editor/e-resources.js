@@ -166,9 +166,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "alicorn",
 			type: "rare",
 			calculatePerTick: true,
-			inputHandler: function () {
-				this.game.upgradeItems({zigguratUpgrades: ["skyPalace", "unicornUtopia", "sunspire"]});
-			}
+			upgrades: {zigguratUpgrades: ["skyPalace", "unicornUtopia", "sunspire"]}
 		}, {
 			name: "necrocorn",
 			type: "rare",
@@ -710,7 +708,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 		}
 
 		td = dojo.create("td", null, tr);
-		this.game._createInput({class: this.inputClass || "abbrInput"},
+		this.game._createInput({class: "ownedInput " + (this.inputClass || "abbrInput")},
 			td, this, "value");
 		if (this.inputParseFn) {
 			this.valueNode.parseFn = this.inputParseFn;

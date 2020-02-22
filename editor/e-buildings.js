@@ -314,6 +314,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"scienceMax": 1500,
 				"energyConsumption": 0
 			},
+			upgrades: {buildings: ["library"]},
 			calculateEffects: function (self, game) {
 				self.effects["scienceMax"] = 1500;
 

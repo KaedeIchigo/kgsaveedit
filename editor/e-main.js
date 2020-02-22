@@ -894,9 +894,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Sets the select element to the given value if it exists
-		* Defaults to the select's defaultVal if set, else the first option
-	**/
+	 * Sets the select element to the given value if it exists
+	 * Defaults to the select's defaultVal if set, else the first option
+	 */
 	setSelectByValue: function (ele, value) {
 		if (!ele || !ele.length) {
 			return "";
@@ -1989,10 +1989,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Checks whether everything in a given meta.requires is owned
-		* Returns defaultUnlocked if no .requires, else unlocked
-		* Has a hack for stages (>_>)
-	**/
+	 * Checks whether everything in a given meta.requires is owned
+	 * Returns defaultUnlocked if no .requires, else unlocked
+	 * Has a hack for stages (>_>)
+	 */
 	checkRequirements: function (meta, defaultUnlocked, isStage) {
 		if (!meta) {
 			return false;
@@ -2077,9 +2077,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Create a numeric input element and attaches an "input" event handler to it
-		* Automatically updates metaObj[dataProp] if both are set
-	**/
+	 * Create a numeric input element and attaches an "input" event handler to it
+	 * Automatically updates metaObj[dataProp] if both are set
+	 */
 	_createInput: function (attrs, parentNode, metaObj, dataProp, pos, noUpdate) {
 		var input = dojo.create("input", attrs, parentNode, pos || "last");
 		input.type = "text";
@@ -2153,9 +2153,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Special case of _createInput for metaObj.val
-		* Sets default html classes and a handler to update .on if not .togglable or if .togglableOnOff
-		*/
+	 * Special case of _createInput for metaObj.val
+	 * Sets default html classes and a handler to update .on if not .togglable or if .togglableOnOff
+	 */
 	_createValInput: function (attrs, parentNode, metaObj, pos, noUpdate) {
 		if (!attrs) {
 			attrs = {};
@@ -2174,9 +2174,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Creates a checkbox and a label wrapper, and attaches a click event handler
-		* Automatically updates metaObj[dataProp] if both are set
-	**/
+	 * Creates a checkbox and a label wrapper, and attaches a click event handler
+	 * Automatically updates metaObj[dataProp] if both are set
+	 */
 	_createCheckbox: function (text, parentNode, metaObj, prop, pos) {
 		var label = dojo.create("label", {innerHTML: " "}, parentNode, pos || "last");
 		var cbox = dojo.create("input", {type: "checkbox"}, label, "first");
@@ -2207,8 +2207,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Call handler methods, and recalculate things as necessary
-	**/
+	 * Call handler methods, and recalculate things as necessary
+	 */
 	_callHandlers: function (ele) {
 		if (dojo.isFunction(ele.handler)) {
 			ele.handler();
@@ -2232,10 +2232,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Recursively access a obj's properties, given a string of period-separated object keys
-		* Kinda like lodash.get, but with support to find an array member with a .name property matching a given key,
-		* and otherwise not very robust
-		*/
+	 * Recursively access a obj's properties, given a string of period-separated object keys
+	 * Kinda like lodash.get, but with support to find an array member with a .name property matching a given key,
+	 * and otherwise not very robust
+	 */
 	resolveObjPath: function (obj, path) {
 		if (path && path.split) {
 			var keys = path.split(".");
@@ -2270,8 +2270,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Loop through a list, calling a method by the given name on each of its members, with arguments passed through
-	**/
+	 * Loop through a list, calling a method by the given name on each of its members, with arguments passed through
+	 */
 	callMethods: function (list, method) {
 		var args = [].slice.call(arguments, 2);
 		if (list && list.length) {
@@ -2284,9 +2284,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
-		* Loop through a list, calling a method by the given name on each of its members,
-		* and returns an array of the returned values
-	**/
+	 * Loop through a list, calling a method by the given name on each of its members,
+	 * and returns an array of the returned values
+	 */
 	mapMethods: function (list, method) {
 		var args = [].slice.call(arguments, 2);
 		var map = [];
