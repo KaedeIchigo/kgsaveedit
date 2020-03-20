@@ -78,7 +78,8 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		dojo.place(document.createTextNode("Color scheme: "), this.tabBlockNode);
 		var scheme = dojo.create("select", {
 			id: "setColorScheme",
-			innerHTML: '<option value="">Classic</option><option value="dark">Inverted</option><option value="grassy">Grassy</option><option value="sleek">Sleek (By Kida)</option>'
+			innerHTML: '<option value="">Classic</option><option value="dark">Inverted</option>' +
+				'<option value="grassy">Grassy (by shrx)</option><option value="sleek">Sleek (by Kida)</option><option value="gold">Gold (by Volkeyrn)</option>'
 		}, this.tabBlockNode);
 		scheme.game = game;
 		this.scheme = scheme;

@@ -98,7 +98,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				this.game.village.synchKittens();
 			},
 			getMaxValue: function () {
-				return this.game.getEffect("maxKittens");
+				return Math.floor(this.game.getEffect("maxKittens"));
 			}
 		}, {
 			name: "zebras",
@@ -785,6 +785,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 		dojo.toggleClass(this.valueNode, "blaze", value === 420);
 		dojo.toggleClass(this.valueNode, "hail", value === 666);
 		dojo.toggleClass(this.valueNode, "pray", value === 777);
+		dojo.toggleClass(this.valueNode, "leet", value === 1337);
 
 		this.perTickCached = 0;
 		if (this.calculatePerTick) {

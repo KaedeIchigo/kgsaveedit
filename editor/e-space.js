@@ -615,28 +615,32 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 					effects: {
 						"maxKittens": 0
 					},
-					calculateEffects: function (self) {
+					calculateEffects: function (self, game) {
 						self.effects = {
-							"maxKittens": 1
+							"maxKittens": 1 + game.getEffect("terraformingMaxKittensRatio")
 						};
 					}
 				}, {
 					name: "hydroponics",
 					prices: [
-						{name: "kerosene", val: 500}
+						{name: "kerosene",    val: 500},
+						{name: "unobtainium", val: 1}
 					],
 					priceRatio: 1.15,
 					requires: {tech: ["hydroponics"]},
 					effects: {
-						"catnipMaxRatio": 0,
-						"catnipRatio":    0
+						"catnipMaxRatio":              0,
+						"catnipRatio":                 0,
+						"terraformingMaxKittensRatio": 0
 					},
 					calculateEffects: function (self) {
 						self.effects = {
-							"catnipMaxRatio": 0.1,
-							"catnipRatio":    0.025
+							"catnipMaxRatio":              0.1,
+							"catnipRatio":                 0.025,
+							"terraformingMaxKittensRatio": 0.01
 						};
-					}
+					},
+					upgrades: {spaceBuilding: ["terraformingStation"]}
 				}
 			],
 			requires: {spaceMission: ["yarnMission"]}

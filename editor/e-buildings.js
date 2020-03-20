@@ -61,6 +61,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				}
 			},
 			calculateEnergyProduction: function (game, season) {
+				if (game.challenges.currentChallenge == "winterIsComing") {
+					season = 3;
+				}
 				var energyProduction = 2 * (1 + game.getEffect("solarFarmRatio"));
 				if (season == 3) {
 					energyProduction *= 0.75;
@@ -256,7 +259,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			requires: {tech: ["math"]},
 			effects: {
 				"scienceRatio": 0.2,
-				"learnRatio":   0.05,
+				"skillXP":      0.05,
 				"cultureMax":   25,
 				"scienceMax":   500
 			},

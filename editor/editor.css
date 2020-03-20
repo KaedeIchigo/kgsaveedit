@@ -626,6 +626,13 @@ input.integerInput.timeInput {
             animation: pray-rainbow 1.5s linear infinite;
 }
 
+.leet {
+    font-family: "Lucida Console", Monaco, monospace;
+    text-align: right;
+    color: #33ff00;
+    background-color: #282828;
+}
+
 @-webkit-keyframes blaze-rainbow {
     0%, 100% { color: #ff0000; }
          17% { color: #ffff00; }

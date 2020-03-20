@@ -811,7 +811,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["robotics"]},
 			effects: {
 				"calcinerSteelRatio": 0.1
-			}
+			},
+			upgrades: {buildings: ["calciner"]}
 		}, {
 			name: "automatedPlants",
 			prices: [

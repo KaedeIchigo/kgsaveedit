@@ -168,7 +168,7 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "ratio"
 			},
 
-			"learnRatio": {
+			"skillXP": {
 				type: "perTick"
 			},
 
@@ -683,6 +683,11 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"voidResonance": {
+				type: "ratio"
+			},
+
+			"terraformingMaxKittensRatio": {
+				title: "terraformingMaxKittens",
 				type: "ratio"
 			}
 		}
