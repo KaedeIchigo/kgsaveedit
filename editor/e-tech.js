@@ -509,6 +509,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 	],
 
 	tabName: "Science",
+	leaderBonuses: ["scientist"],
 	getVisible: function () {
 		return this.game.bld.get("library").owned() || this.get("calendar").owned() || this.get("chronophysics").owned();
 	},

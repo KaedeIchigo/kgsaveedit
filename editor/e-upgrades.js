@@ -1720,6 +1720,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	},
 
 	tabName: "Workshop",
+	leaderBonuses: ["engineer", "metallurgist", "chemist"],
 	getVisible: function () {
 		return this.game.bld.get("workshop").owned();
 	},
@@ -1899,7 +1900,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		// (One * bonus / handicap) crafts per engineer per 10 minutes
 		var effectPerTick = (1 / (600 * this.game.ticksPerSecond)) * (kittenResProduction * tierCraftRatio) / craft.progressHandicap;
 
-		return afterCraft ? effectPerTick * this.game.getResCraftRatio({name: resName}) : effectPerTick;
+		return afterCraft ? effectPerTick * this.game.getResCraftRatio(resName) : effectPerTick;
 	},
 
 	save: function (saveData) {
@@ -1977,7 +1978,7 @@ dojo.declare("classes.KGSaveEdit.CraftMeta", classes.KGSaveEdit.MetaItem, {
 	getDescription: function () {
 		var desc = this.description;
 
-		var craftBonus = this.game.getResCraftRatio(this);
+		var craftBonus = this.game.getResCraftRatio(this.name);
 		if (this.name != "wood") {
 			craftBonus -= this.game.getCraftRatio();
 		}

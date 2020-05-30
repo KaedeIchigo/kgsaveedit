@@ -633,12 +633,21 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 						"catnipRatio":                 0,
 						"terraformingMaxKittensRatio": 0
 					},
-					calculateEffects: function (self) {
+					calculateEffects: function (self, game) {
 						self.effects = {
 							"catnipMaxRatio":              0.1,
 							"catnipRatio":                 0.025,
 							"terraformingMaxKittensRatio": 0.01
 						};
+						self.updateEffects(self, game);
+					},
+					updateEffects: function (self, game) {
+						// 0 HP = +0%
+						// 100 HP = +100%
+						// 300 HP = +200%
+						self.effects["terraformingMaxKittensRatio"] = game.getTriValue(self.on, 100) / self.on;
+						// Reset each tick because of cycle effect (from Yarn and Piscine) being applied continuously, due to presence of method "action"
+						self.effects["catnipRatio"] = 0.025;
 					},
 					upgrades: {spaceBuilding: ["terraformingStation"]}
 				}
@@ -742,7 +751,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 				}, {
 					name: "moltenCore",
 					prices: [
-						{name: "science", val: 250000000},
+						{name: "science", val: 25000000},
 						{name: "uranium", val: 5000000}
 					],
 					priceRatio: 1.25,

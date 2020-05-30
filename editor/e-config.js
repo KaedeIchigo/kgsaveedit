@@ -39,11 +39,11 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 			"ru": "Русский",
 			"zh": "中文",
 			"ja": "日本語",
-			"br": "Portuguese",
-			"es": "Española",
-			"fr": "French",
-			"cz": "Česky",
-			"pl": "Polskie"
+			"br": "Português",
+			"es": "Español",
+			"fr": "Français",
+			"cz": "Čeština",
+			"pl": "Polski"
 		};
 
 		this.availableLocaleLabels = {};
@@ -196,6 +196,7 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 			throw "Couldn't load user locale '" + lang + "'";
 		});
 
+		// using deferred because it should always resolve, error or not
 		var fetchEditori189 = $.Deferred();
 		$.getJSON("editor/i18n/" + lang + ".json?v=" + editorVersion).always(function (data) {
 			fetchEditori189.resolve(data);

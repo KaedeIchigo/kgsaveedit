@@ -22,24 +22,44 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			desc: "Use percentage resource production values",
 			src: "game.opts"
 		}, {
+			name: "showNonApplicableButtons",
+			desc: "Always show festivals/trade/sacrifice/shatter buttons even if not applicable",
+			src: "game.opts"
+		}, {
+			name: "usePercentageConsumptionValues",
+			desc: "Use percentage values for craft/trade/sacrifice buttons",
+			src: "game.opts"
+		}, {
 			name: "highlightUnavailable",
 			desc: "Highlight buildings limited by storage space",
 			src: "game.opts"
 		}, {
 			name: "hideSell",
-			desc: 'Hide "sell" buttons',
+			desc: "Hide 'sell' buttons",
 			src: "game.opts"
 		}, {
-			name: "enableRedshift",
-			desc: "Enable offline progression (Experimental)",
+			name: "hideDowngrade",
+			desc: "Hide 'downgrade' buttons",
+			src: "game.opts"
+		}, {
+			name: "hideBGImage",
+			desc: "Hide background image (for color schemes where applicable)",
+			src: "game.opts"
+		}, {
+			name: "tooltipsInRightColumn",
+			desc: "Move tooltips in right column",
 			src: "game.opts"
 		}, {
 			name: "forceLZ",
-			desc: "Always compress save files (Experimental)",
+			desc: "Always compress save files <i>(experimental)</i>",
+			src: "game.opts"
+		}, {
+			name: "compressSaveFile",
+			desc: "Compress exported save file <i>(experimental)</i><br>&nbsp; &nbsp; &nbsp; &nbsp;WARNING: it generates save files that are NOT COMPATIBLE with older versions, like mobile versions.",
 			src: "game.opts"
 		}, {
 			name: "noConfirm",
-			desc: "Do not confirm when clearing all jobs",
+			desc: "Do not confirm when clearing all jobs or when buying or selling all (Shift-click)",
 			src: "game.opts"
 		}, {
 			name: "IWSmelter",
@@ -47,8 +67,20 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			src: "game.opts"
 		}, {
 			name: "disableTelemetry",
-			desc: "Disable game statistics.",
+			desc: "Disable game telemetry.",
 			class: "bottom-margin"
+		}, {
+			name: "enableRedshift",
+			desc: "Enable offline progression",
+			src: "game.opts"
+		}, {
+			name: "batchSize",
+			desc: "Batch size of Ctrl-click",
+			type: "int",
+			parseFn: function (val) {
+				return Math.max(Math.min(val, 9999), 1) || 10;
+			},
+			src: "game.opts"
 		}, {
 			name: "isCMBREnabled",
 			desc: "Global donate bonus enabled",
@@ -63,11 +95,70 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		}
 	],
 	scheme: null,
+	schemesData: [
+		{name: "default"},
+		{name: "dark"},
+		{name: "grassy"},
+		{name: "sleek"},
+		{
+			name: "gold",
+			condition: function () {
+				return this.game.bld.get("mint").val >= 24;
+			}
+		}, {
+			name: "space",
+			condition: function () {
+				return this.game.space.getProgram("sattelite").val >= 24;
+			}
+		}, {
+			name: "wood",
+			condition: function () {
+				return this.game.bld.get("lumberMill").val >= 100;
+			}
+		}, {
+			name: "school",
+			condition: function () {
+				return this.game.bld.get("academy").val >= 68;
+			}
+		}, {
+			name: "fluid",
+			condition: function () {
+				return this.game.space.getProgram("hydrofracturer").val >= 10;
+			}
+		}, {
+			name: "vessel",
+			condition: function () {
+				return this.game.space.getProgram("researchVessel").val >= 20;
+			}
+		}, {
+			name: "minimalist",
+			condition: function () {
+				return this.game.bld.get("warehouse").val >= 10;
+			}
+		}, {
+			name: "oil",
+			condition: function () {
+				return this.game.bld.get("oilWell").val >= 73;
+			}
+		}, {
+			name: "unicorn",
+			condition: function () {
+				return this.game.religion.getZU("unicornUtopia").val >= 1;
+			}
+		}
+	],
+	schemes: null,
 
 	tabName: "Options &amp; Settings",
 
 	constructor: function () {
 		this.i18nKeys = {tabName: "KGSaveEdit.opts.tab"};
+
+		this.schemes = [];
+		for (var i = 0; i < this.schemesData.length; i++) {
+			var scheme = new classes.KGSaveEdit.GenericItem(this.game, this.schemesData[i]);
+			this.schemes.push(scheme);
+		}
 	},
 
 	renderTabBlock: function () {
@@ -75,31 +166,53 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 
 		dojo.place(game.calendar.domNode, this.tabBlockNode);
 
-		dojo.place(document.createTextNode("Color scheme: "), this.tabBlockNode);
-		var scheme = dojo.create("select", {
-			id: "setColorScheme",
-			innerHTML: '<option value="">Classic</option><option value="dark">Inverted</option>' +
-				'<option value="grassy">Grassy (by shrx)</option><option value="sleek">Sleek (by Kida)</option><option value="gold">Gold (by Volkeyrn)</option>'
-		}, this.tabBlockNode);
-		scheme.game = game;
-		this.scheme = scheme;
-		scheme.defaultVal = this.game.colorScheme || "";
+		// schemes
+		var table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
+		dojo.create("tr", {innerHTML: '<th colspan="3">Color schemes</th>'}, table);
 
-		on(scheme, "change", function () {
-			this.game.colorScheme = this.value;
-			this.game.update();
-		});
+		for (var i = 0; i < this.schemes.length; i++) {
+			var scheme = this.schemes[i];
+			scheme.unlocked = !scheme.condition;
 
-		dojo.place("<br><br>", scheme, "after");
+			var tr = dojo.create("tr", {
+				innerHTML: '<td class="schemeName">' + $I("opts.theme." + scheme.name) + "</td><td></td><td></td>",
+				class: "schemeRow"
+			}, table);
+			scheme.domNode = tr;
+			scheme.nameNode = tr.children[0];
 
-		for (var i = 0; i < this.options.length; i++) {
+			var input = this.game._createCheckbox("Active", tr.children[1]);
+			input.cbox.type = "radio";
+			input.cbox.name = "colorScheme";
+			scheme.activeNode = input.cbox;
+
+			if (this.game.colorScheme === scheme.name || scheme.name === "default") {
+				scheme.activeNode.checked = true;
+			}
+
+			if (scheme.condition) {
+				this.game._createCheckbox("Unlocked", tr.children[2], scheme, "unlocked");
+			}
+		}
+
+		for (i = 0; i < this.options.length; i++) {
 			var option = this.options[i];
 			var ref = option.src === "game.opts" ? game.opts : game;
 
 			var div = dojo.create("div", {
 				"data-option-name": option.name
 			}, this.tabBlockNode);
-			game._createCheckbox(option.desc, div, ref, option.name);
+
+			if (option.type === "int") {
+				div.textContent = " " + option.desc;
+				input = game._createInput({class: "integerInput"}, div, ref, option.name, "first");
+				if (option.parseFn) {
+					input.parseFn = option.parseFn;
+				}
+
+			} else {
+				game._createCheckbox(option.desc, div, ref, option.name);
+			}
 
 			if (option.class) {
 				div.className = option.class;
@@ -107,9 +220,9 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		}
 
 		// Dead Kittens & Karma
-		var table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
+		table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
 
-		var tr = dojo.create("tr", {
+		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.opts.deadKittens") + "</td><td></td>"
 		}, table);
 		game._createInput({class: "integerInput"}, tr.children[1], game, "deadKittens");
@@ -143,7 +256,51 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 
 		dojo.place(game.console.domNode, this.tabBlockNode);
 
-		// dojo.place(game.telemetry.domNode, this.tabBlockNode);
+		dojo.place(game.telemetry.domNode, this.tabBlockNode);
+	},
+
+	updateTab: function () {
+		var colorScheme = "default";
+		var unlockedSchemes = [];
+		for (var i = 0; i < this.schemes.length; i++) {
+			var scheme = this.schemes[i];
+
+			if (scheme.condition) {
+				var conditionMet = scheme.condition();
+				scheme.set("unlocked", conditionMet || scheme.unlockedNode.prevChecked, true);
+				this.game.toggleDisabled(scheme.unlockedNode, conditionMet);
+			}
+
+			dojo.toggleClass(scheme.domNode, "spoiler", !scheme.unlocked);
+
+			if (scheme.activeNode.checked) {
+				colorScheme = scheme.name;
+			}
+			if (scheme.unlocked) {
+				unlockedSchemes.push(scheme.name);
+			}
+		}
+		this.game.colorScheme = colorScheme;
+		this.game.unlockedSchemes = unlockedSchemes;
+	},
+
+	load: function (saveData) {
+		var unlockedSchemes = [];
+		if (saveData.game && saveData.game.unlockedSchemes) {
+			unlockedSchemes = saveData.game.unlockedSchemes;
+		}
+
+		var colorScheme = this.game.colorScheme || "default";
+		var setColorScheme = false;
+
+		for (var i = this.schemes.length - 1; i >= 0; i--) {
+			var scheme = this.schemes[i];
+			scheme.set("unlocked", !scheme.condition || unlockedSchemes.indexOf(scheme.name) > -1);
+			if (!setColorScheme && (scheme.name === colorScheme || scheme.name === "default")) {
+				scheme.activeNode.checked = true;
+				setColorScheme = true;
+			}
+		}
 	}
 });
 
@@ -741,6 +898,7 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 	],
 
 	tabName: "Trade",
+	leaderBonuses: ["merchant"],
 	races: null,
 	racesByName: null,
 
@@ -1278,10 +1436,10 @@ dojo.declare("classes.KGSaveEdit.Telemetry", null, {
 		}
 	},
 
+	// See https://www.ietf.org/rfc/rfc4122.txt, section 4.4
 	generateGuid: function () {
-		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-			var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
-			return v.toString(16);
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			return (c == 'x' ? 16 * Math.random() | 0 : 4 * Math.random() | 8).toString(16);
 		});
 	},
 

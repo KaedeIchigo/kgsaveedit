@@ -682,6 +682,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 						);
 						self.effects["ironPerTickCon"] *= amt;
 						self.effects["coalPerTickCon"] *= amt;
+						// Automated production, metallurgist leader won't help here
 						self.effects["steelPerTickProd"] *= (amt *
 							(1 + game.getCraftRatio() * game.getEffect("calcinerSteelCraftRatio") +
 								game.bld.get("reactor").getOn() * game.getEffect("calcinerSteelReactorBonus")));

@@ -374,16 +374,16 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			class: "bottom-margin"
 		}, this.tabBlockNode);
 
-		this.hatsBlock = dojo.create("table", {
+		/* this.hatsBlock = dojo.create("table", {
 			id: "hatsBlock",
 			innerHTML: '<tr><th colspan="2">A Secret Council of Hats</th></tr>'
 		}, this.tabBlockNode);
-		this.hatsBlockHeader = this.hatsBlock.children[0];
+		this.hatsBlockHeader = this.hatsBlock.children[0]; */
 	},
 
 	render: function () {
 		this.game.callMethods(this.achievements, "render", this.achievementsBlock, "achievement");
-		this.game.callMethods(this.hats, "render", this.hatsBlock, "hat");
+		// this.game.callMethods(this.hats, "render", this.hatsBlock, "hat");
 	},
 
 	hasUnlocked: function () {
@@ -448,7 +448,7 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 		}
 		this.councilUnlocked = councilUnlocked;
 
-		dojo.toggleClass(this.hatsBlockHeader, "spoiler", !this.councilUnlocked || !this.game.science.get("metaphysics").owned());
+		// dojo.toggleClass(this.hatsBlockHeader, "spoiler", !this.councilUnlocked || !this.game.science.get("metaphysics").owned());
 
 		this.game._toggleNewMarker(this.tabWrapper, hasNewMarker);
 	},
@@ -504,6 +504,8 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 
 
 dojo.declare("classes.KGSaveEdit.AchievementMeta", [classes.KGSaveEdit.GenericItem], {
+	rendered: false,
+
 	constructor: function () {
 		this.unlocked = Boolean(this.unlocked);
 		this.isNew = false;
@@ -546,9 +548,15 @@ dojo.declare("classes.KGSaveEdit.AchievementMeta", [classes.KGSaveEdit.GenericIt
 				}
 			}));
 		}
+
+		this.rendered = true;
 	},
 
 	update: function () {
+		if (!this.rendered) {
+			return;
+		}
+
 		var wasUnlocked = this.unlocked;
 		if (this.condition) {
 			var unlocked = this.condition();
@@ -620,7 +628,8 @@ dojo.declare("classes.KGSaveEdit.StatsManager", [classes.KGSaveEdit.UI.Tab, clas
 		}, {
 			name: "totalResets",
 			title: "stats.run.number",
-			val: 0
+			val: 0,
+			unlocked: true
 		}, {
 			name: "totalParagon",
 			title: "stats.paragon.total",

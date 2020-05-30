@@ -105,13 +105,13 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		{name: "chemist"},
 		{name: "none"}
 	],
+	traitsByName: null,
 
 	jobs: null,
 	jobsByName: null,
 
-	traitsByName: null,
-
-	tabName: "Small village",
+	tabName: "Village",
+	leaderBonuses: ["manager"],
 	getVisible: function () {
 		return this.game.resPool.get("kittens").owned() || this.game.resPool.get("zebras").owned() ||
 			this.game.bld.get("hut").owned() || this.game.time.getVSU("usedCryochambers").owned();
@@ -181,19 +181,6 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 	getEffect: function (effectName) {
 		return this.map.getEffect(effectName);
-	},
-
-	renderTraitSelect: function (parent, pos) {
-		var sel = dojo.create("select", null, parent, pos);
-
-		for (var i = 0; i < this.traits.length; i++) {
-			var trait = this.traits[i];
-			dojo.create("option", {
-				value: trait.name,
-				innerHTML: trait.title
-			}, sel);
-		}
-		return sel;
 	},
 
 	renderTabBlock: function () {
@@ -484,11 +471,49 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		});
 
 		tr = dojo.create("tr", {
+			innerHTML: "<td></td><td>" + $I("KGSaveEdit.village.edit.color") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a> </td>"
+		}, table);
+
+		self.massEditColorControl = dojo.place(dojo.clone(cbox), tr.children[0]);
+		self.massEditColorNode = methodKitten.renderColorSelect(tr.children[2]);
+		self.massEditColorAllRandom = game._createCheckbox($I("KGSaveEdit.village.massedit.random.all"), tr.children[3]).cbox;
+		on(self.massEditColorNode, "change", function () {
+			this.className = this.options[this.selectedIndex].className;
+		});
+		on(tr.children[3].children[0], "click", function () {
+			game.setSelectByValue(self.massEditColorNode, methodKitten.getRandomColor(), true);
+		});
+
+		tr = dojo.create("tr", {
+			innerHTML: '<td></td><td class="indentPad">' + $I("KGSaveEdit.village.edit.color") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a> </td>"
+		}, table);
+
+		self.massEditVarietyControl = dojo.place(dojo.clone(cbox), tr.children[0]);
+		self.massEditVarietyNode = methodKitten.renderVarietySelect(tr.children[2]);
+		self.massEditVarietyAllRandom = game._createCheckbox($I("KGSaveEdit.village.massedit.random.all"), tr.children[3]).cbox;
+		on(tr.children[3].children[0], "click", function () {
+			game.setSelectByValue(self.massEditVarietyNode, methodKitten.getRandomVariety(true));
+		});
+
+		tr = dojo.create("tr", {
+			innerHTML: "<td></td><td>" + $I("KGSaveEdit.village.edit.rarity") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a> </td>"
+		}, table);
+
+		self.massEditRarityControl = dojo.place(dojo.clone(cbox), tr.children[0]);
+		self.massEditRarityNode = dojo.create("select", {
+			innerHTML: '<option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>'
+		}, tr.children[2]);
+		self.massEditRarityAllRandom = game._createCheckbox($I("KGSaveEdit.village.massedit.random.all"), tr.children[3]).cbox;
+		on(tr.children[3].children[0], "click", function () {
+			game.setSelectByValue(self.massEditRarityNode, methodKitten.getRandomRarity());
+		});
+
+		tr = dojo.create("tr", {
 			innerHTML: "<td></td><td>" + $I("KGSaveEdit.village.edit.trait") + '<td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a> </td>"
 		}, table);
 
 		self.massEditTraitControl = dojo.place(dojo.clone(cbox), tr.children[0]);
-		self.massEditTraitNode = self.renderTraitSelect(tr.children[2]);
+		self.massEditTraitNode = methodKitten.renderTraitSelect(tr.children[2]);
 		self.massEditTraitNode.defaultVal = "none";
 		self.massEditTraitAllRandom = game._createCheckbox($I("KGSaveEdit.village.massedit.random.all"), tr.children[3]).cbox;
 		on(tr.children[3].children[0], "click", function () {
@@ -596,6 +621,9 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			}
 		});
 
+		game.setSelectByValue(this.massEditColorNode, 0, true);
+		game.setSelectByValue(this.massEditVarietyNode, 0);
+		game.setSelectByValue(this.massEditRarityNode, 0);
 		game.setSelectByValue(this.massEditTraitNode, "none");
 	},
 
@@ -626,6 +654,18 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 			if (this.massEditAgeControl.checked) {
 				data.age = this.massEditAgeAllRandom.checked ? kitten.getRandomAge() : this.massEditAgeNode.parsedValue;
+			}
+
+			if (this.massEditColorControl.checked) {
+				data.color = this.massEditColorAllRandom.checked ? kitten.getRandomColor() : Number(this.massEditColorNode.value) || 0;
+			}
+
+			if (this.massEditVarietyControl.checked) {
+				data.variety = this.massEditVarietyAllRandom.checked ? kitten.getRandomVariety(data.color) : Number(this.massEditVarietyNode.value) || 0;
+			}
+
+			if (this.massEditRarityControl.checked) {
+				data.rarity = this.massEditRarityAllRandom.checked ? kitten.getRandomRarity() : Number(this.massEditRarityNode.value) || 0;
 			}
 
 			if (this.massEditTraitControl.checked) {
@@ -736,12 +776,18 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					case "engineer": // Crafting bonus
 						defaultObject = 0.05 * burnedParagonRatio;
 						break;
-					/*case "merchant": // Trading bonus
-						defaultObject = 0.030 * burnedParagonRatio;
+					case "metallurgist": // Crafting bonus for non x-ium metallic stuff (plate, steel, gear, alloy)
+						defaultObject = 0.1 * burnedParagonRatio;
+						break;
+					case "chemist": // Crafting bonus for "chemical" stuff (concrete, eludium, kerosene, thorium)
+						defaultObject = 0.075 * burnedParagonRatio;
+						break;
+					/* case "merchant": // Trading bonus
+						defaultObject = 0.03 * burnedParagonRatio;
 						break;
 					case "manager": // Hunting bonus
 						defaultObject = 0.5 * burnedParagonRatio;
-						break;*/
+						break; */
 					case "scientist": // Science prices bonus
 						for (var i = 0; i < defaultObject.length; i++) {
 							if (defaultObject[i].name === "science") {
@@ -761,23 +807,6 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			}
 		}
 		return defaultObject;
-	},
-
-	getLeaderDescription: function (job) {
-		switch (job) {
-			case "engineer":
-				return $I("village.bonus.desc.engineer");
-			case "merchant":
-				return $I("village.bonus.desc.merchant");
-			case "manager":
-				return $I("village.bonus.desc.manager");
-			case "scientist":
-				return $I("village.bonus.desc.scientist");
-			case "wise":
-				return $I("village.bonus.desc.wise");
-			default:
-				return "";
-		}
 	},
 
 	getResConsumption: function () {
@@ -1369,7 +1398,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					saveJob.value = 0;
 				}
 			}),
-			map: this.map.villageData
+			// map: this.map.villageData
 		};
 	},
 
@@ -1390,9 +1419,9 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			}
 		}
 
-		if (saveData.village.map) {
+		/* if (saveData.village.map) {
 			this.map.villageData = saveData.village.map;
-		}
+		} */
 	}
 });
 
@@ -1503,9 +1532,35 @@ dojo.declare("classes.KGSaveEdit.JobMeta", classes.KGSaveEdit.MetaItem, {
 });
 
 dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
+	statics: {
+		SAVE_PACKET_OFFSET: 100
+	},
+
 	names: ["Angel", "Charlie", "Mittens", "Oreo", "Lily", "Ellie", "Amber", "Molly", "Jasper",
-			"Oscar", "Theo", "Maddie", "Cassie", "Timber", "Meeko", "Micha", "Tami", "Plato" ],
-	surnames: ["Smoke", "Dust", "Chalk", "Fur", "Clay", "Paws", "Tails", "Sand", "Scratch", "Berry", "Shadow"],
+			"Oscar", "Theo", "Maddie", "Cassie", "Timber", "Meeko", "Micha", "Tami", "Plato",
+			"Bea", "Cedar", "Cleo", "Dali", "Fiona", "Hazel", "Iggi", "Jasmine", "Kali", "Luna",
+			"Reilly", "Reo", "Rikka", "Ruby", "Tammy"],
+	surnames: ["Smoke", "Dust", "Chalk", "Fur", "Clay", "Paws", "Tails", "Sand", "Scratch", "Berry", "Shadow",
+			"Ash", "Bark", "Bowl", "Brass", "Dusk", "Gaze", "Gleam", "Grass", "Moss", "Plaid", "Puff", "Rain",
+			"Silk", "Silver", "Speck", "Stripes", "Tingle", "Wool", "Yarn"],
+
+	colors: [
+		{color: "brown", title: "None"},
+		{color: "cinamon", title: "None"},
+		{color: "cream", title: "Coral"},
+		{color: "black", title: "Grey"},
+		{color: "fawn", title: "Fawn"},
+		{color: "white", title: "White"},
+		{color: "lilac", title: "Lilac"}
+	],
+
+	varieties: [
+		{style: "dual", title: "None"},
+		{style: "tabby", title: "None"},
+		{style: "torbie", title: "Torbie"},
+		{style: "calico", title: "Calico"},
+		{style: "spots", title: "Spots"}
+	],
 
 	game: null,
 	village: null,
@@ -1524,11 +1579,46 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	},
 
 	getRandomAge: function () {
-		return 16 + this.game.rand(30);
+		//kittens tend to be on the younger side with some basic minimal age
+		var age = 5 + this.game.rand(10);
+		if (this.game.rand(100) < 30) {
+			this.age += this.game.rand(30);
+		}
+		return age;
 	},
 
 	getRandomTrait: function () {
 		return this.traits[this.game.rand(this.traits.length)];
+	},
+
+	getRandomRarity: function () {
+		var rarity = 0;
+		//5% of kitten to be rarity 1 or 2, and extra 10% on top of it to be extra rare
+		if (this.game.rand(100) <= 5) {
+			rarity = this.game.rand(2) + 1;
+			if (this.game.rand(100) <= 10) {
+				rarity += 1;
+			}
+		}
+		return rarity;
+	},
+
+	getRandomColor: function () {
+		var color = 0;
+		//10% of chance to generate one of 6 primary colors (rare colors TBD)
+		if (this.game.rand(100) <= 10) {
+			color = this.game.rand(6) + 1;
+		}
+		return color;
+	},
+
+	getRandomVariety: function (enable) {
+		var variety = 0;
+		//10% of chance of colored cat to be one of 5 rare varieties (dual, tabby, torbie, calico, spots)
+		if (enable && this.game.rand(100) <= 10) {
+			variety = this.game.rand(4) + 1;
+		}
+		return variety;
 	},
 
 	job: null,
@@ -1539,6 +1629,10 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	skills: null,
 	exp: 0,
 	rank: 0,
+
+	rarity: 0,   //a growth/skill potential, 0 if none
+	color: 0,    //kitten color, the higher the rarer, 0 if none
+	variety: 0,  //rare kitten pattern variety
 
 	expectedExp: 0,
 
@@ -1564,6 +1658,10 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 		this.exp = 0;
 		this.rank = 0;
+
+		this.rarity = this.getRandomRarity();
+		this.color = this.getRandomColor();
+		this.variety = this.getRandomVariety(this.color);
 
 		this.skills = {};
 	},
@@ -1670,7 +1768,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		}
 		var kittenJob = this.village.getJob(this.job);
 
-		this.nameBlock.textContent = this.name + " " + this.surname;
+		this.nameBlock.innerHTML = this.getStyledName();
 		// this.jobBlock.textContent = " - " + this.job;
 		// dojo.toggleClass(this.jobBlock, "hidden", !kittenJob);
 
@@ -1710,6 +1808,47 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 		this.kittenSkillsBlock.innerHTML = skillsText.join("<br>");
 		this.updateEditJobSkills();
+	},
+
+	renderTraitSelect: function (parent, pos) {
+		var sel = dojo.create("select", null, parent, pos);
+
+		for (var i = 0; i < this.traits.length; i++) {
+			var trait = this.traits[i];
+			dojo.create("option", {
+				value: trait.name,
+				innerHTML: trait.title
+			}, sel);
+		}
+		return sel;
+	},
+
+	renderColorSelect: function (parent, pos) {
+		var sel = dojo.create("select", null, parent, pos);
+		// skip first since it's inaccessible
+		for (var i = 1; i < this.colors.length; i++) {
+			var obj = this.colors[i];
+			dojo.create("option", {
+				value: i - 1,
+				innerHTML: obj.title,
+				class: "color-" + obj.color
+			}, sel);
+		}
+		return sel;
+	},
+
+	renderVarietySelect: function (parent, pos) {
+		var sel = dojo.create("select", null, parent, pos);
+		// skip first since it's inaccessible
+		for (var i = 1; i < this.varieties.length; i++) {
+			var obj = this.varieties[i];
+			dojo.create("option", {
+				value: i - 1,
+				innerHTML: obj.title,
+				class: "variety-" + obj.style
+			}, sel);
+		}
+		return sel;
 	},
 
 	renderEditBlock: function () {
@@ -1753,8 +1892,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		var tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.name") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
 		}, table);
-		self.editNameNode = game._createInput({class: "textInput"},
-			tr.children[1]);
+		self.editNameNode = game._createInput({class: "textInput"}, tr.children[1]);
 
 		on(tr.children[2].children[0], "click", function () {
 			self.editNameNode.value = self.getRandomName();
@@ -1763,8 +1901,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.surname") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
 		}, table);
-		self.editSurnameNode = game._createInput({class: "textInput"},
-			tr.children[1]);
+		self.editSurnameNode = game._createInput({class: "textInput"}, tr.children[1]);
 
 		on(tr.children[2].children[0], "click", function () {
 			self.editSurnameNode.value = self.getRandomSurname();
@@ -1781,9 +1918,42 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		});
 
 		tr = dojo.create("tr", {
+			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.color") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
+		}, table);
+		self.editColorNode = self.renderColorSelect(tr.children[1]);
+
+		on(self.editColorNode, "change", function () {
+			self.editColorNode.className = self.editColorNode.options[self.editColorNode.selectedIndex].className;
+		});
+
+		on(tr.children[2].children[0], "click", function () {
+			game.setSelectByValue(self.editColorNode, self.getRandomColor(), true);
+		});
+
+		tr = dojo.create("tr", {
+			innerHTML: '<td class="indentPad">' + $I("KGSaveEdit.village.edit.variety") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
+		}, table);
+		self.editVarietyNode = self.renderVarietySelect(tr.children[1]);
+
+		on(tr.children[2].children[0], "click", function () {
+			game.setSelectByValue(self.editVarietyNode, self.getRandomVariety(true));
+		});
+
+		tr = dojo.create("tr", {
+			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.rarity") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
+		}, table);
+		self.editRarityNode = dojo.create("select", {
+			innerHTML: '<option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>'
+		}, tr.children[1]);
+
+		on(tr.children[2].children[0], "click", function () {
+			game.setSelectByValue(self.editRarityNode, self.getRandomRarity());
+		});
+
+		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.trait") + '</td><td></td><td><a href="#">' + $I("KGSaveEdit.village.edit.random") + "</a></td>"
 		}, table);
-		self.editTraitNode = village.renderTraitSelect(tr.children[1], "first");
+		self.editTraitNode = self.renderTraitSelect(tr.children[1], "first");
 		self.editTraitNode.defaultVal = "none";
 
 		on(tr.children[2].children[0], "click", function () {
@@ -1876,11 +2046,20 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		return bonus;
 	},
 
+	getStyledName: function (isLeader) {
+		return '<span class="name color-' +
+			((this.color && this.colors[this.color + 1]) ? this.colors[this.color + 1].color : "none") +
+			" variety-" + ((this.variety && this.varieties[this.variety + 1]) ? this.varieties[this.variety + 1].style : "none") +
+			'">' +
+			(isLeader ? ":3 " : "") + this.name + " " + this.surname +
+		"</span>";
+	},
+
 	getGovernName: function () {
 		var trait = this.trait || this.traitsByName.none;
 		var title = trait.name == "none" ? $I("village.census.trait.none") : trait.title +
-			" (" + this.village.getLeaderDescription(this.trait.name) + ") [" + $I("village.census.rank") + " " + this.rank + "]";
-		return this.name + " " + this.surname + " (" + title + ")";
+			" (" + $I("village.bonus.desc." + trait.name) + ") [" + $I("village.census.rank") + " " + this.rank + "]";
+		return this.getStyledName(true) + " (" + title + ")";
 	},
 
 	quitJob: function () {
@@ -1969,6 +2148,9 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		this.editNameNode.value = this.name;
 		this.editSurnameNode.value = this.surname;
 		this.game.setInput(this.editAgeNode, this.age);
+		this.game.setSelectByValue(this.editColorNode, this.color, true);
+		this.game.setSelectByValue(this.editVarietyNode, this.variety);
+		this.game.setSelectByValue(this.editRarityNode, this.rarity);
 		this.game.setSelectByValue(this.editTraitNode, this.trait.name || this.trait);
 		this.game.setInput(this.editRankNode, this.rank, true);
 		this.game.setInput(this.editExpNode, this.exp);
@@ -2003,7 +2185,10 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			job: this.job,
 			engineerSpeciality: this.engineerSpeciality,
 			skills: skills,
-			isLeader: this.isLeader
+			isLeader: this.isLeader,
+			color: Number(this.editColorNode.value) || 0,
+			variety: Number(this.editVarietyNode.value) || 0,
+			rarity: Number(this.editRarityNode.value) || 0
 		});
 
 		if (this.isLeader) {
@@ -2030,12 +2215,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	save: function (forEdit) {
 		var isAnarchy = !forEdit && this.game.challenges.currentChallenge === "anarchy";
 		var saveKitten = this.game.filterMetaObj(this, ["name", "surname", "trait",
-			"age", "skills", "exp", "job", "engineerSpeciality", "rank", "isLeader"]);
-
-		if (!forEdit) {
-			saveKitten.engineerSpeciality = saveKitten.engineerSpeciality || undefined;
-			saveKitten.isLeader = saveKitten.isLeader || undefined;
-		}
+			"age", "color", "variety", "rarity", "skills", "exp", "job", "engineerSpeciality", "rank", "isLeader"]);
 
 		saveKitten.trait = {name: saveKitten.trait.name}; //still in filter above to preserve order
 
@@ -2073,7 +2253,88 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 		saveKitten.skills = newSkills;
 
+		if (!forEdit) {
+			if (this.game.opts.compressSaveFile) {
+				saveKitten = this.compressData(saveKitten);
+			} else {
+				// don't serialize falsy values
+				saveKitten.color = saveKitten.color || undefined;
+				saveKitten.variety = saveKitten.variety || undefined;
+				saveKitten.rarity = saveKitten.rarity || undefined;
+				saveKitten.exp = saveKitten.exp || undefined;
+				saveKitten.job = saveKitten.job || undefined;
+				saveKitten.engineerSpeciality = saveKitten.engineerSpeciality || undefined;
+				saveKitten.rank = saveKitten.rank || undefined;
+				saveKitten.isLeader = saveKitten.isLeader || undefined;
+			}
+		}
+
 		return saveKitten;
+	},
+
+	compressData: function (saveKitten) {
+		var skills = [];
+		var minSkill = Number.MAX_VALUE;
+		var maxSkill = -minSkill;
+		for (var i = 0; i < this.village.jobNames.length; ++i) {
+			var skill = saveKitten.skills[this.village.jobNames[i]] || 0;
+			skills[i] = skill;
+			minSkill = Math.min(skill, minSkill);
+			maxSkill = Math.max(skill, maxSkill);
+		}
+		if (minSkill == maxSkill) {
+			skills = maxSkill;
+		}
+
+		var nameIndex = this.names.indexOf(this.name);
+		var surnameIndex = this.surnames.indexOf(this.surname);
+		// don't serialize falsy values
+		var compressedSave = {
+			ssn: this._mergeSSN(
+				[
+					nameIndex > -1 ? nameIndex : 0,
+					surnameIndex > -1 ? surnameIndex : 0,
+					this.age || this.getRandomAge(),
+					this._getTraitIndex(this.trait.name),
+					this.color,
+					this.variety,
+					this.rarity
+				],
+				this.statics.SAVE_PACKET_OFFSET
+			),
+			skills: skills || undefined,
+			exp: this.exp || undefined,
+			job: this.job ? this.village.jobNames.indexOf(this.job) : undefined,
+			engineerSpeciality: this.engineerSpeciality || undefined,
+			rank: this.rank || undefined,
+			isLeader: this.isLeader || undefined
+		};
+		// Custom sur/names
+		if (nameIndex <= 0 || surnameIndex <= 0) {
+			compressedSave.name = this.name;
+			compressedSave.surname = this.surname;
+		}
+		return compressedSave;
+	},
+
+	/**
+	 * As the max possible integer in JS is 2^53 ~= 90.07*100^7, with a packet offset of 100 only 7 numbers in 0..99 can be compressed, and the 8th number is limited to 0..89
+	 */
+	_mergeSSN: function (values) {
+		var result = 0;
+		for (var i = values.length - 1; i >= 0; i--) {
+			result *= this.statics.SAVE_PACKET_OFFSET;
+			result += values[i];
+		}
+		return result;
+	},
+
+	_getTraitIndex: function (name) {
+		for (var i = this.traits.length - 1; i >= 0; i--) {
+			if (this.traits[i].name === name) {
+				return i;
+			}
+		}
 	},
 
 	load: function (data) {
@@ -2081,10 +2342,14 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			dojo.addClass(this.editBlock, "hidden");
 		}
 
+		if (typeof data.ssn !== "undefined") {
+			data = this.decompressData(data);
+		}
+
 		var wasLeader = this.isLeader;
 
-		this.name               = typeof data.name === "string" ? data.name : this.village.getRandomName();
-		this.surname            = typeof data.surname === "string" ? data.surname : this.village.getRandomSurname();
+		this.name               = typeof data.name === "string" ? data.name : this.getRandomName();
+		this.surname            = typeof data.surname === "string" ? data.surname : this.getRandomSurname();
 		this.age                = Math.max(Math.floor(num(data.age)), 0);
 		this.exp                = Math.max(num(data.exp), 0);
 		this.trait              = data.trait;
@@ -2092,6 +2357,9 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		this.engineerSpeciality = null;
 		this.rank               = Math.max(Math.floor(num(data.rank)), 0);
 		this.isLeader           = Boolean(data.isLeader);
+		this.color              = data.color || 0;
+		this.variety            = data.variety || 0;
+		this.rarity             = data.rarity || 0;
 
 		if (data.engineerSpeciality && this.job === "engineer" && this.game.workshop.getCraft(data.engineerSpeciality)) {
 			this.engineerSpeciality = data.engineerSpeciality;
@@ -2125,6 +2393,42 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 		this.renderInfo();
 		this.update();
+	},
+
+	decompressData: function (data) {
+		var ssn = this._splitSSN(data.ssn, 7);
+		data.name = data.name || this.names[ssn[0]];
+		data.surname = data.surname || this.surnames[ssn[1]];
+		data.age = ssn[2];
+		data.trait = this.traits[ssn[3]];
+		data.color = ssn[4];
+		data.variety = ssn[5];
+		data.rarity = ssn[6];
+
+		var uncompressedSkills = {};
+		var dataSkills = data.skills || 0;
+		var sameSkill = typeof(dataSkills) == "number";
+		for (var i = this.village.jobNames.length - 1; i >= 0; --i) {
+			var skill = sameSkill ? dataSkills : (dataSkills[i] || 0);
+			if (skill > 20001) {
+				skill = 20001;
+			}
+			uncompressedSkills[this.village.jobNames[i]] = skill;
+		}
+		data.skills = uncompressedSkills;
+		data.job = data.job != undefined ? this.village.jobNames[data.job] : null;
+		return data;
+	},
+
+	_splitSSN: function (mergedResult, numberOfValues) {
+		var values = [];
+		for (var i = 0; i < numberOfValues; i++) {
+			var value = mergedResult % this.statics.SAVE_PACKET_OFFSET;
+			mergedResult -= value;
+			mergedResult /= this.statics.SAVE_PACKET_OFFSET;
+			values.push(value);
+		}
+		return values;
 	}
 });
 

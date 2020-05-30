@@ -45,6 +45,7 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 	isVisible: true,
 
 	tabName: "Undefined",
+	leaderBonuses: null,
 
 	constructor: function (game) {
 		this.game = game;
@@ -64,10 +65,13 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 		});
 
 		self.tabNode = dojo.create("a", {
-			class: "tab",
-			href: "#",
-			innerHTML: self.tabName
+			class: "tab " + self.tabName,
+			href: "#"
 		}, self.tabWrapper);
+		self.tabNameNode = dojo.create("span", {
+			class: "tabName",
+			innerHTML: self.tabName
+		}, self.tabNode);
 
 		self.tabBlockNode = dojo.create("div", {
 			class: "tabBlock hidden" + (self.tabBlockClass ? " " + self.tabBlockClass : "")
@@ -88,11 +92,16 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 
 	updateTab: function () {
 		if (this.getTabName) {
-			this.tabNode.innerHTML = this.getTabName();
+			this.tabNameNode.innerHTML = this.getTabName();
 		}
 
 		this.isVisible = this.getVisible();
 		dojo.toggleClass(this.tabWrapper, "spoiler", !this.isVisible);
+		var showBonus = false;
+		if (this.leaderBonuses && this.game.village.leader) {
+			showBonus = this.leaderBonuses.indexOf(this.game.village.leader.trait.name) > -1;
+		}
+		dojo.toggleClass(this.tabNameNode, "traitLeaderBonus", showBonus);
 	}
 });
 
@@ -117,9 +126,9 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 	}, */
 
 	/**
-	 * Loops through dataArray, and creates new ClassObjs out of its data
+	 * Loops through `dataArray`, and creates new `ClassObj`s out of its data
 	 * Creates array/itemByName objects for storing the new items if necessary
-	 * If a function is passed as fn, calls it with this set to the manager
+	 * If a function is passed as `fn`, calls it with `this` set to the manager
 	 */
 	registerMetaItems: function (dataArray, ClassObj, key, fn) {
 		var arr = this[key] || [];

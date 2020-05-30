@@ -385,6 +385,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 	hasTranscendeceUpgrade: false, //cache for getRU("transcendence").owned()
 
 	tabName: "Religion",
+	leaderBonuses: ["wise"],
 	getVisible: function () {
 		return this.game.resPool.get("faith").unlocked || (this.game.challenges.currentChallenge === "atheism" && this.game.bld.get("ziggurat").owned());
 	},

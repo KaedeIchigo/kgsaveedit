@@ -35,7 +35,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			],
 			priceRatio: 1.25,
 			heat: 0,
-			// isAutomationEnabled: true,
+			isAutomationEnabled: false,
 			effects: {
 				"heatMax":      100,
 				"heatPerTick": -0.02

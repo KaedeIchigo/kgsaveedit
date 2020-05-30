@@ -688,7 +688,8 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 
 			"terraformingMaxKittensRatio": {
 				title: "terraformingMaxKittens",
-				type: "ratio"
+				type: "ratio",
+				calculation: "nonProportional"
 			}
 		}
 	}
@@ -709,14 +710,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	saveVersion: 15,
 
 	opts: null,
+	optsKeys: null,
 
 	keyStates: null,
 
 	isCMBREnabled: false,
 
-	colorScheme: "",
 	forceShowLimits: false,
 	useWorkers: false,
+	colorScheme: "",
+	unlockedSchemes: null,
 
 	tabs: null,
 	managers: null,
@@ -902,7 +905,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	 * Sets the select element to the given value if it exists
 	 * Defaults to the select's defaultVal if set, else the first option
 	 */
-	setSelectByValue: function (ele, value) {
+	setSelectByValue: function (ele, value, updateClass) {
 		if (!ele || !ele.length) {
 			return "";
 		}
@@ -912,6 +915,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 		if (ele.selectedIndex < 0) {
 			ele.options[0].selected = true;
+		}
+		if (updateClass) {
+			ele.className = ele.options[ele.selectedIndex].className;
 		}
 		return ele.value;
 	},
@@ -1189,12 +1195,12 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return 0;
 	},
 
-	getCraftRatio: function () {
-		return this.getEffect("craftRatio") + this.village.getEffectLeader("engineer", 0);
+	getCraftRatio: function (tag) {
+		return this.getEffect("craftRatio") + this.village.getEffectLeader("engineer", 0) + this.village.getEffectLeader(tag, 0);
 	},
 
-	getResCraftRatio: function (res) {
-		if (res.name === "wood") {
+	getResCraftRatio: function (craftedResName) {
+		if (craftedResName === "wood") {
 			var refineRatio = this.getEffect("refineRatio");
 			if (this.ironWill) {
 				return ((1 + refineRatio) * (1 + this.getEffect("woodRatio"))) - 1;
@@ -1203,9 +1209,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			}
 		}
 
-		var ratio = this.getCraftRatio();
+		var ratio = this.getCraftRatio(this.resPool.get(craftedResName).tag);
 
-		if (res.name === "blueprint") {
+		if (craftedResName === "blueprint") {
 			var bpRatio = this.getEffect("cadBlueprintCraftRatio");
 			var scienceBldAmt = this.bld.get("library").val + this.bld.get("academy").val +
 				this.bld.get("observatory").val + this.bld.get("biolab").val;
@@ -1213,7 +1219,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			ratio += scienceBldAmt * bpRatio;
 		}
 
-		if (res.name == "kerosene") {
+		if (craftedResName == "kerosene") {
 			var fRatio = this.getEffect("factoryRefineRatio");
 
 			var amt = this.bld.get("factory").on;
@@ -1222,9 +1228,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		//get resource specific craft ratio (like factory bonus)
-		var resCraftRatio = this.getEffect(res.name + "CraftRatio") || 0;
+		var resCraftRatio = this.getEffect(craftedResName + "CraftRatio") || 0;
 
-		return (ratio + resCraftRatio) * (1 + (this.getEffect(res.name + "GlobalCraftRatio") || 0));
+		return (ratio + resCraftRatio) * (1 + (this.getEffect(craftedResName + "GlobalCraftRatio") || 0));
 	},
 
 	renderPrices: function (tooltip, prices) {
@@ -1270,7 +1276,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		if (!hasRes && res.craftable && res.name !== "wood") {
 			var craft = this.workshop.getCraft(res.name);
 			if (craft.unlocked) {
-				var craftRatio = this.getResCraftRatio(res);
+				var craftRatio = this.getResCraftRatio(res.name);
 				nameSpan.innerHTML = "+ " + nameSpan.innerHTML;
 
 				if (!indent) {
@@ -2334,17 +2340,17 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			isCMBREnabled: this.isCMBREnabled,
 			useWorkers: this.useWorkers,
 			colorScheme: this.colorScheme,
+			unlockedSchemes: this.unlockedSchemes,
 			karmaKittens: this.karmaKittens,
 			karmaZebras: this.karmaZebras,
 			ironWill: this.ironWill,
 			deadKittens: this.deadKittens,
 			cheatMode: this.cheatMode,
 
-			opts: this.filterMetaObj(this.opts, ["usePerSecondValues", "forceHighPrecision", "usePercentageResourceValues",
-				"highlightUnavailable", "hideSell", "noConfirm", "IWSmelter", "disableCMBR", "disableTelemetry", "enableRedshift", "useLegacyTwoInRowLayout", "forceLZ"])
+			opts: this.filterMetaObj(this.opts, this.optsKeys)
 		};
 
-		// this.telemetry.save(saveData);
+		this.telemetry.save(saveData);
 		this.extrasTab.save(saveData);
 
 		if (compress) {
@@ -2718,17 +2724,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			this.loadMetaFields(this, data, ["forceShowLimits", "colorScheme", "karmaKittens", "karmaZebras",
 				"deadKittens", "useWorkers", "cheatMode", "isCMBREnabled"]);
 
-			this.OptionsTab.scheme.value = this.colorScheme;
 			this.ironWill = ("ironWill" in data) ? Boolean(data.ironWill) : true;
 
-			this.loadMetaFields(this.opts, data.opts, ["usePerSecondValues", "forceHighPrecision", "usePercentageResourceValues",
-				"highlightUnavailable", "hideSell", "noConfirm", "IWSmelter", "disableCMBR", "disableTelemetry", "enableRedshift", "forceLZ"]);
+			this.loadMetaFields(this.opts, data.opts, this.optsKeys);
 		}
 
 		this.resPool.load(saveData);
 		this.village.load(saveData);
 		this.calendar.load(saveData);
 		this.console.load(saveData);
+		this.OptionsTab.load(saveData);
 
 		this.callMethods(this.managers, "load", saveData);
 
@@ -2797,21 +2802,30 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			altKey: false
 		};
 
-		this.opts = new classes.KGSaveEdit.GenericItem(this, {
+		var defaultOpts = {
 			usePerSecondValues: true,
 			forceHighPrecision: false,
 			usePercentageResourceValues: false,
+			showNonApplicableButtons: false,
+			usePercentageConsumptionValues: false,
 			highlightUnavailable: true,
 			hideSell: false,
+			hideDowngrade: false,
+			hideBGImage: false,
+			tooltipsInRightColumn: false,
 			noConfirm: false,
 			IWSmelter: true,
 			disableCMBR: false,
 			disableTelemetry: true,
 			enableRedshift: false,
+			batchSize: 10,
 			// Used only in KG Mobile
 			useLegacyTwoInRowLayout: false,
-			forceLZ: false
-		});
+			forceLZ: false,
+			compressSaveFile: false
+		};
+		this.opts = new classes.KGSaveEdit.GenericItem(this, defaultOpts);
+		this.optsKeys = Object.keys(defaultOpts);
 
 		this.toolbar = new classes.KGSaveEdit.ui.Toolbar(this);
 
@@ -2892,7 +2906,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		this.calendar.render();
 		this.console.render();
-		// this.telemetry.render();
+		this.telemetry.render();
 
 		this.resPool.render();
 

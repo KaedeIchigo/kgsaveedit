@@ -32,21 +32,15 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			calculatePerTick: true
 		}, {
 			name: "iron",
-			tags: {
-				baseMetal: true
-			},
+			tag: "baseMetal",
 			calculatePerTick: true
 		}, {
 			name: "titanium",
-			tags: {
-				baseMetal: true
-			},
+			tag: "baseMetal",
 			calculatePerTick: true
 		}, {
 			name: "gold",
-			tags: {
-				baseMetal: true
-			},
+			tag: "baseMetal",
 			calculatePerTick: true
 		}, {
 			name: "oil",
@@ -54,16 +48,12 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "uranium",
 			color: "#4ea24e",
-			tags: {
-				baseMetal: true
-			},
+			tag: "baseMetal",
 			calculatePerTick: true
 		}, {
 			name: "unobtainium",
 			color: "#a00000",
-			tags: {
-				baseMetal: true
-			},
+			tag: "baseMetal",
 			calculatePerTick: true
 		}, {
 			name: "antimatter",
@@ -208,66 +198,66 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "relic",
 			type: "exotic",
 			color: "#fa0ede",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-purple 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-purple 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-purple 1.5s ease-in-out infinite alternate",
 				animation:           "neon-purple 1.5s ease-in-out infinite alternate"
-			}
+			} */
 		}, {
 			name: "void",
 			type: "exotic",
 			color: "#fa0ede",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-purple 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-purple 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-purple 1.5s ease-in-out infinite alternate",
 				animation:           "neon-purple 1.5s ease-in-out infinite alternate"
-			},
+			}, */
 			inputClass: "integerInput abbrInput"
 		}, {
 			name: "elderBox",
 			description: true,
 			type: "exotic",
 			color: "#fa0ede",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-pink 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-pink 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
 				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
-			},
+			}, */
 			relockIfZero: true
 		}, {
 			name: "wrappingPaper",
 			type: "exotic",
 			color: "#fa0ede",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-pink 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-pink 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
 				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
-			}
+			} */
 		}, {
 			name: "blackcoin",
 			type: "exotic",
 			color: "gold",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-gold 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-gold 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-gold 1.5s ease-in-out infinite alternate",
 				animation:           "neon-gold 1.5s ease-in-out infinite alternate"
-			}
+			} */
 		}, {
 			name: "bloodstone",
 			type: "exotic",
 			craftable: true,
 			color: "red",
-			style: {
+			/* style: {
 				"-webkit-animation": "neon-red 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-red 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-red 1.5s ease-in-out infinite alternate",
 				animation:           "neon-red 1.5s ease-in-out infinite alternate"
-			}
+			} */
 		}, {
 			name: "beam",
 			craftable: true
@@ -276,27 +266,33 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			craftable: true
 		}, {
 			name: "plate",
-			craftable: true
+			craftable: true,
+			tag: "metallurgist"
 		}, {
 			name: "steel",
 			craftable: true,
 			color: "gray",
-			calculatePerTick: true
+			calculatePerTick: true,
+			tag: "metallurgist"
 		}, {
 			name: "concrate",
-			craftable: true
+			craftable: true,
+			tag: "chemist"
 		}, {
 			name: "gear",
 			craftable: true,
-			color: "gray"
+			color: "gray",
+			tag: "metallurgist"
 		}, {
 			name: "alloy",
 			craftable: true,
-			color: "gray"
+			color: "gray",
+			tag: "metallurgist"
 		}, {
 			name: "eludium",
 			craftable: true,
-			color: "darkViolet"
+			color: "darkViolet",
+			tag: "chemist"
 		}, {
 			name: "scaffold",
 			craftable: true,
@@ -314,7 +310,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "kerosene",
 			craftable: true,
-			color: "darkYellow"
+			color: "darkYellow",
+			tag: "chemist"
 		}, {
 			name: "parchment",
 			craftable: true,
@@ -337,7 +334,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "thorium", //divinite
 			craftable: true,
 			color: "#4ea24e",
-			calculatePerTick: true
+			calculatePerTick: true,
+			tag: "chemist"
 		}, {
 			name: "megalith",
 			craftable: true,
@@ -490,7 +488,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			}
 		}
 
-		if (res.tags && res.tags.baseMetal) {
+		if (res.tag === "baseMetal") {
 			maxValue *= (1 + this.game.getEffect("baseMetalMaxRatio"));
 		}
 
