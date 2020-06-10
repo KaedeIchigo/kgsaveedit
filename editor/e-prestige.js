@@ -322,6 +322,7 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 
 	constructor: function () {
 		this.registerMetaItems(this.perksData, classes.KGSaveEdit.UpgradeMeta, "perks", function (prestige) {
+			prestige.upgradeType = "perks";
 			prestige.i18nKeys = {
 				label: "prestige." + prestige.name + ".label",
 				description: "prestige." + prestige.name + ".desc"
@@ -334,7 +335,11 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 	},
 
 	getPerk: function (name) {
-		return this.perksByName[name];
+		var perk = this.perksByName[name];
+		if (name && !perk) {
+			console.error("Perk not found", name);
+		}
+		return perk;
 	},
 
 	getSpentParagon: function () {

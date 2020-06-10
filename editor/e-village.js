@@ -164,7 +164,11 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getJob: function (name) {
-		return this.jobsByName[name];
+		var job = this.jobsByName[name];
+		// if (name && !job) {
+		// 	console.error("Job not found", name);
+		// }
+		return job;
 	},
 
 	getJobLimit: function (jobName) {
@@ -728,7 +732,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		return this.getKittens() - total;
 	},
 
-	getFreeEngineer: function () {
+	getFreeEngineers: function () {
 		return this.game.workshop.freeEngineers;
 	},
 
@@ -1426,8 +1430,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 });
 
 dojo.declare("classes.KGSaveEdit.JobMeta", classes.KGSaveEdit.MetaItem, {
-	game: null,
-
+	upgradeType: "jobs",
 	name: "Undefined",
 	title: "Undefined",
 	unlocked: false,
@@ -2266,6 +2269,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 				saveKitten.engineerSpeciality = saveKitten.engineerSpeciality || undefined;
 				saveKitten.rank = saveKitten.rank || undefined;
 				saveKitten.isLeader = saveKitten.isLeader || undefined;
+				saveKitten.isAdopted = saveKitten.isAdopted || undefined;
 			}
 		}
 
@@ -2307,7 +2311,8 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			job: this.job ? this.village.jobNames.indexOf(this.job) : undefined,
 			engineerSpeciality: this.engineerSpeciality || undefined,
 			rank: this.rank || undefined,
-			isLeader: this.isLeader || undefined
+			isLeader: this.isLeader || undefined,
+			isAdopted: this.isAdopted || undefined
 		};
 		// Custom sur/names
 		if (nameIndex <= 0 || surnameIndex <= 0) {
@@ -2360,6 +2365,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		this.color              = data.color || 0;
 		this.variety            = data.variety || 0;
 		this.rarity             = data.rarity || 0;
+		this.isAdopted          = data.isAdopted || false;
 
 		if (data.engineerSpeciality && this.job === "engineer" && this.game.workshop.getCraft(data.engineerSpeciality)) {
 			this.engineerSpeciality = data.engineerSpeciality;

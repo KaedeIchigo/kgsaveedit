@@ -4,6 +4,7 @@ require([], function () {
 "use strict";
 
 dojo.declare("classes.KGSaveEdit.UpgradeMeta", classes.KGSaveEdit.MetaItem, {
+	upgradeType: "upgrades",
 	name: "Undefined",
 	unlocked: false,
 	researched: false,
@@ -1433,7 +1434,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			effects: {
 				"crackerRatio": 1
 			},
-			upgrades: {program: ["planetCracker"]}
+			upgrades: {spaceBuilding: ["planetCracker"]}
 		}, {
 			name: "thoriumEngine",
 			prices: [
@@ -1504,7 +1505,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			},
 			upgrades: {voidSpace: ["chronocontrol"]}
 		}, {
-			name: "turnSmoothly",
+			name: "turnSmoothly", // chronosurge
 			prices: [
 				{name: "unobtainium",  val: 100000},
 				{name: "timeCrystal",  val: 25},
@@ -1518,6 +1519,15 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			upgrades: {
 				buildings: ["chronosphere"]
 			}
+		}, {
+			name: "invisibleBlackHand",
+			prices: [
+				{name: "void",         val: 32},
+				{name: "blackcoin",    val: 64},
+				{name: "timeCrystal",  val: 128},
+				{name: "temporalFlux", val: 4096}
+			],
+			requires: {tech: ["blackchain"]}
 		}
 	],
 
@@ -1784,18 +1794,27 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}
 	},
 
-	get: function (upgradeName) {
-		return this.upgradesByName[upgradeName];
+	get: function (name) {
+		var upgrade = this.upgradesByName[name];
+		if (name && !upgrade) {
+			console.error("Workshop upgrade not found", name);
+		}
+		return upgrade;
 	},
 
-	getCraft: function (craftName) {
-		return this.craftsByName[craftName];
+	getCraft: function (name) {
+		var craft = this.craftsByName[name];
+		// if (name && !craft) {
+		// 	console.error("Workshop craft not found", name);
+		// }
+		return craft;
 	},
 
 	getTabName: function () {
 		var name = this.tabName;
-		if (this.game.village.getFreeEngineer() > 0) {
-			name += $I("common.warning");
+		var freeEngineers = this.game.village.getFreeEngineers();
+		if (freeEngineers > 0) {
+			name += " (" + this.game.getDisplayValueExt(freeEngineers, false, false, 0) + ")";
 		}
 		return name;
 	},
@@ -1899,8 +1918,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 
 		// (One * bonus / handicap) crafts per engineer per 10 minutes
 		var effectPerTick = (1 / (600 * this.game.ticksPerSecond)) * (kittenResProduction * tierCraftRatio) / craft.progressHandicap;
-
-		return afterCraft ? effectPerTick * this.game.getResCraftRatio(resName) : effectPerTick;
+		return effectPerTick * (1 + (afterCraft ? this.game.getResCraftRatio(resName) : 0));
 	},
 
 	save: function (saveData) {
@@ -1949,6 +1967,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 
 
 dojo.declare("classes.KGSaveEdit.CraftMeta", classes.KGSaveEdit.MetaItem, {
+	upgradeType: "crafts",
 	unlocked: false,
 	value: 0,
 	progress: 0,
@@ -2023,7 +2042,7 @@ dojo.declare("classes.KGSaveEdit.CraftMeta", classes.KGSaveEdit.MetaItem, {
 		}, this.domNode.children[1], this, "value");
 
 		input.parseFn = function (value) {
-			return Math.min(value, this.metaObj.value + this.game.village.getFreeEngineer());
+			return Math.min(value, this.metaObj.value + this.game.village.getFreeEngineers());
 		};
 
 		this.game._createLinkList(this, this.domNode.children[2], [

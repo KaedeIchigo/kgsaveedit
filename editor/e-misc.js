@@ -939,7 +939,11 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 	},
 
 	get: function (name) {
-		return this.racesByName[name];
+		var race = this.racesByName[name];
+		if (name && !race) {
+			console.error("Race not found", name);
+		}
+		return race;
 	},
 
 	getTabName: function () {
@@ -1001,8 +1005,6 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 
 
 dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager, {
-	game: null,
-
 	currentChallenge: null,
 
 	challengesData: [
@@ -1051,8 +1053,7 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager,
 		}
 	],
 
-	constructor: function (game) {
-		this.game = game;
+	constructor: function () {
 		this.challenges = [];
 
 		this.registerMetaItems(this.challengesData, classes.KGSaveEdit.ChallengeMeta, "challenges");
@@ -1250,8 +1251,8 @@ dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 
 
 dojo.declare("classes.KGSaveEdit.ui.Toolbar", null, {
-	icons: null,
 	game: null,
+	icons: null,
 
 	constructor: function (game) {
 		this.game = game;
@@ -1477,8 +1478,6 @@ dojo.declare("classes.KGSaveEdit.Server", classes.KGSaveEdit.core, {
 
 
 dojo.declare("classes.KGSaveEdit.VoidManager", classes.KGSaveEdit.Manager, {
-	game: null,
-
 	voidUpgradesData: [
 		{
 		name: "spaceCathedral",
@@ -1496,14 +1495,16 @@ dojo.declare("classes.KGSaveEdit.VoidManager", classes.KGSaveEdit.Manager, {
 
 	faction: null,
 
-	constructor: function (game) {
-		this.game = game;
-
+	constructor: function () {
 		this.registerMetaItems(this.voidUpgradesData, classes.KGSaveEdit.GenericItem, "voidUpgrades");
 	},
 
 	getVU: function (name) {
-		return this.voidUpgradesByName[name];
+		var vu = this.voidUpgradesByName[name];
+		if (name && !vu) {
+			console.error("Void upgrade not found", name);
+		}
+		return vu;
 	},
 
 	save: function (saveData) {

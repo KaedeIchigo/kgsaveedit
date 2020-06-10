@@ -400,15 +400,27 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 	},
 
 	getZU: function (name) {
-		return this.zigguratUpgradesByName[name];
+		var upgrade = this.zigguratUpgradesByName[name];
+		if (name && !upgrade) {
+			console.error("Ziggurat upgrade not found", name);
+		}
+		return upgrade;
 	},
 
 	getRU: function (name) {
-		return this.religionUpgradesByName[name];
+		var upgrade = this.religionUpgradesByName[name];
+		if (name && !upgrade) {
+			console.error("Religion upgrade not found", name);
+		}
+		return upgrade;
 	},
 
 	getTU: function (name) {
-		return this.transcendenceUpgradesByName[name];
+		var upgrade = this.transcendenceUpgradesByName[name];
+		if (name && !upgrade) {
+			console.error("Transcendence upgrade not found", name);
+		}
+		return upgrade;
 	},
 
 	getFaithBonus: function () {
@@ -606,6 +618,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 
 
 dojo.declare("classes.KGSaveEdit.ZigguratMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "zigguratUpgrades",
 	unlocked: false,
 
 	constructor: function () {
@@ -646,6 +659,7 @@ dojo.declare("classes.KGSaveEdit.ZigguratMeta", classes.KGSaveEdit.MetaItemStack
 
 
 dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "religionUpgrades",
 	upgradable: false,
 
 	constructor: function () {

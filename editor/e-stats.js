@@ -359,11 +359,19 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 	},
 
 	get: function (name) {
-		return this.achievementsByName[name];
+		var achievement = this.achievementsByName[name];
+		if (name && !achievement) {
+			console.error("Achievement not found", name);
+		}
+		return achievement;
 	},
 
 	getHat: function (name) {
-		return this.hatsByName[name];
+		var hat = this.hatsByName[name];
+		if (name && !hat) {
+			console.error("Hat not found", name);
+		}
+		return hat;
 	},
 
 	renderTabBlock: function () {

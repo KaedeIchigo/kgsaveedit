@@ -328,9 +328,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			name: "blackchain",
 			prices: [
 				{name: "science", val: 5000000},
-				{name: "relic",   val: 5000}
+				{name: "relic",   val: 4096}
 			],
-			// unlocks: {},
+			// unlocks: {upgrades: ["invisibleBlackHand"]},
 			requires: {tech: ["quantumCryptography"]}
 		}, {
 			name: "nuclearFission",
@@ -549,7 +549,11 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	get: function (name) {
-		return this.techsByName[name];
+		var tech = this.techsByName[name];
+		if (name && !tech) {
+			console.error("Tech not found", name);
+		}
+		return tech;
 	},
 
 	save: function (saveData) {
@@ -589,6 +593,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 
 
 dojo.declare("classes.KGSaveEdit.ScienceMeta", classes.KGSaveEdit.UpgradeMeta, {
+	upgradeType: "tech",
+
 	constructor: function () {
 		this.i18nKeys = {
 			label: "science." + this.name + ".label",

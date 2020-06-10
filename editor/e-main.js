@@ -697,6 +697,8 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 
 
 dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
+	game: null,
+
 	ticksPerSecond: 5,
 
 	karmaKittens: 0,
@@ -740,6 +742,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	//TODO move this to game.math like KG?
 	uniformRandomInteger: function (min, max) {
+		min = Math.round(min);
+		max = Math.round(max);
 		return min + Math.floor(Math.random() * (max - min));
 	},
 
@@ -1135,18 +1139,28 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	upgradeItems: function (list) {
 		for (var type in list) {
 			for (var i = list[type].length - 1; i >= 0; i--) {
-				var meta = this.getUnlockByName(list[type][i], type);
-				if (meta) {
-					if (meta.calculateEffects) {
-						meta.calculateEffects(meta, this);
-						if (type === "spaceBuilding") {
-							this.calendar.cycleEffectsBasics(meta.effects, meta.name);
-						}
-					}
-					if (meta.metaObj && meta.metaObj.invalidateCachedEffects) {
-						meta.metaObj.invalidateCachedEffects();
-					}
+				var meta = list[type][i];
+				if (typeof meta === "string") {
+					meta = this.getUnlockByName(meta, type);
 				}
+				this.upgradeItem(meta, type);
+			}
+		}
+	},
+
+	upgradeItem: function (meta, type) {
+		if (meta) {
+			if (!type) {
+				type = meta.upgradeType;
+			}
+			if (meta.calculateEffects) {
+				meta.calculateEffects(meta, this);
+				if (type === "spaceBuilding") {
+					this.calendar.cycleEffectsBasics(meta.effects, meta.name);
+				}
+			}
+			if (meta.metaObj && meta.metaObj.invalidateCachedEffects) {
+				meta.metaObj.invalidateCachedEffects();
 			}
 		}
 	},
@@ -1172,9 +1186,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		// TODO: delegate this to managers? Can't be done in load unfortunately.
 		this.upgradeItems({
-			buildings: this.bld.buildingsNames,
-			program: this.space.allPrograms,
-			jobs: this.village.jobNames
+			buildings: this.bld.buildings,
+			spaceBuilding: this.space.allPrograms,
+			jobs: this.village.jobs
 		});
 	},
 
@@ -2232,9 +2246,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			}
 
 			if (dojo.hasClass(ele, "ownedInput")) {
-				if (meta.metaObj && meta.metaObj.invalidateCachedEffects) {
-					meta.metaObj.invalidateCachedEffects();
-				}
+				this.upgradeItem(meta);
 				if (meta.upgrades) {
 					this.upgradeItems(meta.upgrades);
 				}

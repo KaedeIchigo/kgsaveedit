@@ -637,7 +637,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 						self.effects = {
 							"catnipMaxRatio":              0.1,
 							"catnipRatio":                 0.025,
-							"terraformingMaxKittensRatio": 0.01
+							"terraformingMaxKittensRatio": 0
 						};
 						self.updateEffects(self, game);
 					},
@@ -809,6 +809,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 			var bld = planet.buildings || [];
 			planet.buildings = [];
 			this.registerMetaItems(bld, classes.KGSaveEdit.ProgramMeta, "allPrograms", function (program) {
+				program.upgradeType = "spaceBuilding";
 				program.i18nKeys = {
 					label: "space.planet." + planet.name + "." + program.name + ".label",
 					description: "space.planet." + planet.name + "." + program.name + ".desc"
@@ -828,15 +829,27 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 	},
 
 	getProgram: function (name) {
-		return this.allProgramsByName[name];
+		var program = this.allProgramsByName[name];
+		if (name && !program) {
+			console.error("Program not found", name);
+		}
+		return program;
 	},
 
 	getBuilding: function (name) {
-		return this.allProgramsByName[name];
+		var building = this.allProgramsByName[name];
+		if (name && !building) {
+			console.error("Space building not found", name);
+		}
+		return building;
 	},
 
 	getPlanet: function (name) {
-		return this.planetsByName[name];
+		var planet = this.planetsByName[name];
+		if (name && !planet) {
+			console.error("Planet not found", name);
+		}
+		return planet;
 	},
 
 	getEffect: function (name) {
@@ -1057,6 +1070,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 
 
 dojo.declare("classes.KGSaveEdit.ProgramMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "spaceMission",
 	unlocked: false,
 	upgradable: true,
 

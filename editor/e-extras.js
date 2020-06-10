@@ -8,8 +8,7 @@ dojo.declare("classes.KGSaveEdit.ExtrasTab", classes.KGSaveEdit.UI.Tab, {
 
 	extraMetadata: null,
 
-	constructor: function (game) {
-		this.game = game;
+	constructor: function () {
 		this.extraMetadata = [];
 	},
 
@@ -214,6 +213,8 @@ dojo.declare("classes.KGSaveEdit.ExtraMetaItem", classes.KGSaveEdit.GenericItem,
 
 
 dojo.declare("classes.KGSaveEdit.ExtraTooltipHelp", [classes.KGSaveEdit.TooltipItem], {
+	game: null,
+
 	constructor: function (game) {
 		this.game = game;
 	},

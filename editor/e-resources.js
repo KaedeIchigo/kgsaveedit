@@ -4,8 +4,6 @@ require(["dojo/on"], function (on) {
 "use strict";
 
 dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
-	game: null,
-
 	resources: null,
 	resourcesByName: null,
 
@@ -406,7 +404,11 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 	},
 
 	get: function (name) {
-		return this.resourcesByName[name];
+		var resource = this.resourcesByName[name];
+		// if (name && !resource) {
+		// 	console.error("Resource not found", name);
+		// }
+		return resource;
 	},
 
 	update: function () {
@@ -660,7 +662,6 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 
 
 dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem, classes.KGSaveEdit.TooltipItem], {
-	game: null,
 	domNode: null,
 	valueIn: null,
 

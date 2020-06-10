@@ -1429,7 +1429,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 	constructor: function (game) {
 		this.i18nKeys = {tabName: "buildings.tabName"};
 
-		this.buildingsNames = [];
 		this.buildingGroups = {};
 
 		for (var name in this.buildingGroupsData) {
@@ -1441,7 +1440,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		this.activeGroup = this.buildingGroups.all;
 
 		this.registerMetaItems(this.buildingsData, classes.KGSaveEdit.BuildingMeta, "buildings", function (bld) {
-			this.buildingsNames.push(bld.name);
 			this.buildingGroups.all.buildings.push(bld.name);
 
 			var effects = bld.get("effects") || {};
@@ -1607,7 +1605,11 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 	},
 
 	getBuilding: function (name) {
-		return this.buildingsByName[name];
+		var building = this.buildingsByName[name];
+		if (name && !building) {
+			console.error("Building not found", name);
+		}
+		return building;
 	},
 
 	getAutoProductionRatio: function () {
@@ -1671,6 +1673,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 
 dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "buildings",
 	domNode: null,
 
 	unlockable: false,

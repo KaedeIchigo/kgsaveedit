@@ -4,8 +4,6 @@ require(["dojo/on"], function (on) {
 "use strict";
 
 dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, classes.KGSaveEdit.Manager], {
-	game: null,
-
 	flux: 0, /* Amount of years skipped by CF time jumps */
 	heat: 0,
 	timestamp: null,
@@ -37,8 +35,8 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			heat: 0,
 			isAutomationEnabled: false,
 			effects: {
-				"heatMax":      100,
-				"heatPerTick": -0.02
+				"heatMax":     100,
+				"heatPerTick": 0.02
 			},
 			unlocked: true,
 			// unlocks: {chronoforge: ["timeBoiler"]},
@@ -208,15 +206,14 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 	effectsBase: {
 		"temporalFluxMax": 60 * 10 * 5,  //10 minutes (5 == this.game.ticksPerSecond)
 		"heatMax":         100,
-		"heatPerTick":    -0.01
+		"heatPerTick":     0.01
 	},
 
 	getEffectBase: function (name) {
 		return num(this.effectsBase[name]);
 	},
 
-	constructor: function (game) {
-		this.game = game;
+	constructor: function () {
 		this.timestamp = Date.now();
 		this.i18nKeys = {tabName: "tab.name.time"};
 
@@ -241,11 +238,19 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 	},
 
 	getCFU: function (name) {
-		return this.cfuByName[name];
+		var upgrade = this.cfuByName[name];
+		if (name && !upgrade) {
+			console.error("Chronoforge upgrade not found", name);
+		}
+		return upgrade;
 	},
 
 	getVSU: function (name) {
-		return this.vsuByName[name];
+		var upgrade = this.vsuByName[name];
+		if (name && !upgrade) {
+			console.error("Voidspace upgrade not found", name);
+		}
+		return upgrade;
 	},
 
 	renderTabBlock: function () {
@@ -425,6 +430,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 
 
 dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "chronoforge",
 	unlocked: false,
 
 	priceRatio: 1.25,
@@ -546,6 +552,8 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 
 
 dojo.declare("classes.KGSaveEdit.VSUMeta", classes.KGSaveEdit.CFUMeta, {
+	upgradeType: "voidSpace",
+
 	//workaround for strictmode
 	afterRender: function () {
 		dojo.addClass(this.domNode.children[1], "rightAlign");
