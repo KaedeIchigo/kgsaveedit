@@ -50,7 +50,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		}, {
 			name: "priest",
 			requires: function (game) {
-				return game.challenges.currentChallenge !== "atheism" && game.science.get("theology").owned();
+				return /* !game.challenges.isActive("atheism") && */ game.science.get("theology").owned();
 			},
 			modifiers: {
 				"faith": 0.0015
@@ -131,7 +131,12 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	censusPageMax: 1, // highest census page
 	kittensPerPage: 10,
 
+	reserveKittens: null,
+	generatedReserveKittens: null,
+
 	selectedKittens: null,
+
+	censusReserveKittens: false,
 
 	constructor: function (game) {
 		this.jobs = [];
@@ -144,9 +149,13 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		this.censusPageKittens = [];
 		this.traitsByName = {};
 
+		this.reserveKittens = [];
+		this.generatedReserveKittens = [];
+
 		this.selectedKittens = [];
 
 		this.map = new classes.KGSaveEdit.villageMap(game);
+		this.registerEffectNames(this.map.effects);
 
 		for (var i = 0, len = this.jobsData.length; i < len; i++) {
 			var job = new classes.KGSaveEdit.JobMeta(game, this.jobsData[i]);
@@ -187,6 +196,22 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		return this.map.getEffect(effectName);
 	},
 
+	// show no leader set as long as you have theocracy set with an inappropriate leader
+	// or in other words, remember which kitten was leader if you set and then unset theocracy
+	// also handles setting number of kittens lower that the leaders' array index
+	// should export as no leader if the leader is not valid
+	getLeader: function () {
+		var leader = this.leader;
+		if (!leader || this.kittens.indexOf(leader) < 0) {
+			return null;
+		}
+		var theocracy = this.game.science.getPolicy("theocracy");
+		if (theocracy.owned() && leader.job !== theocracy.requiredLeaderJob) {
+			return null;
+		}
+		return leader;
+	},
+
 	renderTabBlock: function () {
 		var self = this;
 		var game = self.game;
@@ -219,9 +244,42 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		}, self.tabBlockNode);
 
 		self.governmentBlock = dojo.create("div", {
-			class: "noAnarchy",
+			class: "toggleAnarchy noAnarchy",
 			id: "governmentBlock"
 		}, self.censusBlock);
+
+		var censusSourceBlock = dojo.create("div", {id: "censusSourceBlock", class: "bottom-margin"}, self.censusBlock);
+		var label = dojo.create("label", {innerHTML: $I("KGSaveEdit.village.census.source.villageKittens")}, censusSourceBlock);
+		self.censusSourceKittens = dojo.create("input", {
+			id: "censusSourceKittens",
+			name: "censusSource",
+			type: "radio",
+			checked: true
+		}, label, "first");
+		label = dojo.create("label", {innerHTML: $I("KGSaveEdit.village.census.source.reserveKittens")}, censusSourceBlock);
+		self.censusSourceReserves = dojo.create("input", {
+			id: "censusSourceReserves",
+			name: "censusSource",
+			type: "radio"
+		}, label, "first");
+		self.censusReserveKittens = false;
+
+		on(censusSourceBlock, on.selector('input[type="radio"]', "click"), function () {
+			var prevCensusReserveKittens = self.censusReserveKittens;
+			self.censusReserveKittens = self.censusSourceReserves.checked;
+			dojo.toggleClass(self.censusKittensBlock, "showReserves", self.censusReserveKittens);
+			if (prevCensusReserveKittens !== self.censusReserveKittens) {
+				self.takeCensus();
+				self.updateSelectedKittens();
+			}
+		});
+
+		dojo.place(document.createTextNode(" \u00A0"), censusSourceBlock); //insert &nbsp; equivalent
+		self.reserveKittensCountNode = game._createInput({class: "integerInput"}, censusSourceBlock);
+
+		self.reserveKittensCountNode.handler = function () {
+			self.synchReserveKittens(this.parsedValue);
+		};
 
 		self.unassignLeaderBlock = dojo.create("div");
 
@@ -364,29 +422,24 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 		self.massEditSelectAllNode = game._createCheckbox($I("KGSaveEdit.village.census.select.all"), self.massEditSelectKittensSpan).cbox;
 		on(self.massEditSelectAllNode, "click", function () {
-			for (var i = self.kittens.length - 1; i >= 0; i--) {
-				self.kittens[i].set("selected", this.checked, false, true);
-			}
+			var kittensList = self.getKittensForCensus();
+			self.toggleKittenSelected(kittensList, this.checked);
 			self.updateSelectedKittens();
 		});
 
 		self.massEditSelectFilterNode = game._createCheckbox($I("KGSaveEdit.village.census.select.filtered"), self.massEditSelectKittensSpan).cbox;
 		on(self.massEditSelectFilterNode, "click", function () {
-			for (var i = self.censusKittens.length - 1; i >= 0; i--) {
-				self.censusKittens[i].set("selected", this.checked, false, true);
-			}
+			self.toggleKittenSelected(self.censusKittens, this.checked);
 			self.updateSelectedKittens();
 		});
 
 		self.massEditSelectPageNode = game._createCheckbox($I("KGSaveEdit.village.census.select.page"), self.massEditSelectKittensSpan).cbox;
 		on(self.massEditSelectPageNode, "click", function () {
-			for (var i = self.censusPageKittens.length - 1; i >= 0; i--) {
-				self.censusPageKittens[i].set("selected", this.checked, false, true);
-			}
+			self.toggleKittenSelected(self.censusPageKittens, this.checked);
 			self.updateSelectedKittens();
 		});
 
-		self.censusKittensBlock = dojo.create("div", null, self.censusBlock);
+		self.censusKittensBlock = dojo.create("div", {class: "toggleAnarchy"}, self.censusBlock);
 
 		self.noCensusKittensBlock = dojo.create("div", {
 			class: "ital",
@@ -403,7 +456,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		self.massEditNode = dojo.create("div", {
 			id: "massEditKittensBlock",
 			class: "hideSiblings hidden"
-		}, self.censusKittensBlock, "before");
+		}, self.censusKittensBlock, "first");
 
 		var methodKitten = new classes.KGSaveEdit.Kitten(game);
 
@@ -411,7 +464,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 		var div = dojo.create("div", {
 			class: "censusLine",
-			innerHTML: "<span>Editing 0 kittens</span> &nbsp; <span> &nbsp; </span>"
+			innerHTML: "<span>Editing 0 kittens</span> &nbsp; <span> &nbsp; </span>" // i18n'd later
 		}, self.massEditNode);
 		this.massEditHeaderSpan = div.children[0];
 
@@ -541,11 +594,6 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		self.massEditExpNode = game._createInput({class: "expEdit"}, tr.children[2], null, null, null, true);
 		self.massEditExpSetExpected = game._createCheckbox($I("KGSaveEdit.village.massedit.exp.setExpected"), tr.children[3]).cbox;
 
-		// dojo.create("div", {
-		// 	class: "noAnarchy",
-		// 	innerHTML: "Job skills"
-		// }, this.massEditNode);
-
 		table = dojo.create("table", {
 			class: "noAnarchy"
 		}, this.massEditNode);
@@ -608,7 +656,10 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			return;
 		}
 
-		if (!this.massEditNode) {
+		if (this.massEditNode) {
+			dojo.place(this.massEditNode, this.censusKittensBlock, "first");
+
+		} else {
 			this.renderMassEditNode();
 		}
 
@@ -719,17 +770,33 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		}
 	},
 
+	addReserveKittens: function (limit) {
+		while (this.generatedReserveKittens.length < limit) {
+			var kitten = new classes.KGSaveEdit.Kitten(this.game);
+			kitten.reserve = true;
+			this.generatedReserveKittens.push(kitten);
+		}
+	},
+
 	getKittens: function () {
 		return this.game.resPool.get("kittens").value;
 	},
 
+	getKittensForCensus: function () {
+		return this.censusReserveKittens ? this.reserveKittens : this.kittens;
+	},
+
 	getFreeKittens: function () {
-		var total = 0;
+		var workingKittens = 0;
 		for (var i = this.jobs.length - 1; i >= 0; i--) {
-			total += this.jobs[i].value;
+			workingKittens += this.jobs[i].value;
 		}
 
-		return this.getKittens() - total;
+		var diligentKittens = (this.game.challenges.isActive("anarchy") ?
+			Math.round(this.getKittens() * (0.5 - this.game.getLimitedDR(this.game.getEffect("kittenLaziness"), 0.25))) :
+			this.getKittens());
+
+		return Math.max(diligentKittens - workingKittens, 0) || 0;
 	},
 
 	getFreeEngineers: function () {
@@ -771,38 +838,43 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getEffectLeader: function (trait, defaultObject) {
-		if (this.game.challenges.currentChallenge !== "anarchy" && this.leader) {
-			var leaderTrait = this.leader.trait["name"];
+		var leader = this.getLeader();
+		if (leader && !this.game.challenges.isActive("anarchy")) {
+			var leaderRatio = 1;
+			if (this.game.science.getPolicy("monarchy").owned()) {
+				leaderRatio = 1.95;
+			}
+			var leaderTrait = leader.trait["name"];
 			if (leaderTrait === trait) {
 				var burnedParagonRatio = 1 + this.game.prestige.getBurnedParagonRatio();
 				// Modify the defautlObject depends on trait
 				switch (trait) {
 					case "engineer": // Crafting bonus
-						defaultObject = 0.05 * burnedParagonRatio;
+						defaultObject = 0.05 * burnedParagonRatio * leaderRatio;
 						break;
 					case "metallurgist": // Crafting bonus for non x-ium metallic stuff (plate, steel, gear, alloy)
-						defaultObject = 0.1 * burnedParagonRatio;
+						defaultObject = 0.1 * burnedParagonRatio * leaderRatio;
 						break;
 					case "chemist": // Crafting bonus for "chemical" stuff (concrete, eludium, kerosene, thorium)
-						defaultObject = 0.075 * burnedParagonRatio;
+						defaultObject = 0.075 * burnedParagonRatio * leaderRatio;
 						break;
 					/* case "merchant": // Trading bonus
-						defaultObject = 0.03 * burnedParagonRatio;
+						defaultObject = 0.03 * burnedParagonRatio * leaderRatio;
 						break;
 					case "manager": // Hunting bonus
-						defaultObject = 0.5 * burnedParagonRatio;
+						defaultObject = 0.5 * burnedParagonRatio * leaderRatio;
 						break; */
 					case "scientist": // Science prices bonus
 						for (var i = 0; i < defaultObject.length; i++) {
 							if (defaultObject[i].name === "science") {
-								defaultObject[i].val -= defaultObject[i].val * this.game.getHyperbolicEffect(0.05 * burnedParagonRatio, 1.0); //5% before BP
+								defaultObject[i].val -= defaultObject[i].val * this.game.getLimitedDR(0.05 * burnedParagonRatio, 1.0); //5% before BP
 							}
 						}
 						break;
 					case "wise": // Religion bonus
 						for (i = 0; i < defaultObject.length; i++) {
 							if (defaultObject[i].name === "faith" || defaultObject[i].name === "gold") {
-								defaultObject[i].val -= defaultObject[i].val * this.game.getHyperbolicEffect(0.09 + 0.01 * burnedParagonRatio, 1.0); //10% before BP
+								defaultObject[i].val -= defaultObject[i].val * this.game.getLimitedDR(0.09 + 0.01 * burnedParagonRatio, 1.0); //10% before BP
 							}
 						}
 						break;
@@ -814,13 +886,13 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getResConsumption: function () {
-		var kittens = this.kittens.length;
-
+		var kittens = this.getKittens();
+		var philosophyLuxuryModifier = 1 - this.game.getEffect("luxuryConsuptionReduction");
 		var res = {
 			"catnip": this.catnipPerKitten * kittens,
-			"furs":  -0.01 * kittens,
-			"ivory": -0.007 * kittens,
-			"spice": -0.001 * kittens
+			"furs":  -0.01 * kittens * philosophyLuxuryModifier,
+			"ivory": -0.007 * kittens * philosophyLuxuryModifier,
+			"spice": -0.001 * kittens * philosophyLuxuryModifier
 		};
 		return res;
 	},
@@ -837,111 +909,135 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			res["manpower"] = num(res["manpower"]) + 0.15; //zebras are a bit stronger than kittens
 		}
 		if (zebras > 1) {
-			res["manpower"] += this.game.getHyperbolicEffect((zebras - 1) * 0.05, 2);
+			res["manpower"] += this.game.getLimitedDR((zebras - 1) * 0.05, 2);
 		}
 
 		return res;
 	},
 
 	updateResourceProduction: function () {
-		var productionRatio = (1 + this.game.getEffect("skillMultiplier")) / 4;
-
 		var res = {};
+		var leader = this.getLeader();
+		var leaderBonus = leader ? this.getLeaderBonus(leader.rank) : 1;
 
-		for (var i in this.kittens) {
+		for (var i = 0, len = this.kittens.length; i < len; i++) {
 			var kitten = this.kittens[i];
-			if (kitten.job) {
-				var job = this.getJob(kitten.job);
-				if (job) {
-					if (this.game.challenges.currentChallenge === "atheism" && job.name === "priest") {
-						continue;
+
+			if (!kitten.job) {
+				continue;
+			}
+			var job = this.getJob(kitten.job);
+			if (!job /* || (kitten.job === "priest" && this.game.challenges.isActive("atheism")) */) {
+				continue;
+			}
+
+			var mod = this.getValueModifierPerSkill(kitten.skills[kitten.job] || 0);
+
+			for (var jobResMod in job.modifiers) {
+				var diff = job.modifiers[jobResMod] + job.modifiers[jobResMod] * mod;
+
+				if (diff > 0) {
+					if (kitten === leader) {
+						diff *= leaderBonus;
+					} else if (leader) {
+						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
+					diff *= this.happiness;	//alter positive resource production from jobs
+				}
 
-					var mod = this.getValueModifierPerSkill(num(kitten.skills[kitten.job]));
-					for (var jobResMod in job.modifiers) {
+				if (!res[jobResMod]) {
+					res[jobResMod] = diff;
+				} else {
+					res[jobResMod] += diff;
+				}
+			}
 
-						var diff = job.modifiers[jobResMod] + job.modifiers[jobResMod] * ((mod - 1) * productionRatio);
+			if (job.name === "engineer" && typeof(kitten.engineerSpeciality) !== "undefined" && kitten.engineerSpeciality !== null) {
+				jobResMod = "ES" + kitten.engineerSpeciality;
 
-						if (diff > 0) {
-							if (kitten.isLeader) {
-								diff *= this.getLeaderBonus(kitten.rank);
-							}
-							diff *= this.happiness; //alter positive resource production from jobs
-						}
+				var automationBonus = this.game.getEffect(kitten.engineerSpeciality + "AutomationBonus") || 0;
+				diff = 1 + automationBonus;
 
-						if (res[jobResMod]) {
-							res[jobResMod] += diff;
-						} else {
-							res[jobResMod] = diff;
-						}
+				var rankDiff = this.game.workshop.getCraft(kitten.engineerSpeciality).tier - kitten.rank;
+				if (rankDiff > 0) {
+					diff -= diff * rankDiff * 0.15;
+				}
+
+				diff += diff * mod;
+
+				if (diff > 0) {
+					if (kitten === leader) {
+						diff *= leaderBonus;
+					} else if (leader) {
+						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
+					diff *= this.happiness;	//alter positive resource production from jobs
+				}
 
-					if (job.name === "engineer" && typeof kitten.engineerSpeciality !== "undefined" && kitten.engineerSpeciality != null) {
-						jobResMod = "ES" + kitten.engineerSpeciality;
-
-						var automationBonus = this.game.getEffect(kitten.engineerSpeciality + "AutomationBonus") || 0;
-						diff = 1 + automationBonus;
-
-						var rankDiff = this.game.workshop.getCraft(kitten.engineerSpeciality).tier - kitten.rank;
-						if (rankDiff > 0) {
-							diff -= diff * rankDiff * 0.15;
-						}
-
-						diff += diff * (mod - 1) * productionRatio;
-
-						if (diff > 0) {
-							if (kitten.isLeader) {
-								diff *= this.getLeaderBonus(kitten.rank);
-							}
-							diff *= this.happiness; //alter positive resource production from jobs
-						}
-
-						if (res[jobResMod]) {
-							res[jobResMod] += diff;
-						} else {
-							res[jobResMod] = diff;
-						}
-					}
+				if (!res[jobResMod]) {
+					res[jobResMod] = diff;
+				} else {
+					res[jobResMod] += diff;
 				}
 			}
 		}
 		this.resourceProduction = res;
 	},
 
+	getUnhappiness: function () {
+		var populationPenalty = 2;
+		if (this.game.science.getPolicy("liberty").owned()) {
+			populationPenalty = 1;
+		}
+		if (this.game.science.getPolicy("fascism").owned()) {
+			return 0;
+		}
+		return (this.getKittens() - 5) * populationPenalty * (1 + this.game.getEffect("unhappinessRatio"));
+	},
+
+	getEnvironmentEffect: function () {
+		return this.game.getEffect("environmentHappinessBonus") + this.game.getEffect("environmentUnhappiness");
+	},
+
 	updateHappines: function () {
 		var happiness = 100;
 		var numKittens = this.getKittens();
 
-		var unhappiness = (numKittens - 5) * 2;
-		unhappiness *= 1 + this.game.getEffect("unhappinessRatio"); //limit ratio by 1.0 by 75% hyperbolic falloff
-
+		var unhappiness = this.getUnhappiness();
 		if (numKittens > 5) {
 			happiness -= unhappiness; //every kitten takes 2% of production rate if >5
 		}
 
+		var enviromentalEffect = this.getEnvironmentEffect();
 		var happinessBonus = this.game.getEffect("happiness");
-		happiness += happinessBonus;
+		var challengeHappiness = this.game.getEffect("challengeHappiness");
+		happiness += (happinessBonus + enviromentalEffect + challengeHappiness);
 
 		//boost happiness/production by 10% for every uncommon/rare resource
 		var resources = this.game.resPool.resources;
+		var happinessPerLuxury = 10;
+		//philosophy epicurianism effect
+		happinessPerLuxury += this.game.getEffect("luxuryHappinessBonus");
 		for (var i = resources.length - 1; i >= 0; i--) {
 			var res = resources[i];
 			if (res.type !== "common" && res.owned()) {
 				if (res.name !== "elderBox" || !this.game.resPool.get("wrappingPaper").owned()) {
-					happiness += 10;
+					happiness += happinessPerLuxury;
 				}
 			}
 		}
 
 		if (this.game.calendar.festivalDays) {
-			happiness += 30;
+			happiness += 30 * (1 + this.game.getEffect("festivalRatio"));
 		}
 
-		happiness += this.game.resPool.get("karma").value; //+1% to the production per karma point
+		var karma = this.game.resPool.get("karma");
+		happiness += karma.value; //+1% to the production per karma point
 
 		var overpopulation = numKittens - this.maxKittens;
 		if (overpopulation > 0) {
-			happiness -= overpopulation * 2; //overpopulation penalty
+			var overpopulationPenalty = 2;
+			happiness -= overpopulation * overpopulationPenalty;
 		}
 
 		if (happiness < 25) {
@@ -951,12 +1047,20 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		this.happiness = happiness / 100;
 	},
 
+	toggleKittenSelected: function (kittens, selected) {
+		for (var i = kittens.length - 1; i >= 0; i--) {
+			kittens[i].set("selected", selected, false, true);
+		}
+	},
+
 	updateSelectedKittens: function (skipUpdate) {
 		if (this.massEditNode) {
 			dojo.addClass(this.massEditNode, "hidden");
 		}
 
-		this.selectedKittens = dojo.filter(this.kittens, function (kitten) {
+		var kittensList = this.getKittensForCensus();
+
+		this.selectedKittens = dojo.filter(kittensList, function (kitten) {
 			return kitten.selected;
 		});
 
@@ -974,7 +1078,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	updateSelectedKittenControls: function () {
-		this._updateMassEditSelectCbox(this.massEditSelectAllNode, this.kittens.length, this.selectedKittens.length);
+		var kittensList = this.getKittensForCensus();
+		this._updateMassEditSelectCbox(this.massEditSelectAllNode, kittensList.length, this.selectedKittens.length);
 
 		var censusKittensSelected = 0;
 		for (var i = this.censusKittens.length - 1; i >= 0; i--) {
@@ -1023,7 +1128,11 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getLeaderBonus: function (rank) {
-		return rank === 0 ? 1.0 : (rank + 1) / 1.4;
+		var bonus = rank == 0 ? 1.0 : (rank + 1) / 1.4;
+		if (this.game.science.getPolicy("authocracy").owned()) {
+			bonus *= 2;
+		}
+		return bonus;
 	},
 
 	sortKittens: function (kittens) {
@@ -1057,15 +1166,29 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getValueModifierPerSkill: function (value) {
-		if (this.game.challenges.currentChallenge !== "anarchy") {
-			if (value >= 9000) { return 1.75; }
-			if (value >= 5000) { return 1.50; }
-			if (value >= 2500) { return 1.30; }
-			if (value >= 1200) { return 1.18; }
-			if (value >= 500)  { return 1.10; }
-			if (value >= 100)  { return 1.05; }
+		var bonus = 0;
+		switch (true) {
+			case value < 100:
+				break;
+			case value < 500:
+				bonus = 0.0125;
+				break;
+			case value < 1200:
+				bonus = 0.025;
+				break;
+			case value < 2500:
+				bonus = 0.045;
+				break;
+			case value < 5000:
+				bonus = 0.075;
+				break;
+			case value < 9000:
+				bonus = 0.125;
+				break;
+			default:
+				bonus = 0.1875 * (1 + this.game.getLimitedDR(this.game.getEffect("masterSkillMultiplier"), 4));
 		}
-		return 1.0;
+		return bonus * (1 + this.game.getEffect("skillMultiplier"));
 	},
 
 	getSkillLevel: function (exp) {
@@ -1131,7 +1254,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			return kitten.job === "engineer" && !kitten.engineerSpeciality;
 		});
 
-		if (this.game.village.leader && this.game.workshop.get("register").owned()) {
+		if (this.getLeader() && this.game.workshop.get("register").owned()) {
 			freeKittens.sort(function (a, b) { return b.val - a.val; });
 			freeKittens.sort(function (a, b) { return b.rank - a.rank; });
 		}
@@ -1251,24 +1374,18 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	synchKittens: function (force) {
-		var kittens = this.getKittens();
-		this.addKittens(kittens);
+		var kittensCount = this.getKittens();
+		this.addKittens(kittensCount);
 
-		if (force || this.kittens.length !== kittens) {
-			this.kittens = this.generatedKittens.slice(0, kittens);
+		if (force || this.kittens.length !== kittensCount) {
+			this.kittens = this.generatedKittens.slice(0, kittensCount);
 
 			//clear properties from voided kittens
-			for (var i = kittens; i < this.generatedKittens.length; i++) {
+			for (var i = kittensCount; i < this.generatedKittens.length; i++) {
 				var genKitten = this.generatedKittens[i];
 				genKitten.set("selected", false);
-				var rerender = genKitten.isLeader || genKitten.job;
-				if (genKitten.isLeader) {
-					genKitten.fireLeader(true); //skip render
-				}
 				if (genKitten.job) {
 					genKitten.job = null;
-				}
-				if (rerender) {
 					genKitten.render();
 				}
 			}
@@ -1280,12 +1397,31 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		}
 	},
 
+	synchReserveKittens: function (kittensCount, force) {
+		this.addReserveKittens(kittensCount);
+
+		if (force || this.reserveKittens.length !== kittensCount) {
+			this.reserveKittens = this.generatedReserveKittens.slice(0, kittensCount);
+			for (var i = kittensCount; i < this.generatedReserveKittens.length; i++) {
+				this.generatedReserveKittens[i].set("selected", false);
+			}
+
+			if (this.censusReserveKittens) {
+				this.updateSelectedKittens(true); //will update buttons after taking the census
+				this.takeCensus();
+			}
+		}
+	},
+
 	renderGovernment: function () {
 		this.governmentBlock.innerHTML = "";
 
 		var leader = this.leader;
+		if (leader && this.kittens.indexOf(leader) < 0) {
+			leader = null;
+		}
 
-		if (leader && this.kittens.indexOf(leader) > -1) {
+		if (leader) {
 			var nextRank = Math.floor(this.getRankExp(leader.rank));
 
 			var name = leader.getGovernName();
@@ -1301,9 +1437,16 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 				" (" + (leader.job ? this.getJob(leader.job).title : "") + ")";
 			}
 
-			var leaderBlock = dojo.create("div", {
-				innerHTML: leaderInfo + "<br>"
-			}, this.governmentBlock);
+			var leaderBlock = dojo.create("div", null, this.governmentBlock);
+			var leaderInfoBlock = dojo.create("div", {innerHTML: leaderInfo}, leaderBlock);
+
+			if (this.getLeader() !== leader) {
+				dojo.addClass(leaderInfoBlock, "ital");
+				var theocracy = this.game.science.getPolicy("theocracy");
+				var jobTitle = this.getJob(theocracy.requiredLeaderJob).title;
+				var wrongLeaderNotice = dojo.create("div", {innerHTML: $I("msg.policy.wrongLeaderJobDemoted", [theocracy.label, jobTitle])}, leaderBlock);
+				this.game._toggleNewMarker(wrongLeaderNotice, true);
+			}
 
 			dojo.place(this.unassignLeaderBlock, leaderBlock);
 			dojo.toggleClass(this.unassignLeaderJobBtn, "hidden", !this.getJob(leader.job));
@@ -1317,9 +1460,12 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		var censusKittens = [];
 
 		if (job === "leader") { //short-circuit, ignore trait filter
-			censusKittens = [this.leader];
+			if (!this.censusReserveKittens && this.leader) {
+				censusKittens.push(this.leader);
+			}
+
 		} else {
-			censusKittens = this.kittens.filter(function (kitten) {
+			censusKittens = dojo.filter(this.getKittensForCensus(), function (kitten) {
 				if (trait !== "all" && kitten.trait.name !== trait) {
 					return false;
 				}
@@ -1355,7 +1501,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		}
 		this.censusPageKittens = kittens;
 
-		if (kittens.length) {
+		if (kittens.length > 0) {
 			for (var i = 0, len = kittens.length; i < len; i++) {
 				if (!kittens[i].domNode || refresh) {
 					kittens[i].render();
@@ -1366,7 +1512,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			dojo.place(this.noCensusKittensBlock, this.censusKittensBlock);
 		}
 
-		dojo.toggleClass(this.censusPageBlock, "hidden", !this.getKittens() || kittensPerPage < 1);
+		dojo.toggleClass(this.censusPageBlock, "hidden", !kittens.length || kittensPerPage < 1);
 		dojo.toggleClass(this.censusPageFirst, "invisible", page <= 1);
 		dojo.toggleClass(this.censusPagePrev, "invisible", page <= 1);
 		dojo.toggleClass(this.censusPageNext, "invisible", page >= pageMax);
@@ -1378,7 +1524,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	update: function () {
-		dojo.toggleClass(this.tabBlockNode, "anarchy", this.game.challenges.currentChallenge === "anarchy");
+		dojo.query(".toggleAnarchy").toggleClass("anarchy", this.game.challenges.isActive("anarchy"));
 
 		this.maxKittens = this.game.resPool.get("kittens").maxValue;
 
@@ -1389,6 +1535,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 		this.map.update();
 
+		this.game._toggleNewMarker(this.tabWrapper, this.leader && this.kittens.indexOf(this.leader) > -1 && this.leader !== this.getLeader());
+
 		this.updateHappines();
 		this.updateResourceProduction();
 	},
@@ -1397,11 +1545,11 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		saveData.village = {
 			kittens: this.game.mapMethods(this.kittens, "save"),
 			maxKittens: this.maxKittens,
-			jobs: this.game.filterMetadata(this.jobs, ["name", "unlocked", "value"], function (saveJob) {
-				if (this.name === "priest" && this.game.challenges.currentChallenge === "atheism") {
+			jobs: this.game.filterMetadata(this.jobs, ["name", "unlocked", "value"]/* , function (saveJob) {
+				if (this.name === "priest" && this.game.challenges.isActive("atheism")) {
 					saveJob.value = 0;
 				}
-			}),
+			} */)
 			// map: this.map.villageData
 		};
 	},
@@ -1415,17 +1563,31 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			job.set("unlocked", saveJob.unlocked);
 		});
 
-		var kittens = saveData.village.kittens;
-		if (kittens && kittens.length) {
-			this.addKittens(kittens.length);
-			for (var i = 0, len = kittens.length; i < len; i++) {
-				this.generatedKittens[i].load(kittens[i] || {});
+		var saveKittens = saveData.village.kittens;
+		if (saveKittens && saveKittens.length > 0) {
+			this.addKittens(saveKittens.length);
+			for (var i = 0, len = saveKittens.length; i < len; i++) {
+				this.generatedKittens[i].load(saveKittens[i] || {});
 			}
 		}
 
 		/* if (saveData.village.map) {
 			this.map.villageData = saveData.village.map;
 		} */
+	},
+
+	saveReserveKittens: function () {
+		return this.game.mapMethods(this.reserveKittens, "save");
+	},
+
+	loadReserveKittens: function (saveKittens) {
+		if (saveKittens) {
+			this.game.setInput(this.reserveKittensCountNode, saveKittens.length, true);
+			this.synchReserveKittens(saveKittens.length, true);
+			for (var i = 0, len = saveKittens.length; i < len; i++) {
+				this.generatedReserveKittens[i].load(saveKittens[i] || {});
+			}
+		}
 	}
 });
 
@@ -1642,6 +1804,8 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	isLeader: false,
 	isSenator: false,
 
+	reserve: false,
+
 	constructor: function (game) {
 		this.game = game;
 		this.village = game.village;
@@ -1686,6 +1850,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	render: function () {
 		var self = this;
 		self.domNode = dojo.create("div", {class: "kittenBlock"});
+		dojo.toggleClass(self.domNode, "reserveKitten", self.reserve);
 
 		self.editBlock = null;
 
@@ -1734,7 +1899,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		}
 
 		self.setLeaderNode = dojo.create("div", {
-			class: "noAnarchy",
+			class: "noAnarchy hideOnReserves",
 			innerHTML: '<a href="#" title="Make a leader">&#9734;</a>'
 		}, div).children[0];
 		on(self.setLeaderNode, "click", function () {
@@ -1977,7 +2142,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 		tr = dojo.create("tr", {
 			class: "noAnarchy",
-			innerHTML: "<td>>" + $I("KGSaveEdit.village.edit.exp") + '</td><td></td><td><a href="#" class="hidden">(Expected: 0)</a></td>'
+			innerHTML: "<td>" + $I("KGSaveEdit.village.edit.exp") + '</td><td></td><td><a href="#" class="hidden">(Expected: 0)</a></td>'
 		}, table);
 		self.editExpNode = game._createInput({class: "expEdit"},
 			tr.children[1], null, null, null, true);
@@ -2082,7 +2247,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	},
 
 	makeLeader: function (noRender) {
-		if (this.isLeader && this.village.leader === this) {
+		if (this.reserve || this.isLeader && this.village.leader === this) {
 			return;
 		}
 
@@ -2146,7 +2311,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			this.renderEditBlock();
 		}
 
-		this.editCurrentNameNode.innerHTML = "Editing " + this.name + " " + this.surname + " &nbsp;";
+		this.editCurrentNameNode.innerHTML = $I("KGSaveEdit.village.edit.header", [this.name + " " + this.surname]) + " &nbsp;";
 
 		this.editNameNode.value = this.name;
 		this.editSurnameNode.value = this.surname;
@@ -2216,7 +2381,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 	},
 
 	save: function (forEdit) {
-		var isAnarchy = !forEdit && this.game.challenges.currentChallenge === "anarchy";
+		var isAnarchy = !forEdit && !this.reserve && this.game.challenges.isActive("anarchy");
 		var saveKitten = this.game.filterMetaObj(this, ["name", "surname", "trait",
 			"age", "color", "variety", "rarity", "skills", "exp", "job", "engineerSpeciality", "rank", "isLeader"]);
 
@@ -2227,7 +2392,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			saveKitten.surname = this.getRandomSurname();
 		}
 
-		if (!this.village.getJob(saveKitten.job)) {
+		if (this.reserve || !this.village.getJob(saveKitten.job)) {
 			saveKitten.job = null;
 		}
 
@@ -2247,16 +2412,20 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			}
 		}
 
-		if (!forEdit && this.game.challenges.currentChallenge === "atheism") {
-			if (saveKitten.job === "priest") {
-				saveKitten.job = null;
-			}
-			delete newSkills["priest"];
-		}
+		// if (!forEdit && !this.reserve && this.game.challenges.isActive("atheism")) {
+		// 	if (saveKitten.job === "priest") {
+		// 		saveKitten.job = null;
+		// 	}
+		// 	delete newSkills["priest"];
+		// }
 
 		saveKitten.skills = newSkills;
 
 		if (!forEdit) {
+			if (this.reserve || (this.isLeader && this !== this.village.getLeader())) {
+				saveKitten.isLeader = false;
+			}
+
 			if (this.game.opts.compressSaveFile) {
 				saveKitten = this.compressData(saveKitten);
 			} else {
@@ -2485,7 +2654,7 @@ dojo.declare("classes.KGSaveEdit.villageMap", null, {
 
 	constructor: function (game) {
 		this.game = game;
-		this.effects = {};
+		this.effects = {"mapPriceReduction": 0};
 		this.resetMap();
 	},
 
@@ -2573,7 +2742,7 @@ dojo.declare("classes.KGSaveEdit.villageMap", null, {
 	},
 
 	getEffect: function (effectName) {
-		return this.effects[effectName] || 0;
+		return num(this.effects[effectName]);
 	},
 
 	update: function () {
@@ -2590,7 +2759,7 @@ dojo.declare("classes.KGSaveEdit.villageMap", null, {
 
 		this.exploredLevel = exploredLevel;
 		this.effects["mapPriceReduction"] = -this.getPriceReduction();
-	},
+	}
 
 	//TODO render if bloodrizer ever turns on the map
 });

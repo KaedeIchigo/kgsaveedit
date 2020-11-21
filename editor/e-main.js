@@ -57,6 +57,11 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 					title: $I("effectsMgr.type.resMax", [restitle]),
 					resname: resname
 				};
+			case "MaxChallenge": //for when challenges change Max of resources; LDR to all other sources of Max
+				return {
+					title: $I("effectsMgr.type.resMax", [restitle]),
+					resName: resname
+				};
 			case "Ratio":
 				return {
 					title: $I("effectsMgr.type.resRatio", [restitle]),
@@ -210,6 +215,14 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "fixed"
 			},
 
+			"festivalRatio": {
+				type: "ratio"
+			},
+
+			"festivalArrivalRatio": {
+				type: "ratio"
+			},
+
 			// energy
 
 			"energyProduction": {
@@ -222,6 +235,14 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"energyProductionRatio": {
+				type: "ratio"
+			},
+
+			"energyConsumptionRatio": {
+				type: "ratio"
+			},
+
+			"energyConsumptionIncrease": {
 				type: "ratio"
 			},
 
@@ -354,6 +375,10 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "ratio"
 			},
 
+			"masterSkillMultiplier": {
+				type: "ratio"
+			},
+
 			"uraniumRatio": {
 				type: "ratio"
 			},
@@ -415,11 +440,11 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"riftChance": {
-				type: "fixed"
+				type: "ratio"
 			},
 
 			"ivoryMeteorChance": {
-				type: "fixed"
+				type: "ratio"
 			},
 
 			"ivoryMeteorRatio": {
@@ -431,7 +456,7 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"alicornChance": {
-				type: "fixed"
+				type: "ratio"
 			},
 
 			"tcRefineRatio": {
@@ -447,6 +472,18 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"faithRatioReligion": {
+				type: "ratio"
+			},
+
+			"solarRevolutionLimit": {
+				type: "ratio"
+			},
+
+			"solarRevolutionRatio": {
+				type: "ratio"
+			},
+
+			"faithSolarRevolutionBoost": {
 				type: "ratio"
 			},
 
@@ -622,6 +659,10 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "ratio"
 			},
 
+			"corruptionBoostRatioChallenge": {
+				type: "ratio"
+			},
+
 			"blsCorruptionRatio": {
 				type: "ratio"
 			},
@@ -690,7 +731,214 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				title: "terraformingMaxKittens",
 				type: "ratio",
 				calculation: "nonProportional"
-			}
+			},
+
+			//age 2 policy effects
+			"rankLeaderBonusConversion": {
+				type: "ratio"
+			},
+
+			"boostFromLeader": {
+				type: "ratio"
+			},
+
+			//age 3 policy effects
+			"goldCostReduction": {
+				type: "ratio"
+			},
+
+			"factoryCostReduction": {
+				type: "ratio"
+			},
+
+			"logHouseCostReduction": { //yes, it is log house!
+				type: "ratio"
+			},
+
+			"communismProductionBonus": {
+				type: "ratio"
+			},
+
+			//age 4 policy effects
+			"technocracyScienceCap": {
+				type: "ratio"
+			},
+
+			//age 5 policy effects
+			"aiCoreProductivness": {
+				title: "aiCoreProductivity",
+				type: "ratio"
+			},
+
+			"aiCoreUpgradeBonus": {
+				type: "ratio"
+			},
+
+			"blsProductionBonus": {
+				type: "ratio"
+			},
+
+			"leviathansEnergyModifier": {
+				type: "ratio"
+			},
+
+			"holyGenocideBonus": {
+				type: "ratio"
+			},
+
+			//foreign policy effects
+			"tradeCatpowerDiscount": {
+				type: "fixed"
+			},
+
+			"tradeGoldDiscount": {
+				type: "fixed"
+			},
+
+			"zebraRelationModifier": {
+				type: "fixed"
+			},
+
+			"nonZebraRelationModifier": {
+				type: "fixed"
+			},
+
+			"sharedKnowledgeBonus": {
+				type: "ratio"
+			},
+
+			"culturalExchangeBonus": {
+				type: "ratio"
+			},
+
+			"embassyCostReduction": {
+				type: "ratio"
+			},
+
+			"onAHillCultureCap": {
+				type: "ratio"
+			},
+
+			"satelliteSynergyBonus": {
+				type: "ratio"
+			},
+
+			"globalRelationsBonus": {
+				type: "fixed"
+			},
+
+			//philosophy
+			"luxuryConsuptionReduction": {
+				type: "ratio"
+			},
+
+			"luxuryHappinessBonus": {
+				type: "fixed"
+			},
+
+			"rationalityBonus": {
+				type: "ratio"
+			},
+
+			"mysticismBonus": {
+				type: "ratio"
+			},
+
+			//environment policy
+			"environmentMineralBonus": {
+				type: "ratio"
+			},
+
+			"environmentWoodBonus": {
+				type: "ratio"
+			},
+
+			"environmentHappinessBonus": {
+				type: "fixed"
+			},
+
+			"environmentUnhappiness": {
+				type: "fixed"
+			},
+
+			"environmentFactoryCraftBonus": {
+				type: "ratio"
+			},
+
+			"coalPolicyRatio": {
+				type: "ratio"
+			},
+
+			"ironPolicyRatio": {
+				type: "ratio"
+			},
+
+			"titaniumPolicyRatio": {
+				type: "ratio"
+			},
+
+			"faithPolicyRatio": {
+				type: "ratio"
+			},
+
+			"unobtainiumPolicyRatio": {
+				type: "ratio"
+			},
+
+			"sciencePolicyRatio": {
+				type: "ratio"
+			},
+
+			"culturePolicyRatio": {
+				type: "ratio"
+			},
+
+			"mineralsPolicyRatio": {
+				type: "ratio"
+			},
+
+			"woodPolicyRatio": {
+				type: "ratio"
+			},
+
+			"goldPolicyRatio": {
+				type: "ratio"
+			},
+
+			//challenges
+			"springCatnipRatio": {
+				type: "ratio"
+			},
+
+			"summerSolarFarmRatio": {
+				type: "ratio"
+			},
+
+			"shatterCostReduction": {
+				type: "ratio"
+			},
+
+			"shatterCostIncreaseChallenge": {
+				type: "ratio"
+			},
+
+			"coldChance": {
+				type: "ratio"
+			},
+
+			"coldHarshness": {
+				type: "ratio"
+			},
+
+			"kittenLaziness": {
+				type: "ratio"
+			},
+
+			"shatterVoidCost": {
+				type: "fixed"
+			},
+
+			"challengeHappiness": {}
 		}
 	}
 });
@@ -975,19 +1223,51 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return clone;
 	},
 
-	toDisplayDays: function (daysRaw) {
-		var daysNum = parseInt(daysRaw, 10); // don't forget the second param
+	toDisplaySeconds: function (secondsRaw) {
+		var sec_num = parseInt(secondsRaw, 10); // don't forget the second param
 
-		var years = Math.floor(daysNum / (4 * 100));
-		var days = daysNum - (years * 4 * 100);
+		var year_secs = 86400 * 365;
+
+		var years   = Math.floor(sec_num / year_secs);
+		var days    = Math.floor((sec_num - (years * year_secs)) / 86400);
+		var hours   = Math.floor((sec_num - (years * year_secs) - (days * 86400)) / 3600);
+		var minutes = Math.floor((sec_num - (years * year_secs) - (days * 86400 + hours * 3600)) / 60);
+		var seconds = sec_num - (years * year_secs) - (days * 86400) - (hours * 3600) - (minutes * 60);
 
 		if (years > 0) {
 			years = this.getDisplayValueExt(years);
 		}
 
 		var timeFormated = "";
-		if (years) { timeFormated = years + "y "; }
-		if (days) { timeFormated += days + "d "; }
+		if (years) { timeFormated = years + $I("unit.y") + " "; }
+		if (days) {  timeFormated += days + $I("unit.d") + " "; }
+		if (!years) {
+			if (hours) {   timeFormated += hours + $I("unit.h") + " "; }
+			if (minutes) { timeFormated += minutes + $I("unit.m") + " "; }
+			if (seconds) { timeFormated += seconds + $I("unit.s") + " "; }
+		}
+
+		return timeFormated;
+	},
+
+	/**
+	 * The same as toDisplaySeconds, but converts ingame days into xYears xDays
+	 * Just for aestetical pleasness
+	 */
+	toDisplayDays: function (daysRaw) {
+		var daysNum = parseInt(daysRaw, 10); // don't forget the second param
+
+		var daysPerYear = this.calendar.daysPerSeason * this.calendar.seasonsPerYear;
+		var years = Math.floor(daysNum / daysPerYear);
+		var days = daysNum - years * daysPerYear;
+
+		if (years > 0) {
+			years = this.getDisplayValueExt(years);
+		}
+
+		var timeFormated = "";
+		if (years) { timeFormated = years + $I("unit.y") + " "; }
+		if (days) {  timeFormated += days + $I("unit.d") + " "; }
 
 		return timeFormated;
 	},
@@ -1035,7 +1315,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	getDisplayValueExt: function (value, prefix, usePerTickHack, precision, postfix) {
 		if (!value) { return "0"; }
 		if (!isFinite(value)) {
-			return this.getDisplayValue(value, prefix) + (usePerTickHack ? $I("res.per.sec") : "");
+			return this.getDisplayValue(value, prefix) + (usePerTickHack ? $I("unit.sec") : "");
 		}
 
 		usePerTickHack &= this.opts.usePerSecondValues;
@@ -1044,19 +1324,53 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		postfix = postfix || "";
-		var absValue = Math.abs(value);
-		for (var i = 0; i < this.postfixes.length; i++) {
-			var p = this.postfixes[i];
-			if (absValue >= p.limit) {
-				if (usePerTickHack) { // Prevent recursive * this.ticksPerSecond;
-					value = value / this.ticksPerSecond;
+
+		var l = Math.floor(Math.log10(value));
+
+		switch (this.opts.notation) {
+			case "e":
+				if (l >= 4) {
+					value /= Math.pow(10, l);
+					postfix = "e" + l;
 				}
-				return this.getDisplayValueExt(value / p.divisor, prefix, usePerTickHack, precision, postfix + p.postfix[0]);
-			}
+				break;
+			case "sie":
+				if (value < 9000) {
+					postfix = "";
+				} else if (9000 <= value && l < 6) {
+					value /= 1000;
+					postfix = "K";
+				} else if (6 <= l && l < 9) {
+					value /= 1000 * 1000;
+					postfix = "M";
+				} else if (9 <= l && l < 12) {
+					value /= 1000 * 1000 * 1000;
+					postfix = "G";
+				} else if (12 <= l && l < 15) {
+					value /= 1000 * 1000 * 1000 * 1000;
+					postfix = "T";
+				} else {
+					value = value / Math.pow(10, l);
+					postfix = "e" + l;
+				}
+				break;
+			case "si":
+			default:
+				var absValue = Math.abs(value);
+				for (var i = 0; i < this.postfixes.length; i++) {
+					var p = this.postfixes[i];
+					if (absValue >= p.limit) {
+						if (usePerTickHack) { // Prevent recursive * this.ticksPerSecond;
+							value = value / this.ticksPerSecond;
+						}
+						return this.getDisplayValueExt(value / p.divisor, prefix, usePerTickHack, precision, postfix + p.postfix[0]);
+					}
+				}
+				break;
 		}
 
 		var _value = this.getDisplayValue(value, prefix, precision);
-		return _value + postfix + (usePerTickHack ? $I("res.per.sec") : "");
+		return _value + postfix + (usePerTickHack ? "/" + $I("unit.sec") : "");
 	},
 
 	getDisplayValue: function (floatVal, plusPrefix, precision) {
@@ -1104,6 +1418,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		switch (type) {
 			case "tech":
 				return this.science.get(unlockId);
+			case "policies":
+				return this.science.getPolicy(unlockId);
 			case "jobs":
 				return this.village.getJob(unlockId);
 			case "crafts":
@@ -1130,6 +1446,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				return this.time.getCFU(unlockId);
 			case "voidSpace":
 				return this.time.getVSU(unlockId);
+			case "challenges":
+				return this.challenges.getChallenge(unlockId);
 			default:
 				console.log("Couldn't get unlock ", unlockId, " of type ", type);
 				return false;
@@ -1178,33 +1496,37 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	calculateAllEffects: function () {
+		// don't need to call this for all since it's called through upgradeItem/s
 		this.workshop.invalidateCachedEffects();
-		this.prestige.invalidateCachedEffects();
 		this.religion.invalidateCachedEffects();
-		this.space.invalidateCachedEffects();
+		this.prestige.invalidateCachedEffects();
 		this.time.invalidateCachedEffects();
 
 		// TODO: delegate this to managers? Can't be done in load unfortunately.
 		this.upgradeItems({
+			policies: this.science.policies,
+			jobs: this.village.jobs,
 			buildings: this.bld.buildings,
 			spaceBuilding: this.space.allPrograms,
-			jobs: this.village.jobs
+			challenges: this.challenges.challenges
 		});
 	},
 
-	getTriValue: function (value, stripe) {
+	// Unlimited Diminishing Return
+	// getTriValue
+	getUnlimitedDR: function (value, stripe) {
 		return (Math.sqrt(1 + 8 * value / stripe) - 1) / 2;
 	},
 
-	getTriValueOrigin: function (value, stripe) {
-		return (Math.pow(value * 2 + 1, 2) - 1) * stripe / 8;
+	getInverseUnlimitedDR: function (value, stripe) {
+		return value * (value + 1) * stripe / 2;
 	},
 
 	//CMBR is capped by 20%
 
 	getCMBRBonus: function () {
 		if (this.isCMBREnabled) {
-			return this.getHyperbolicEffect(1.0, 0.2);
+			return this.getLimitedDR(1.0, 0.2);
 		}
 		return 0;
 	},
@@ -1212,6 +1534,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	getCraftRatio: function (tag) {
 		return this.getEffect("craftRatio") + this.village.getEffectLeader("engineer", 0) + this.village.getEffectLeader(tag, 0);
 	},
+
 
 	getResCraftRatio: function (craftedResName) {
 		if (craftedResName === "wood") {
@@ -1422,18 +1745,26 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	getEffect: function (effectName) {
+		if (!this.globalEffectNames[effectName]) {
+			return 0;
+		}
+
 		var effect =
 			this.bld.getEffect(effectName) +
 			this.space.getEffect(effectName) +
+			this.science.getEffect(effectName) +
 			this.workshop.getEffect(effectName) +
 			this.prestige.getEffect(effectName) +
 			this.religion.getEffect(effectName) +
+			this.challenges.getEffect(effectName) +
 			this.time.getEffect(effectName) +
 			this.village.getEffect(effectName);
 		return effect;
 	},
 
-	getHyperbolicEffect: function (effect, limit) {
+	// Unlimited Diminishing Return
+	// getHyperbolicEffect
+	getLimitedDR: function (effect, limit) {
 		var absEffect = Math.abs(effect);
 		var maxUndiminished = 0.75 * limit; //first 75% is free from diminishing returns
 		if (absEffect <= maxUndiminished) {
@@ -1449,7 +1780,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return effect < 0 ? -totalEffect : totalEffect;
 	},
 
-	isHyperbolic: function (name) {
+	_hasLimitedDiminishingReturn: function (name) {
 		return (name === "catnipDemandRatio" ||
 			name === "fursDemandRatio" ||
 			name === "ivoryDemandRatio" ||
@@ -1549,34 +1880,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return this.fixFloatPointNumber(this.getEffect(resName + "PerTickCon"));
 	},
 
-	toDisplaySeconds: function (secondsRaw) {
-		var sec_num = Math.round(secondsRaw);
-
-		var year_secs = 86400 * 365;
-
-		var years   = Math.floor(sec_num / year_secs);
-		var days    = Math.floor((sec_num - (years * year_secs)) / 86400);
-		var hours   = Math.floor((sec_num - (years * year_secs) - (days * 86400)) / 3600);
-		var minutes = Math.floor((sec_num - (years * year_secs) - (days * 86400 + hours * 3600)) / 60);
-		var seconds = sec_num - (years * year_secs) - (days * 86400) - (hours * 3600) - (minutes * 60);
-
-		if (years > 0) {
-			years = this.getDisplayValueExt(years);
-		}
-
-		var timeFormated = "";
-		if (years) { timeFormated = years + "y "; }
-		if (days) { timeFormated += days + "d "; }
-		if (!years) {
-			if (hours) {  timeFormated += hours + "h "; }
-			if (minutes) { timeFormated += minutes + "m "; }
-			if (seconds) { timeFormated += seconds + "s "; }
-		}
-
-		return timeFormated;
-	},
-
-	calcResourcePerTick: function (resName, season) {
+	calcResourcePerTick: function (resName) {
 		var res = this.resPool.get(resName);
 
 		// BUILDING PerTickBase
@@ -1595,18 +1899,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		perTick += perTickBaseSpace;
 
 		// *SEASON MODIFIERS
-		if (!season) {
-			season = this.calendar.getCurSeason();
-		}
-		var weatherMod = this.calendar.getWeatherMod();
-		weatherMod = (season.modifiers[resName] + weatherMod);
-		if (weatherMod < -0.95) {
-			weatherMod = -0.95;
-		}
-
-		if (season.modifiers[resName]) {
-			perTick *= weatherMod;
-		}
+		perTick *= this.calendar.getWeatherMod(res);
 
 		// +VILLAGE JOB PRODUCTION
 		var resMapProduction = this.village.getResProduction();
@@ -1641,7 +1934,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		// *PARAGON BONUS
 		var paragonProductionRatio = this.prestige.getParagonProductionRatio();
-		if (resName === "catnip" && this.challenges.currentChallenge === "winterIsComing") {
+		if (resName === "catnip" && this.challenges.isActive("winterIsComing")) {
 			paragonProductionRatio = 0; //winter has come
 		}
 
@@ -1653,6 +1946,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		// +BUILDING AUTOPROD
 		var perTickAutoprod = this.getEffect(resName + "PerTickAutoprod");
 		perTickAutoprod *= paragonSpaceProductionRatio;
+		var leader = this.village.getLeader();
+		perTickAutoprod *= (1 + this.getEffect("rankLeaderBonusConversion") * (leader ? leader.rank : 0));
 
 		perTick += perTickAutoprod;
 
@@ -1677,16 +1972,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		// +*FAITH BONUS
-		var religionProductionBonus = this.religion.getProductionBonus();
-		perTick *= 1 + (religionProductionBonus / 100);
+		var religionProductionBonus = this.religion.getSolarRevolutionRatio();
+		perTick *= 1 + religionProductionBonus;
 
 		//+COSMIC RADIATION
-		if (!this.opts.disableCMBR) {
-			perTick *= (1 + this.getCMBRBonus());
+		if (!this.opts.disableCMBR && resName !== "coal") {
+			perTick *= 1 + this.getCMBRBonus();
 		}
 
 		//ParagonSpaceProductionRatio definition 4/4
-		paragonSpaceProductionRatio += paragonSpaceProductionRatio * religionProductionBonus / 100;
+		paragonSpaceProductionRatio *= 1 + religionProductionBonus;
 
 		// +AUTOMATED PRODUCTION BUILDING
 		perTick += this.getEffect(resName + "PerTickProd");
@@ -1714,12 +2009,19 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var resConsumption = resMapConsumption[resName] || 0;
 		resConsumption *= 1 + this.getEffect(resName + "DemandRatio");
 		if (resName === "catnip" && this.village.kittens.length > 0 && this.village.happiness > 1) {
-			if (this.challenges.currentChallenge === "anarchy") {
-				resConsumption += resConsumption * this.village.happiness * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
+			var hapinnessConsumption = Math.max(this.village.happiness - 1, 0);
+			if (this.challenges.isActive("anarchy")) {
+				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
 			} else {
-				resConsumption += resConsumption * (this.village.happiness - 1) * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length);
+				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length);
 			}
 		}
+
+		// +POLICY EFFECTS
+		//necrocracy global effect
+		perTick *= (1 + (this.resPool.get("sorrow").value * this.getEffect("blsProductionBonus")));
+		//policy ratio effects
+		perTick *= (1 + this.getEffect(resName + "PolicyRatio"));
 
 		perTick += resConsumption;
 
@@ -1730,7 +2032,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return perTick;
 	},
 
-	getResourcePerTickStack: function (resName, calcAutomatedEffect, season) {
+	getResourcePerTickStack: function (resName) {
 		var res = this.resPool.get(resName);
 
 		var stack = [];
@@ -1747,7 +2049,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		if (this.workshop.get("spaceManufacturing").owned() && resName !== "uranium") {
 			var factory = this.bld.get("factory");
 			spaceRatio *= (1 + factory.getOn() * factory.effects["craftRatio"] * 0.75);
-			spaceRatio -= 1;
 		}
 
 		// +SPACE PerTickBase
@@ -1765,19 +2066,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		stack.push(perTickBaseSpaceStack);
 
 		// *SEASON MODIFIERS
-		if (!season) {
-			season = this.calendar.getCurSeason();
-		}
-		var weatherMod = this.calendar.getWeatherMod();
-		weatherMod = (season.modifiers[resName] + weatherMod);
-		if (weatherMod < -0.95) {
-			weatherMod = -0.95;
-		}
-
 		stack.push({
 			name: $I("res.stack.weather"),
 			type: "ratio",
-			value: weatherMod - 1
+			value: this.calendar.getWeatherMod(res) - 1
 		});
 
 		// +VILLAGE JOB PRODUCTION
@@ -1837,7 +2129,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		// *PARAGON BONUS
 		var paragonProductionRatio = this.prestige.getParagonProductionRatio();
-		if (resName === "catnip" && this.challenges.currentChallenge === "winterIsComing") {
+		if (resName === "catnip" && this.challenges.isActive("winterIsComing")) {
 			paragonProductionRatio = 0; //winter has come
 		}
 
@@ -1849,6 +2141,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		//ParagonSpaceProductionRatio definition 1/4
 		var paragonSpaceProductionRatio = 1 + paragonProductionRatio * 0.05;
+		var leader = this.village.getLeader();
+		var rankLeaderBonusConversion = this.getEffect("rankLeaderBonusConversion") * (leader ? leader.rank : 0);
 
 		// +BUILDING AUTOPROD
 		var buildingAutoprod = [
@@ -1860,12 +2154,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				name: $I("res.stack.paragon"),
 				type: "ratio",
 				value: paragonProductionRatio * 0.05
+			}, {
+				name: $I("res.stack.rankLeaderBonusConversion"),
+				type: "ratio",
+				value: rankLeaderBonusConversion
 			}
 		];
 		stack.push(buildingAutoprod);
 
 		// *MAGNETOS PRODUCTION BONUS
-		if (!res.transient && this.bld.get("magneto").on > 0 && resName !== "catnip") {
+		if (!res.transient && this.bld.get("magneto").getOn() > 0 && resName !== "catnip") {
 
 			var swRatio = steamworksOn > 0 ? (1 + steamworks.effects["magnetoBoostRatio"] * steamworksOn) : 1;
 			if (resName !== "oil") {
@@ -1893,15 +2191,42 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		}
 
+		var religionProductionBonus = this.religion.getSolarRevolutionRatio();
+
 		// +*FAITH BONUS
 		stack.push({
-			name: $I("res.stack.faith"),
+			name: $I("res.stack.solarRevolution"),
 			type: "ratio",
-			value: this.religion.getProductionBonus() / 100
+			value: religionProductionBonus
 		});
 
+		if (!this.opts.disableCMBR && resName !== "coal") {
+			stack.push({
+				name: "CMBR",
+				type: "ratio",
+				value: this.getCMBRBonus()
+			});
+		}
+
 		//ParagonSpaceProductionRatio definition 4/4
-		paragonSpaceProductionRatio += paragonSpaceProductionRatio * this.religion.getProductionBonus() / 100;
+		paragonSpaceProductionRatio *= 1 + religionProductionBonus;
+
+		//policy effects:
+		//necrocracy global effect
+		//TODO: consider moving it to calculateEffects
+		if (this.science.getPolicy("necrocracy").owned()) {
+			stack.push({
+				name: $I("res.stack.necrocracy"),
+				type: "ratio",
+				value: this.getEffect("blsProductionBonus") * this.resPool.get("sorrow").value
+			});
+		}
+		// +*POLICY
+		stack.push({
+			name: $I("res.stack.policy"),
+			type: "ratio",
+			value: this.getEffect(resName + "PolicyRatio")
+		});
 
 		// +AUTOMATED PRODUCTION BUILDING
 		stack.push({
@@ -1935,7 +2260,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value: paragonSpaceProductionRatio - 1
 			}, {
 				name: $I("res.stack.bonusTransf"),
-				type: "ratio",
+				type: "multiplier",
 				value: this.getEffect("prodTransferBonus")
 			}
 		];
@@ -1990,10 +2315,11 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var resConsumption = resMapConsumption[resName] || 0;
 		resConsumption *= 1 + this.getEffect(resName + "DemandRatio");
 		if (resName === "catnip" && this.village.kittens.length > 0 && this.village.happiness > 1) {
-			if (this.challenges.currentChallenge === "anarchy") {
-				resConsumption += resConsumption * this.village.happiness * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
+			var hapinnessConsumption = Math.max(this.village.happiness - 1, 0);
+			if (this.challenges.isActive("anarchy")) {
+				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
 			} else {
-				resConsumption += resConsumption * (this.village.happiness - 1) * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length);
+				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length);
 			}
 		}
 
@@ -2007,7 +2333,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		stack.push({
 			name: $I("res.stack.time"),
 			type: "ratio",
-			value: (this.getTicksPerSecondUI() - this.ticksPerSecond) / this.ticksPerSecond
+			value: this.timeAccelerationRatio()
 		});
 
 		return stack;
@@ -2046,6 +2372,48 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		return true;
+	},
+
+	/**
+	 * Checks whether anything in a given meta.requires is owned
+	 * Returns defaultUnlocked if no .requires, else unlocked
+	 * Has a hack for stages (>_>)
+	 */
+	checkRequirementsOR: function (meta, defaultUnlocked, isStage) {
+		if (!meta) {
+			return false;
+		}
+
+		var metaReqs = meta[isStage ? "stageRequires" : "requires"];
+		if (!metaReqs) {
+			if (defaultUnlocked !== undefined && defaultUnlocked !== null) {
+				return Boolean(defaultUnlocked);
+			}
+			return Boolean(meta[isStage ? "stageUnlocked" : "unlocked"]);
+		}
+
+		if (dojo.isFunction(metaReqs)) {
+			return meta.requires(this);
+		}
+
+		for (var type in metaReqs) {
+			var req = metaReqs[type];
+			for (var i = req.length - 1; i >= 0; i--) {
+				var u = this.getUnlockByName(req[i], type);
+				if (u && u.owned && u.owned()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	},
+
+	_refreshAbbrInputs: function () {
+		var game = this;
+		$(".abbrInput").each(function () {
+			game.setInput(this);
+		});
 	},
 
 	_toggleLightbox: function (ele) {
@@ -2102,6 +2470,20 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	/**
+	 * Automagically updates `input` if something `.set()`s `metaObj[dataProp]`
+	 */
+	_pairInput: function (input, metaObj, dataProp) {
+		input.game = this;
+		if (metaObj) {
+			input.metaObj = metaObj;
+			if (dataProp) {
+				input.dataProp = dataProp;
+				metaObj[dataProp + "Node"] = input;
+			}
+		}
+	},
+
+	/**
 	 * Create a numeric input element and attaches an "input" event handler to it
 	 * Automatically updates metaObj[dataProp] if both are set
 	 */
@@ -2117,14 +2499,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		input.placeholder = num(input.placeholder);
 		var value = this.parseInput(input);
 
-		if (metaObj) {
-			input.game = metaObj.game;
-			input.metaObj = metaObj;
-			if (dataProp) {
-				input.dataProp = dataProp;
-				metaObj[dataProp + "Node"] = input;
-				value = metaObj[dataProp];
-			}
+		this._pairInput(input, metaObj, dataProp);
+		if (metaObj && dataProp) {
+			value = metaObj[dataProp];
 		}
 
 		input.value = value;
@@ -2207,16 +2584,13 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var cbox = dojo.create("input", {type: "checkbox"}, label, "first");
 		var span = dojo.create("span", {innerHTML: text || ""}, label);
 
+		this._pairInput(cbox, metaObj, prop);
 		if (metaObj) {
 			label.metaObj = metaObj;
-			cbox.metaObj = metaObj;
 			if (prop) {
-				cbox.dataProp = prop;
-				metaObj[prop + "Node"] = cbox;
 				cbox.checked = metaObj[prop];
 			}
 		}
-		cbox.game = this;
 		cbox.prevChecked = cbox.checked;
 
 		on(cbox, "click", function () {
@@ -2545,7 +2919,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			if (!save.challenges) {
 				save.challenges = {};
 			}
-			save.challenges.currentChallenge = null;
 
 			save.saveVersion = 9;
 		}
@@ -2610,11 +2983,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		if (save.saveVersion === 12) {
 			if (save.religion && save.religion.tcratio && save.religion.tu) {
-				var transcendenceLevel = this.religion.getTriValueReligion(save.religion.tcratio) * 100;
-				transcendenceLevel = Math.round(Math.log(transcendenceLevel));
-				if (transcendenceLevel < 0) {
-					transcendenceLevel = 0;
-				}
+				var transcendenceLevel = Math.max(0, Math.round(Math.log(10 * this.game.getUnlimitedDR(save.religion.tcratio, 0.1))));
 				for (i = 0; i < save.religion.tu.length; i++) {
 					if (transcendenceLevel >= this.religion.getTU(save.religion.tu[i].name).tier) {
 						save.religion.tu[i].unlocked = true;
@@ -2701,8 +3070,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		this.village.synchKittens(true);
-		// this.callMethods(this.managers, "invalidateCachedEffects");
 		this.calculateAllEffects();
+		this.update();
+		this.calculateAllEffects(); //sigh
 		this.update();
 
 		return success;
@@ -2814,8 +3184,11 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			altKey: false
 		};
 
+		this.globalEffectNames = {};
+
 		var defaultOpts = {
 			usePerSecondValues: true,
+			notation: "si",
 			forceHighPrecision: false,
 			usePercentageResourceValues: false,
 			showNonApplicableButtons: false,
@@ -2830,6 +3203,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			disableCMBR: false,
 			disableTelemetry: true,
 			enableRedshift: false,
+			enableRedshiftGflops: false,
 			batchSize: 10,
 			// Used only in KG Mobile
 			useLegacyTwoInRowLayout: false,
@@ -2881,8 +3255,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			this.managers.push(this[manager.id]);
 		}
 
-		this.tabs = [this.OptionsTab, this.bld, this.village, this.science, this.workshop,
-			this.diplomacy, this.religion, this.space, this.time, this.achievements, this.stats];
+		this.tabs = [this.OptionsTab, this.bld, this.village, this.science, this.workshop, this.diplomacy,
+			this.religion, this.space, this.time, this.challenges, this.achievements, this.stats];
 		this.activeTab = this.OptionsTab;
 
 		this.extrasTab = new classes.KGSaveEdit.ExtrasTab(this);
@@ -2904,7 +3278,12 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	render: function () {
 		$("[data-lang-key]").each(function () {
-			this.innerHTML = $I(this.getAttribute("data-lang-key"));
+			var key = $I(this.getAttribute("data-lang-key"));
+			if ($(this).is("input")) {
+				this.value = key;
+			} else {
+				this.innerHTML = key;
+			}
 		});
 
 		this.effectsMgr.seti18n();
@@ -2942,16 +3321,23 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		clearTimeout(this.updateTimer);
 
 		this.brokenIronWill = this.resPool.get("kittens").value > 0 || this.game.getEffect("maxKittens") > 0;
+		var updateLiberty = false;
 
 		if (this.brokenIronWill) {
 			if (this.ironWill) {
 				this.ironWill = false;
+				updateLiberty = true;
 			}
 		} else if (!this.ironWill && this.ironWillNode.prevChecked) {
 			this.ironWill = true;
+			updateLiberty = true;
 		}
 		this.ironWillNode.checked = this.ironWill;
 		this.toggleDisabled(this.ironWillNode, this.brokenIronWill);
+
+		if (updateLiberty) {
+			this.upgradeItems({policies: ["liberty"]});
+		}
 
 		// this.callMethods(this.managers, "invalidateCachedEffects");
 		this.callMethods(this.tabs, "updateTab");
@@ -2963,20 +3349,21 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		this.callMethods(this.managers, "update");
 
-		var energyRatio = 1 + this.getEffect("energyProductionRatio");
-		var energyProd = this.getEffect("energyProduction") * energyRatio;
+		var energyProdRatio = 1 + this.getEffect("energyProductionRatio");
+		var energyProd = this.getEffect("energyProduction") * energyProdRatio;
 		var energyWinterProd = energyProd;
-		var energyCons = this.getEffect("energyConsumption");
+		var energyConsRatio = 1 + this.getLimitedDR(this.getEffect("energyConsumptionRatio"), 1) + this.getEffect("energyConsumptionIncrease");
+		var energyCons = this.getEffect("energyConsumption") * energyConsRatio * (this.game.challenges.isActive("energy") ? 2 : 1);
 
 		var currentSeason = this.calendar.season;
 		var solarFarm = this.bld.get("pasture");
 		var calculateEnergyProduction = solarFarm.get("calculateEnergyProduction");
 		if (currentSeason != 3 && calculateEnergyProduction) {
 			var energyLoss = calculateEnergyProduction(this, currentSeason) - calculateEnergyProduction(this, 3);
-			energyWinterProd -= solarFarm.get("on") * energyLoss * energyRatio;
+			energyWinterProd -= solarFarm.getOn() * energyLoss * energyProdRatio;
 		}
 
-		// recalculate because some building.action()s are directly dependant on energy
+		// recalculate because some building.action()s are directly dependent on energy
 		// the game doesn't have to worry about this because it ticks
 		if (
 			energyProd !== this.resPool.energyProd ||

@@ -28,7 +28,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["unicornTomb"]},
 			effects: {
 				"unicornsRatioReligion": 0.1,
-				"riftChance":            5
+				"riftChance":            0.0005
 			}
 		}, {
 			name: "ivoryCitadel",
@@ -41,24 +41,24 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["ivoryTower"]},
 			effects: {
 				"unicornsRatioReligion": 0.25,
-				"ivoryMeteorChance":     5
+				"ivoryMeteorChance":     0.0005
 			}
 		}, {
 			name: "skyPalace",
 			prices: [
 				{name: "ivory",    val: 125000},
-				{name: "megalith", val: 5},
-				{name: "tears",    val: 500}
+				{name: "tears",    val: 500},
+				{name: "megalith", val: 5}
 			],
 			priceRatio: 1.15,
 			// unlocks: {"zigguratUpgrades": ["unicornUtopia"]},
 			requires: {zigguratUpgrades: ["ivoryCitadel"]},
 			effects: {
-				"unicornsRatioReligion": 0.5,
-				"ivoryMeteorRatio":      0.05,
 				"goldMaxRatio":          0.01,
+				"unicornsRatioReligion": 0.5,
 				"alicornChance":         10,
-				"alicornPerTick":        0
+				"alicornPerTick":        0,
+				"ivoryMeteorRatio":      0.05
 			},
 			calculateEffects: function (self, game) {
 				var alicorns = 0;
@@ -70,8 +70,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "unicornUtopia",
 			prices: [
-				{name: "ivory", val: 1000000},
 				{name: "gold",  val: 500},
+				{name: "ivory", val: 1000000},
 				{name: "tears", val: 5000}
 			],
 			priceRatio: 1.15,
@@ -79,10 +79,10 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["skyPalace"]},
 			effects: {
 				"unicornsRatioReligion": 2.5,
-				"ivoryMeteorRatio":      0.15,
 				"alicornChance":         15,
 				"alicornPerTick":        0,
-				"tcRefineRatio":         0.05
+				"tcRefineRatio":         0.05,
+				"ivoryMeteorRatio":      0.15
 			},
 			calculateEffects: function (self, game) {
 				var alicorns = 0;
@@ -102,10 +102,10 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["unicornUtopia"]},
 			effects: {
 				"unicornsRatioReligion": 5,
-				"ivoryMeteorRatio":      0.5,
 				"alicornChance":         30,
 				"alicornPerTick":        0,
-				"tcRefineRatio":         0.1
+				"tcRefineRatio":         0.1,
+				"ivoryMeteorRatio":      0.5
 			},
 			calculateEffects: function (self, game) {
 				var alicorns = 0;
@@ -117,15 +117,21 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "marker",
 			prices: [
+				{name: "unobtainium", val: 2500},
 				{name: "spice",       val: 50000},
 				{name: "tears",       val: 5000},
-				{name: "unobtainium", val: 2500},
 				{name: "megalith",    val: 750}
 			],
 			priceRatio: 1.15,
 			requires: {perks: ["megalomania"]},
 			effects: {
 				"corruptionRatio": 0.000001
+			},
+			calculateEffects: function (self, game) {
+				self.effects["corruptionRatio"] = 0.000001 * (1 + game.getLimitedDR(game.getEffect("corruptionBoostRatioChallenge"), 2));
+			},
+			getEffectiveValue: function (game) {
+				return this.val * (1 + game.getLimitedDR(game.getEffect("corruptionBoostRatioChallenge"), 2));
 			}
 		}, {
 			name: "unicornGraveyard",
@@ -143,9 +149,9 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "unicornNecropolis",
 			prices: [
-				{name: "void",      val: 5},
-				{name: "necrocorn", val: 15},
 				{name: "alicorn",   val: 100},
+				{name: "necrocorn", val: 15},
+				{name: "void",      val: 5},
 				{name: "megalith",  val: 2500}
 			],
 			priceRatio: 1.15,
@@ -156,14 +162,17 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "blackPyramid",
 			prices: [
+				{name: "unobtainium", val: 5000},
 				{name: "spice",       val: 150000},
 				{name: "sorrow",      val: 5},
-				{name: "unobtainium", val: 5000},
 				{name: "megalith",    val: 2500}
 			],
 			priceRatio: 1.15,
 			requires: {perks: ["megalomania"]},
-			effects: {}
+			effects: {},
+			getEffectiveValue: function (game) {
+				return this.val + (game.challenges.getChallenge("blackSky").on > 0 && !game.challenges.isActive("blackSky") ? 1 : 0);
+			}
 		}
 	],
 
@@ -191,8 +200,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "goldenSpire",
 			prices: [
-				{name: "faith", val: 350},
-				{name: "gold",  val: 150}
+				{name: "gold",  val: 150},
+				{name: "faith", val: 350}
 			],
 			priceRatio: 2.5,
 			upgradable: true,
@@ -201,8 +210,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "sunAltar",
 			prices: [
-				{name: "faith", val: 500},
-				{name: "gold",  val: 250}
+				{name: "gold",  val: 250},
+				{name: "faith", val: 500}
 			],
 			priceRatio: 2.5,
 			upgradable: true,
@@ -211,8 +220,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "stainedGlass",
 			prices: [
-				{name: "faith", val: 500},
-				{name: "gold",  val: 250}
+				{name: "gold",  val: 250},
+				{name: "faith", val: 500}
 			],
 			priceRatio: 2.5,
 			upgradable: true,
@@ -221,15 +230,21 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "solarRevolution",
 			prices: [
-				{name: "faith", val: 750},
-				{name: "gold",  val: 500}
+				{name: "gold",  val: 500},
+				{name: "faith", val: 750}
 			],
-			faith: 1000
+			faith: 1000,
+			effects: {
+				"solarRevolutionRatio": 0
+			},
+			calculateEffects: function (self, game) {
+				self.effects["solarRevolutionRatio"] = game.religion.getSolarRevolutionRatio();
+			}
 		}, {
 			name: "basilica",
 			prices: [
-				{name: "faith", val: 1250},
-				{name: "gold",  val: 750}
+				{name: "gold",  val: 750},
+				{name: "faith", val: 1250}
 			],
 			priceRatio: 2.5,
 			upgradable: true,
@@ -238,8 +253,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "templars",
 			prices: [
-				{name: "faith", val: 3500},
-				{name: "gold",  val: 3000}
+				{name: "gold",  val: 3000},
+				{name: "faith", val: 3500}
 			],
 			priceRatio: 2.5,
 			upgradable: true,
@@ -248,15 +263,15 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "apocripha",
 			prices: [
-				{name: "faith", val: 5000},
-				{name: "gold",  val: 5000}
+				{name: "gold",  val: 5000},
+				{name: "faith", val: 5000}
 			],
 			faith: 100000
 		}, {
 			name: "transcendence",
 			prices: [
-				{name: "faith", val: 7500},
-				{name: "gold",  val: 7500}
+				{name: "gold",  val: 7500},
+				{name: "faith", val: 7500}
 			],
 			// unlocks: {challenges: ["atheism"]},
 			faith: 125000
@@ -271,7 +286,12 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			tier: 1,
 			priceRatio: 1.15,
-			effects: {},
+			effects: {
+				"solarRevolutionLimit": 0.05
+			},
+			calculateEffects: function (self, game) {
+				self.effects["solarRevolutionLimit"] = 0.05 * game.religion.transcendenceTier;
+			},
 			flavor: true
 		}, {
 			name: "blackNexus",
@@ -315,7 +335,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			priceRatio: 1.15,
 			effects: {
 				"compendiaTTBoostRatio": 0.02
-			},
+			}
 			// flavor: true
 		}, {
 			name: "blackRadiance",
@@ -368,6 +388,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			effects: {},
 			flavor: true
 		}
+		//Holy Memecide
 	],
 
 	zigguratUpgrades: null,
@@ -380,14 +401,14 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 	faith: 0,
 	faithRatio: 0,
 	corruption: 0,
-	tcratio: 0,
+	transcendenceTier: 0,
 
 	hasTranscendeceUpgrade: false, //cache for getRU("transcendence").owned()
 
 	tabName: "Religion",
 	leaderBonuses: ["wise"],
 	getVisible: function () {
-		return this.game.resPool.get("faith").unlocked || (this.game.challenges.currentChallenge === "atheism" && this.game.bld.get("ziggurat").owned());
+		return this.game.resPool.get("faith").unlocked || (this.game.challenges.isActive("atheism") && this.game.bld.get("ziggurat").owned());
 	},
 
 	constructor: function () {
@@ -396,7 +417,9 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.registerMetaItems(this.religionUpgradesData, classes.KGSaveEdit.ReligionMeta, "religionUpgrades");
 		this.registerMetaItems(this.transcendenceUpgradesData, classes.KGSaveEdit.TranscendenceMeta, "transcendenceUpgrades");
 
-		this.meta.push(this.zigguratUpgrades, this.religionUpgrades, this.transcendenceUpgrades);
+		this.addMeta(this.zigguratUpgrades);
+		this.addMeta(this.religionUpgrades);
+		this.addMeta(this.transcendenceUpgrades);
 	},
 
 	getZU: function (name) {
@@ -423,59 +446,21 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		return upgrade;
 	},
 
-	getFaithBonus: function () {
-		return this.getTriValueReligion(this.faithRatio);
+	getApocryphaBonus: function () {
+		return this.game.getUnlimitedDR(this.faithRatio, 0.1) * 0.1;
 	},
 
-	getTriValueReligion: function (ratio) {
-		return this.game.getTriValue(ratio, 0.1) * 0.1;
+	_getTranscendTotalPrice: function (tier) {
+		return this.game.getInverseUnlimitedDR(Math.exp(tier) / 10, 0.1);
 	},
 
-	getTranscendenceLevel: function () {
-		var bonus = this.getTriValueReligion(this.tcratio) * 100;
-		return Math.max(Math.round(Math.log(bonus)), 0);
-	},
-
-	getTranscendenceRatio: function (level) {
-		var bonus = Math.exp(level);
-		return (Math.pow(bonus / 5 + 1, 2) - 1) / 80;
-	},
-
-	getProductionBonus: function () {
-		var rate = this.getRU("solarRevolution").owned() ? this.game.getTriValue(this.faith, 1000) : 0;
-		//Solar Revolution capped to 1000% so it doesn't become game-breaking
-		var atheismBonus = this.game.challenges.getChallenge("atheism").researched ? this.getTranscendenceLevel() * 0.1 : 0;
-		var blackObeliskBonus = this.getTranscendenceLevel() * this.getTU("blackObelisk").val * 0.005;
-		rate = this.game.getHyperbolicEffect(rate, 1000) * (1 + atheismBonus + blackObeliskBonus);
-		return rate;
-	},
-
-	getEffect: function (name) {
-		var cached = this.effectsCached[name];
-		if (!isNaN(cached)) {
-			return cached;
-		}
-
-		var effect = 0;
-		var effectMeta;
-
-		for (var i = this.zigguratUpgrades.length - 1; i >= 0; i--) {
-			effectMeta = this.zigguratUpgrades[i].getEffect(name);
-			effect += effectMeta;
-		}
-
-		for (i = this.religionUpgrades.length - 1; i >= 0; i--) {
-			effectMeta = this.religionUpgrades[i].getEffect(name);
-			effect += effectMeta;
-		}
-
-		for (i = this.transcendenceUpgrades.length - 1; i >= 0; i--) {
-			effectMeta = this.transcendenceUpgrades[i].getEffect(name);
-			effect += effectMeta;
-		}
-
-		this.effectsCached[name] = effect;
-		return effect;
+	getSolarRevolutionRatio: function () {
+		var uncappedBonus = this.getRU("solarRevolution").owned() ? this.game.getUnlimitedDR(this.faith, 1000) / 100 : 0;
+		return (
+			this.game.getLimitedDR(uncappedBonus, 10 + this.game.getEffect("solarRevolutionLimit") +
+				(this.game.challenges.getChallenge("atheism").on > 0 ? this.transcendenceTier : 0)) *
+			(1 + this.game.getLimitedDR(this.game.getEffect("faithSolarRevolutionBoost"), 4))
+		);
 	},
 
 	renderTabBlock: function () {
@@ -506,22 +491,9 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.game._createInput({class: "abbrInput"}, tr.children[1], this, "corruption");
 
 		tr = dojo.create("tr", {
-			innerHTML: "<td>" + $I("KGSaveEdit.religion.transcendenceRatio") + "</td>" +
-				'<td colspan="2">&nbsp; &harr; &nbsp;</td>'
+			innerHTML: "<td>" + $I("KGSaveEdit.religion.transcendenceTier") + "</td><td></td>"
 		}, table);
-		this.game._createInput({class: "abbrInput"}, tr.children[1], this, "tcratio", "first");
-		this.transcendenceLevelNode = this.game._createInput({class: "integerInput"}, tr.children[1]);
-		dojo.place(document.createTextNode(" " + $I("KGSaveEdit.religion.transcendenceLevel")), tr.children[1]);
-
-		this.tcratioNode.handler = function () {
-			var transcendenceLevel = this.game.religion.getTranscendenceLevel(this.game.religion.tcratio);
-			this.game.setInput(this.game.religion.transcendenceLevelNode, transcendenceLevel, true);
-		};
-
-		this.transcendenceLevelNode.handler = function () {
-			var transcendenceRatio = this.game.religion.getTranscendenceRatio(this.parsedValue);
-			this.game.setInput(this.game.religion.tcratioNode, transcendenceRatio, true);
-		};
+		this.game._createInput({class: "integerInput"}, tr.children[1], this, "transcendenceTier");
 
 		this.religionBlock = dojo.create("table", {
 			id: "religionBlock",
@@ -563,7 +535,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.game.callMethods(this.religionUpgrades, "update");
 		this.game.callMethods(this.transcendenceUpgrades, "update");
 
-		var isAtheism = this.game.challenges.currentChallenge === "atheism";
+		var isAtheism = this.game.challenges.isActive("atheism");
 
 		dojo.toggleClass(this.zigguratBlockHeader, "spoiler", !this.game.bld.get("ziggurat").owned());
 		dojo.toggleClass(this.religionBlockHeader, "spoiler", isAtheism);
@@ -572,23 +544,26 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		var text = "";
 
 		if (this.getRU("solarRevolution").owned()) {
-			var bonus = this.getProductionBonus();
-			text = " (" + this.game.getDisplayValueExt(bonus, true, false, 3) + "% " + $I("religion.faithCount.bonus") + ")";
+			var bonus = this.getSolarRevolutionRatio();
+			text = " (" + this.game.getDisplayValueExt(100 * bonus) + "% " + $I("religion.faithCount.bonus") + ")";
 		}
 		this.solarBonusSpan.textContent = text;
 
-		var ratio = this.getFaithBonus();
+		var ratio = this.getApocryphaBonus();
 		this.apocryphaBonusSpan.textContent = " [" + this.game.getDisplayValueExt(ratio * 100, true, false, 1) + "%]";
 	},
 
 	save: function (saveData) {
-		var isAtheism = this.game.challenges.currentChallenge === "atheism";
+		var isAtheism = this.game.challenges.isActive("atheism");
 
 		saveData.religion = {
-			faith: isAtheism ? 0 : this.faith,
+			// faith: isAtheism ? 0 : this.faith,
+			faith: this.faith,
 			corruption: this.corruption,
 			faithRatio: this.faithRatio,
-			tcratio: this.tcratio,
+			transcendenceTier: this.transcendenceTier,
+			// Duplicated save, for older versions like mobile
+			tcratio: this._getTranscendTotalPrice(this.transcendenceTier),
 			zu: this.game.filterMetadata(this.zigguratUpgrades, ["name", "val", "on", "unlocked"]),
 			ru: this.game.filterMetadata(this.religionUpgrades, ["name", "val", "on"], function (saveRU) {
 				if (isAtheism) {
@@ -608,7 +583,12 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.set("faith", num(saveData.religion.faith));
 		this.set("corruption", num(saveData.religion.corruption));
 		this.set("faithRatio", num(saveData.religion.faithRatio));
-		this.set("tcratio", num(saveData.religion.tcratio));
+		var transcendenceTier = num(saveData.religion.transcendenceTier);
+		// Read old save
+		if (transcendenceTier == 0 && saveData.religion.tcratio > 0) {
+			transcendenceTier = Math.max(0, Math.round(Math.log(10 * this.game.getUnlimitedDR(saveData.religion.tcratio, 0.1))));
+		}
+		this.set("transcendenceTier", transcendenceTier);
 
 		this.loadMetadata(saveData, "religion.zu", "getZU", null, true);
 		this.loadMetadata(saveData, "religion.ru", "getRU", null, true);
@@ -673,7 +653,7 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 	},
 
 	owned: function (override) {
-		if (!override && this.game.challenges.currentChallenge === "atheism") {
+		if (!override && this.game.challenges.isActive("atheism")) {
 			return false;
 		}
 		return this.val > 0;
@@ -698,8 +678,14 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 			priceRatio = 1;
 		}
 
-		for (var i = prices.length - 1; i >= 0; i--) {
-			prices[i].val *= Math.pow(priceRatio, this.val);
+		var pricesDiscount = this.game.getLimitedDR((this.game.getEffect(this.name + "CostReduction")), 1);
+		var priceModifier = 1 - pricesDiscount;
+
+		for (var i = 0; i < prices.length; i++) {
+			var resPriceDiscount = this.game.getEffect(prices[i].name + "CostReduction");
+			resPriceDiscount = this.game.getLimitedDR(resPriceDiscount, 1);
+			var resPriceModifier = 1 - resPriceDiscount;
+			prices[i].val *= Math.pow(priceRatio, this.val) * resPriceModifier * priceModifier;
 		}
 		return this.game.village.getEffectLeader("wise", prices);
 	},
@@ -779,7 +765,7 @@ dojo.declare("classes.KGSaveEdit.TranscendenceMeta", classes.KGSaveEdit.MetaItem
 
 	update: function () {
 		this.updateEnabled();
-		this.unlocked = this.game.religion.getTranscendenceLevel() >= this.tier;
+		this.unlocked = this.game.religion.transcendenceTier >= this.tier;
 		dojo.toggleClass(this.nameNode, "spoiler", !this.unlocked);
 	},
 

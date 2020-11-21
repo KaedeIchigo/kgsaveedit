@@ -21,11 +21,11 @@ dojo.declare("classes.KGSaveEdit.UpgradeMeta", classes.KGSaveEdit.MetaItem, {
 		return name;
 	},
 
-	getEffect: function (name) {
+	getEffect: function (effectName) {
 		if (!this.effects || !this.owned()) {
 			return 0;
 		}
-		return this.effects[name];
+		return this.effects[effectName];
 	},
 
 	render: function () {
@@ -88,8 +88,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		{
 			name: "mineralHoes",
 			prices: [
-				{name: "science",  val: 100},
-				{name: "minerals", val: 275}
+				{name: "minerals", val: 275},
+				{name: "science",  val: 100}
 			],
 			unlocked: true,
 			// unlocks: {upgrades: ["ironHoes"]},
@@ -99,8 +99,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "ironHoes",
 			prices: [
-				{name: "science", val: 200},
-				{name: "iron",    val: 25}
+				{name: "iron",    val: 25},
+				{name: "science", val: 200}
 			],
 			unlocked: true,
 			effects: {
@@ -109,8 +109,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "mineralAxes",
 			prices: [
-				{name: "science",  val: 100},
-				{name: "minerals", val: 500}
+				{name: "minerals", val: 500},
+				{name: "science",  val: 100}
 			],
 			unlocked: true,
 			// unlocks: {upgrades: ["ironAxes"]},
@@ -120,8 +120,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "ironAxes",
 			prices: [
-				{name: "science", val: 200},
-				{name: "iron",    val: 50}
+				{name: "iron",    val: 50},
+				{name: "science", val: 200}
 			],
 			unlocked: true,
 			effects: {
@@ -140,8 +140,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "reinforcedSaw",
 			prices: [
-				{name: "science", val: 2500},
-				{name: "iron",    val: 1000}
+				{name: "iron",    val: 1000},
+				{name: "science", val: 2500}
 			],
 			requires: {tech: ["construction"]},
 			effects: {
@@ -163,8 +163,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "titaniumSaw",
 			prices: [
-				{name: "science",  val: 70000},
-				{name: "titanium", val: 500}
+				{name: "titanium", val: 500},
+				{name: "science",  val: 70000}
 			],
 			// unlocks: {upgrades: ["alloySaw"]},
 			requires: {upgrades: ["steelSaw"]},
@@ -186,8 +186,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "titaniumAxe",
 			prices: [
-				{name: "science",  val: 38000},
-				{name: "titanium", val: 10}
+				{name: "titanium", val: 10},
+				{name: "science",  val: 38000}
 			],
 			requires: {tech: ["navigation"]},
 			effects: {
@@ -206,8 +206,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "unobtainiumAxe",
 			prices: [
-				{name: "science",     val: 125000},
-				{name: "unobtainium", val: 75}
+				{name: "unobtainium", val: 75},
+				{name: "science",     val: 125000}
 			],
 			// requires: {program: ["moonMission"]},
 			effects: {
@@ -217,8 +217,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "unobtainiumSaw",
 			prices: [
-				{name: "science",     val: 145000},
-				{name: "unobtainium", val: 125}
+				{name: "unobtainium", val: 125},
+				{name: "science",     val: 145000}
 			],
 			// requires: {program: ["moonMission"]},
 			effects: {
@@ -229,10 +229,10 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "stoneBarns",
 			prices: [
-				{name: "science",  val: 500},
 				{name: "wood",     val: 1000},
 				{name: "minerals", val: 750},
-				{name: "iron",     val: 50}
+				{name: "iron",     val: 50},
+				{name: "science",  val: 500}
 			],
 			unlocked: true,
 			effects: {
@@ -242,10 +242,10 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "reinforcedBarns",
 			prices: [
+				{name: "iron",    val: 100},
 				{name: "science", val: 800},
 				{name: "beam",    val: 25},
-				{name: "slab",    val: 10},
-				{name: "iron",    val: 100}
+				{name: "slab",    val: 10}
 			],
 			unlocked: true,
 			// unlocks: {upgrades: ["titaniumBarns"]},
@@ -270,8 +270,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "titaniumBarns",
 			prices: [
-				{name: "science",  val: 60000},
 				{name: "titanium", val: 25},
+				{name: "science",  val: 60000},
 				{name: "steel",    val: 200},
 				{name: "scaffold", val: 250}
 			],
@@ -284,8 +284,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "alloyBarns",
 			prices: [
 				{name: "science", val: 75000},
-				{name: "alloy",   val: 20},
-				{name: "plate",   val: 750}
+				{name: "plate",   val: 750},
+				{name: "alloy",   val: 20}
 			],
 			requires: {tech: ["chemistry"]},
 			effects: {
@@ -295,9 +295,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "concreteBarns",
 			prices: [
+				{name: "titanium", val: 2000},
 				{name: "science",  val: 100000},
-				{name: "concrate", val: 45},
-				{name: "titanium", val: 2000}
+				{name: "concrate", val: 45}
 			],
 			requires: {upgrades: ["strenghtenBuild"]},
 			effects: {
@@ -307,8 +307,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "titaniumWarehouses",
 			prices: [
-				{name: "science",  val: 70000},
 				{name: "titanium", val: 50},
+				{name: "science",  val: 70000},
 				{name: "steel",    val: 500},
 				{name: "scaffold", val: 500}
 			],
@@ -320,8 +320,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "alloyWarehouses",
 			prices: [
-				{name: "science",  val: 90000},
 				{name: "titanium", val: 750},
+				{name: "science",  val: 90000},
 				{name: "alloy",    val: 50}
 			],
 			requires: {tech: ["chemistry"]},
@@ -332,8 +332,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "concreteWarehouses",
 			prices: [
-				{name: "science",  val: 100000},
 				{name: "titanium", val: 1250},
+				{name: "science",  val: 100000},
 				{name: "concrate", val: 35}
 			],
 			requires: {upgrades: ["strenghtenBuild"]},
@@ -344,8 +344,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "storageBunkers",
 			prices: [
-				{name: "science",     val: 25000},
 				{name: "unobtainium", val: 500},
+				{name: "science",     val: 25000},
 				{name: "concrate",    val: 1250}
 			],
 			requires: {tech: ["exogeology"]},
@@ -356,19 +356,19 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "energyRifts",
 			prices: [
-				{name: "science",  val: 200000},
 				{name: "titanium", val: 7500},
-				{name: "uranium",  val: 250}
+				{name: "uranium",  val: 250},
+				{name: "science",  val: 200000}
 			],
 			requires: {tech: ["dimensionalPhysics"]},
 			upgrades: {buildings: ["accelerator"]}
 		}, {
 			name: "stasisChambers",
 			prices: [
-				{name: "science",     val: 235000},
-				{name: "alloy",       val: 200},
 				{name: "uranium",     val: 2000},
-				{name: "timeCrystal", val: 1}
+				{name: "science",     val: 235000},
+				{name: "timeCrystal", val: 1},
+				{name: "alloy",       val: 200}
 			],
 			// unlocks: {upgrades: ["voidEnergy"]},
 			requires: {tech: ["chronophysics"]},
@@ -379,10 +379,10 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "voidEnergy",
 			prices: [
-				{name: "science",     val: 275000},
-				{name: "alloy",       val: 250},
 				{name: "uranium",     val: 2500},
-				{name: "timeCrystal", val: 2}
+				{name: "science",     val: 275000},
+				{name: "timeCrystal", val: 2},
+				{name: "alloy",       val: 250}
 			],
 			// unlocks: {upgrades: ["darkEnergy"]},
 			requires: {upgrades: ["stasisChambers"]},
@@ -394,8 +394,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "darkEnergy",
 			prices: [
 				{name: "science",     val: 350000},
-				{name: "eludium",     val: 75},
-				{name: "timeCrystal", val: 3}
+				{name: "timeCrystal", val: 3},
+				{name: "eludium",     val: 75}
 			],
 			requires: {upgrades: ["voidEnergy"]},
 			effects: {
@@ -406,16 +406,16 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "chronoforge",
 			prices: [
 				{name: "science",     val: 500000},
-				{name: "relic",       val: 5},
-				{name: "timeCrystal", val: 10}
+				{name: "timeCrystal", val: 10},
+				{name: "relic",       val: 5}
 			],
 			requires: {tech: ["tachyonTheory"]}
 		}, {
 			name: "tachyonAccelerators",
 			prices: [
 				{name: "science",     val: 500000},
-				{name: "eludium",     val: 125},
-				{name: "timeCrystal", val: 10}
+				{name: "timeCrystal", val: 10},
+				{name: "eludium",     val: 125}
 			],
 			requires: {tech: ["tachyonTheory"]},
 			effects: {
@@ -425,16 +425,16 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "fluxCondensator",
 			prices: [
-				{name: "alloy",       val: 250},
 				{name: "unobtainium", val: 5000},
-				{name: "timeCrystal", val: 5}
+				{name: "timeCrystal", val: 5},
+				{name: "alloy",       val: 250}
 			],
 			requires: {tech: ["chronophysics"]}
 		}, {
 			name: "lhc",
 			prices: [
-				{name: "science",     val: 250000},
 				{name: "unobtainium", val: 100},
+				{name: "science",     val: 250000},
 				{name: "alloy",       val: 150}
 			],
 			requires: {tech: ["dimensionalPhysics"]},
@@ -442,8 +442,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "photovoltaic",
 			prices: [
-				{name: "science",  val: 75000},
-				{name: "titanium", val: 5000}
+				{name: "titanium", val: 5000},
+				{name: "science",  val: 75000}
 			],
 			requires: {tech: ["nanotechnology"]},
 			effects: {
@@ -453,9 +453,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "thinFilm",
 			prices: [
-				{name: "science",     val: 125000},
+				{name: "uranium",     val: 1000},
 				{name: "unobtainium", val: 200},
-				{name: "uranium",     val: 1000}
+				{name: "science",     val: 125000}
 			],
 			requires: {tech: ["sattelites"]},
 			effects: {
@@ -465,8 +465,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "qdot",
 			prices: [
-				{name: "science", val: 175000},
 				{name: "eludium", val: 200},
+				{name: "science", val: 175000},
 				{name: "thorium", val: 1000}
 			],
 			requires: {tech: ["thorium"]},
@@ -496,8 +496,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "barges",
 			prices: [
-				{name: "science",   val: 100000},
 				{name: "titanium",  val: 1500},
+				{name: "science",   val: 100000},
 				{name: "blueprint", val: 30}
 			],
 			requires: {tech: ["industrialization"]},
@@ -508,9 +508,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "reactorVessel",
 			prices: [
-				{name: "science",  val: 135000},
 				{name: "titanium", val: 5000},
-				{name: "uranium",  val: 125}
+				{name: "uranium",  val: 125},
+				{name: "science",  val: 135000}
 			],
 			requires: {tech: ["nuclearFission"]},
 			effects: {
@@ -520,9 +520,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "ironwood",
 			prices: [
-				{name: "science", val: 30000},
 				{name: "wood",    val: 15000},
-				{name: "iron",    val: 3000}
+				{name: "iron",    val: 3000},
+				{name: "science", val: 30000}
 			],
 			// unlocks: {upgrades: ["silos"]},
 			requires: {upgrades: ["reinforcedWarehouses"]},
@@ -532,9 +532,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "concreteHuts",
 			prices: [
+				{name: "titanium", val: 3000},
 				{name: "science",  val: 125000},
-				{name: "concrate", val: 45},
-				{name: "titanium", val: 3000}
+				{name: "concrate", val: 45}
 			],
 			requires: {upgrades: ["strenghtenBuild"]},
 			effects: {
@@ -543,9 +543,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "unobtainiumHuts",
 			prices: [
-				{name: "science",     val: 200000},
+				{name: "titanium",    val: 15000},
 				{name: "unobtainium", val: 350},
-				{name: "titanium",    val: 15000}
+				{name: "science",     val: 200000}
 			],
 			requires: {tech: ["exogeology"]},
 			effects: {
@@ -575,8 +575,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "refrigeration",
 			prices: [
-				{name: "science",   val: 125000},
 				{name: "titanium",  val: 2500},
+				{name: "science",   val: 125000},
 				{name: "blueprint", val: 15}
 			],
 			requires: {tech: ["electronics"]},
@@ -586,9 +586,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "compositeBow",
 			prices: [
-				{name: "science", val: 500},
+				{name: "wood",    val: 200},
 				{name: "iron",    val: 100},
-				{name: "wood",    val: 200}
+				{name: "science", val: 500}
 			],
 			requires: {tech: ["construction"]},
 			effects: {
@@ -597,8 +597,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "crossbow",
 			prices: [
-				{name: "science", val: 12000},
-				{name: "iron",    val: 1500}
+				{name: "iron",    val: 1500},
+				{name: "science", val: 12000}
 			],
 			requires: {tech: ["machinery"]},
 			effects: {
@@ -607,8 +607,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "railgun",
 			prices: [
-				{name: "science",   val: 150000},
 				{name: "titanium",  val: 5000},
+				{name: "science",   val: 150000},
 				{name: "blueprint", val: 25}
 			],
 			requires: {tech: ["particlePhysics"]},
@@ -618,9 +618,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "bolas",
 			prices: [
-				{name: "science",  val: 1000},
+				{name: "wood",     val: 50},
 				{name: "minerals", val: 250},
-				{name: "wood",     val: 50}
+				{name: "science",  val: 1000}
 			],
 			requires: {tech: ["mining"]},
 			effects: {
@@ -630,8 +630,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "huntingArmor",
 			prices: [
-				{name: "science", val: 2000},
-				{name: "iron",    val: 750}
+				{name: "iron",    val: 750},
+				{name: "science", val: 2000}
 			],
 			requires: {tech: ["metal"]},
 			effects: {
@@ -671,21 +671,18 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "caravanserai",
 			prices: [
+				{name: "gold",    val: 250},
 				{name: "science", val: 25000},
-				{name: "ivory",   val: 10000},
-				{name: "gold",    val: 250}
+				{name: "ivory",   val: 10000}
 			],
 			requires: {tech: ["navigation"]},
-			effects: {
-				"standingRatio": 0.35
-			},
 			upgrades: {buildings: ["tradepost"]},
 			flavor: true
 		}, {
 			name: "advancedRefinement",
 			prices: [
-				{name: "science", val: 500},
-				{name: "catnip",  val: 5000}
+				{name: "catnip",  val: 5000},
+				{name: "science", val: 500}
 			],
 			requires: {tech: ["construction"]},
 			handler: function (self) {
@@ -707,8 +704,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "geodesy",
 			prices: [
 				{name: "titanium",  val: 250},
-				{name: "starchart", val: 500},
-				{name: "science",   val: 90000}
+				{name: "science",   val: 90000},
+				{name: "starchart", val: 500}
 			],
 			requires: {tech: ["archeology"]},
 			upgrades: {jobs: ["geologist"]},
@@ -737,8 +734,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "miningDrill",
 			prices: [
 				{name: "titanium", val: 1750},
-				{name: "steel",    val: 750},
-				{name: "science",  val: 100000}
+				{name: "science",  val: 100000},
+				{name: "steel",    val: 750}
 			],
 			requires: {tech: ["metalurgy"]},
 			upgrades: {jobs: ["geologist"]}
@@ -746,8 +743,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "unobtainiumDrill",
 			prices: [
 				{name: "unobtainium", val: 250},
-				{name: "alloy",       val: 1250},
-				{name: "science",     val: 250000}
+				{name: "science",     val: 250000},
+				{name: "alloy",       val: 1250}
 			],
 			requires: {tech: ["exogeology"]},
 			upgrades: {jobs: ["geologist"]}
@@ -756,8 +753,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			prices: [
 				{name: "minerals", val: 5000},
 				{name: "iron",     val: 2000},
-				{name: "beam",     val: 35},
-				{name: "science",  val: 5000}
+				{name: "science",  val: 5000},
+				{name: "beam",     val: 35}
 			],
 			requires: {tech: ["steel"]},
 			flavor: true
@@ -765,8 +762,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "deepMining",
 			prices: [
 				{name: "iron",    val: 1200},
-				{name: "beam",    val: 50},
-				{name: "science", val: 5000}
+				{name: "science", val: 5000},
+				{name: "beam",    val: 50}
 			],
 			requires: {tech: ["steel"]},
 			upgrades: {buildings: ["mine"]},
@@ -774,8 +771,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "pyrolysis",
 			prices: [
-				{name: "compedium", val: 5},
-				{name: "science",   val: 35000}
+				{name: "science",   val: 35000},
+				{name: "compedium", val: 5}
 			],
 			requires: {tech: ["physics"]},
 			effects: {
@@ -794,8 +791,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "oxidation",
 			prices: [
-				{name: "steel",   val: 5000},
-				{name: "science", val: 100000}
+				{name: "science", val: 100000},
+				{name: "steel",   val: 5000}
 			],
 			requires: {tech: ["metalurgy"]},
 			effects: {
@@ -805,8 +802,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "steelPlants",
 			prices: [
 				{name: "titanium", val: 3500},
-				{name: "gear",     val: 750},
-				{name: "science",  val: 140000}
+				{name: "science",  val: 140000},
+				{name: "gear",     val: 750}
 			],
 			// unlocks: {upgrades: ["automatedPlants"]},
 			requires: {tech: ["robotics"]},
@@ -817,8 +814,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "automatedPlants",
 			prices: [
-				{name: "alloy",   val: 750},
-				{name: "science", val: 200000}
+				{name: "science", val: 200000},
+				{name: "alloy",   val: 750}
 			],
 			// unlocks: {upgrades: ["nuclearPlants"]},
 			requires: {upgrades: ["steelPlants"]},
@@ -839,8 +836,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "rotaryKiln",
 			prices: [
 				{name: "titanium", val: 5000},
-				{name: "gear",     val: 500},
-				{name: "science",  val: 145000}
+				{name: "science",  val: 145000},
+				{name: "gear",     val: 500}
 			],
 			requires: {tech: ["robotics"]},
 			effects: {
@@ -849,8 +846,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "fluidizedReactors",
 			prices: [
-				{name: "alloy",   val: 200},
-				{name: "science", val: 175000}
+				{name: "science", val: 175000},
+				{name: "alloy",   val: 200}
 			],
 			requires: {tech: ["robotics"]},
 			effects: {
@@ -866,44 +863,44 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "orbitalGeodesy",
 			prices: [
-				{name: "alloy",   val: 1000},
 				{name: "oil",     val: 35000},
-				{name: "science", val: 150000}
+				{name: "science", val: 150000},
+				{name: "alloy",   val: 1000}
 			],
 			requires: {tech: ["sattelites"]},
 			upgrades: {buildings: ["quarry"]}
 		}, {
 			name: "printingPress",
 			prices: [
-				{name: "gear",    val: 45},
-				{name: "science", val: 7500}
+				{name: "science", val: 7500},
+				{name: "gear",    val: 45}
 			],
 			requires: {tech: ["machinery"]},
 			upgrades: {buildings: ["steamworks"]}
 		}, {
 			name: "offsetPress",
 			prices: [
-				{name: "gear",    val: 250},
 				{name: "oil",     val: 15000},
-				{name: "science", val: 100000}
+				{name: "science", val: 100000},
+				{name: "gear",    val: 250}
 			],
 			requires: {tech: ["combustion"]},
 			upgrades: {buildings: ["steamworks"]}
 		}, {
 			name: "photolithography",
 			prices: [
-				{name: "alloy",   val: 1250},
 				{name: "oil",     val: 50000},
 				{name: "uranium", val: 250},
-				{name: "science", val: 250000}
+				{name: "science", val: 250000},
+				{name: "alloy",   val: 1250}
 			],
 			requires: {tech: ["sattelites"]},
 			upgrades: {buildings: ["steamworks"]}
 		}, {
 			name: "uplink",
 			prices: [
-				{name: "alloy",   val: 1750},
-				{name: "science", val: 75000}
+				{name: "science", val: 75000},
+				{name: "alloy",   val: 1750}
 			],
 			effects: {
 				"uplinkDCRatio": 0.01,
@@ -914,9 +911,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "starlink",
 			prices: [
-				{name: "alloy",   val: 5000},
 				{name: "oil",     val: 25000},
-				{name: "science", val: 175000}
+				{name: "science", val: 175000},
+				{name: "alloy",   val: 5000}
 			],
 			effects: {
 				"uplinkLabRatio": 0.01
@@ -926,17 +923,17 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "cryocomputing",
 			prices: [
-				{name: "eludium", val: 15},
-				{name: "science", val: 125000}
+				{name: "science", val: 125000},
+				{name: "eludium", val: 15}
 			],
 			requires: {tech: ["superconductors"]},
 			upgrades: {buildings: ["library"]}
 		}, {
 			name: "machineLearning",
 			prices: [
+				{name: "antimatter", val: 125},
 				{name: "science",    val: 175000},
-				{name: "eludium",    val: 25},
-				{name: "antimatter", val: 125}
+				{name: "eludium",    val: 25}
 			],
 			effects: {
 				"dataCenterAIRatio": 0.1
@@ -946,33 +943,33 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "factoryAutomation",
 			prices: [
-				{name: "gear",    val: 25},
-				{name: "science", val: 10000}
+				{name: "science", val: 10000},
+				{name: "gear",    val: 25}
 			],
 			requires: {tech: ["machinery"]},
 			flavor: true
 		}, {
 			name: "advancedAutomation",
 			prices: [
+				{name: "science",   val: 100000},
 				{name: "gear",      val: 75},
-				{name: "blueprint", val: 25},
-				{name: "science",   val: 100000}
+				{name: "blueprint", val: 25}
 			],
 			requires: {tech: ["industrialization"]}
 		}, {
 			name: "pneumaticPress",
 			prices: [
+				{name: "science",   val: 20000},
 				{name: "gear",      val: 30},
-				{name: "blueprint", val: 5},
-				{name: "science",   val: 20000}
+				{name: "blueprint", val: 5}
 			],
 			requires: {tech: ["physics"]}
 		}, {
 			name: "combustionEngine",
 			prices: [
+				{name: "science",   val: 20000},
 				{name: "gear",      val: 25},
-				{name: "blueprint", val: 5},
-				{name: "science",   val: 20000}
+				{name: "blueprint", val: 5}
 			],
 			requires: {tech: ["steel"]},
 			effects: {
@@ -983,9 +980,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "fuelInjectors",
 			prices: [
-				{name: "gear",    val: 250},
 				{name: "oil",     val: 20000},
-				{name: "science", val: 100000}
+				{name: "science", val: 100000},
+				{name: "gear",    val: 250}
 			],
 			requires: {tech: ["combustion"]},
 			upgrades: {buildings: ["steamworks"]},
@@ -995,18 +992,18 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "factoryLogistics",
 			prices: [
-				{name: "gear",     val: 250},
 				{name: "titanium", val: 2000},
-				{name: "science",  val: 100000}
+				{name: "science",  val: 100000},
+				{name: "gear",     val: 250}
 			],
 			requires: {tech: ["electronics"]},
 			upgrades: {buildings: ["factory"]}
 		}, {
 			name: "factoryOptimization",
 			prices: [
-				{name: "gear",     val: 125},
 				{name: "titanium", val: 1250},
-				{name: "science",  val: 75000}
+				{name: "science",  val: 75000},
+				{name: "gear",     val: 125}
 			],
 			effects: {
 				"t1CraftRatio": 10,
@@ -1015,9 +1012,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "factoryRobotics",
 			prices: [
-				{name: "gear",     val: 250},
 				{name: "titanium", val: 2500},
-				{name: "science",  val: 100000}
+				{name: "science",  val: 100000},
+				{name: "gear",     val: 250}
 			],
 			requires: {tech: ["robotics"]},
 			effects: {
@@ -1028,8 +1025,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "spaceEngineers",
 			prices: [
-				{name: "alloy",   val: 500},
-				{name: "science", val: 225000}
+				{name: "science", val: 225000},
+				{name: "alloy",   val: 500}
 			],
 			requires: {tech: ["orbitalEngineering"]},
 			effects: {
@@ -1041,9 +1038,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "aiEngineers",
 			prices: [
+				{name: "antimatter",  val: 500},
 				{name: "science",     val: 35000},
-				{name: "eludium",     val: 50},
-				{name: "antimatter",  val: 500}
+				{name: "eludium",     val: 50}
 			],
 			requires: {tech: ["ai"]},
 			effects: {
@@ -1057,8 +1054,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "chronoEngineers",
 			prices: [
 				{name: "science",     val: 500000},
-				{name: "eludium",     val: 100},
-				{name: "timeCrystal", val: 5}
+				{name: "timeCrystal", val: 5},
+				{name: "eludium",     val: 100}
 			],
 			requires: {tech: ["tachyonTheory"]},
 			effects: {
@@ -1086,8 +1083,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "astrolabe",
 			prices: [
 				{name: "titanium",  val: 5},
-				{name: "starchart", val: 75},
-				{name: "science",   val: 25000}
+				{name: "science",   val: 25000},
+				{name: "starchart", val: 75}
 			],
 			requires: {tech: ["navigation"]},
 			upgrades: {buildings: ["observatory"]}
@@ -1095,8 +1092,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "titaniumMirrors",
 			prices: [
 				{name: "titanium",  val: 15},
-				{name: "starchart", val: 20},
-				{name: "science",   val: 20000}
+				{name: "science",   val: 20000},
+				{name: "starchart", val: 20}
 			],
 			requires: {tech: ["navigation"]},
 			effects: {
@@ -1108,8 +1105,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "unobtainiumReflectors",
 			prices: [
 				{name: "unobtainium", val: 75},
-				{name: "starchart",   val: 750},
-				{name: "science",     val: 250000}
+				{name: "science",     val: 250000},
+				{name: "starchart",   val: 750}
 			],
 			requires: {tech: ["exogeology"]},
 			effects: {
@@ -1119,8 +1116,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "eludiumReflectors",
 			prices: [
-				{name: "eludium", val: 15},
-				{name: "science", val: 250000}
+				{name: "science", val: 250000},
+				{name: "eludium", val: 15}
 			],
 			requires: {tech: ["advExogeology"]},
 			effects: {
@@ -1141,8 +1138,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "amBases",
 			prices: [
-				{name: "eludium",    val: 15},
-				{name: "antimatter", val: 250}
+				{name: "antimatter", val: 250},
+				{name: "eludium",    val: 15}
 			],
 			// unlcoks: {upgrades: ["aiBases"]},
 			requires: {tech: ["antimatter"]}
@@ -1157,8 +1154,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "amFission",
 			prices: [
 				{name: "antimatter", val: 175},
-				{name: "thorium",    val: 7500},
-				{name: "science",    val: 525000}
+				{name: "science",    val: 525000},
+				{name: "thorium",    val: 7500}
 			],
 			requires: {tech: ["antimatter"]},
 			effects: {
@@ -1167,8 +1164,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "amReactors",
 			prices: [
-				{name: "eludium",    val: 35},
-				{name: "antimatter", val: 750}
+				{name: "antimatter", val: 750},
+				{name: "eludium",    val: 35}
 			],
 			// unlocks: {upgrades: ["amReactorsMK2"]},
 			requires: {tech: ["antimatter"]},
@@ -1179,8 +1176,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "amReactorsMK2",
 			prices: [
-				{name: "eludium",    val: 70},
-				{name: "antimatter", val: 1750}
+				{name: "antimatter", val: 1750},
+				{name: "eludium",    val: 70}
 			],
 			// unlocks: {upgrades: ["voidReactors"]},
 			requires: {upgrades: ["amReactors"]},
@@ -1191,8 +1188,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "voidReactors",
 			prices: [
-				{name: "void",       val: 250},
-				{name: "antimatter", val: 2500}
+				{name: "antimatter", val: 2500},
+				{name: "void",       val: 250}
 			],
 			requires: {upgrades: ["amReactorsMK2"]},
 			effects: {
@@ -1202,8 +1199,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "relicStation",
 			prices: [
-				{name: "eludium",    val: 100},
-				{name: "antimatter", val: 5000}
+				{name: "antimatter", val: 5000},
+				{name: "eludium",    val: 100}
 			],
 			requires: {tech: ["cryptotheology"]},
 			effects: {
@@ -1223,8 +1220,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "pumpjack",
 			prices: [
 				{name: "titanium", val: 250},
-				{name: "gear",     val: 125},
-				{name: "science",  val: 100000}
+				{name: "science",  val: 100000},
+				{name: "gear",     val: 125}
 			],
 			requires: {tech: ["mechanization"]},
 			effects: {
@@ -1252,8 +1249,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "gmo",
 			prices: [
-				{name: "titanium", val: 1500},
 				{name: "catnip",   val: 1000000},
+				{name: "titanium", val: 1500},
 				{name: "science",  val: 175000}
 			],
 			requires: {tech: ["genetics"]},
@@ -1281,9 +1278,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "logistics",
 			prices: [
+				{name: "science",  val: 100000},
 				{name: "gear",     val: 100},
-				{name: "scaffold", val: 1000},
-				{name: "science",  val: 100000}
+				{name: "scaffold", val: 1000}
 			],
 			requires: {tech: ["industrialization"]},
 			effects: {
@@ -1319,9 +1316,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "assistance",
 			prices: [
+				{name: "science", val: 100000},
 				{name: "steel",   val: 10000},
-				{name: "gear",    val: 250},
-				{name: "science", val: 100000}
+				{name: "gear",    val: 250}
 			],
 			requires: {tech: ["robotics"]},
 			effects: {
@@ -1342,8 +1339,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "coldFusion",
 			prices: [
-				{name: "eludium", val: 25},
-				{name: "science", val: 200000}
+				{name: "science", val: 200000},
+				{name: "eludium", val: 25}
 			],
 			requires: {tech: ["superconductors"]},
 			effects: {
@@ -1353,8 +1350,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "thoriumReactors",
 			prices: [
-				{name: "thorium",  val: 10000},
-				{name: "science",  val: 400000}
+				{name: "science",  val: 400000},
+				{name: "thorium",  val: 10000}
 			],
 			// unlocks: {upgrades: ["enrichedThorium"]},
 			requires: {tech: ["thorium"]},
@@ -1366,8 +1363,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "enrichedThorium",
 			prices: [
-				{name: "thorium", val: 12500},
-				{name: "science", val: 500000}
+				{name: "science", val: 500000},
+				{name: "thorium", val: 12500}
 			],
 			requires: {upgrades: ["thoriumReactors"]},
 			effects: {
@@ -1377,9 +1374,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "hubbleTelescope",
 			prices: [
-				{name: "alloy",   val: 1250},
 				{name: "oil",     val: 50000},
-				{name: "science", val: 250000}
+				{name: "science", val: 250000},
+				{name: "alloy",   val: 1250}
 			],
 			// unlocks: {upgrades: ["satnav"]},
 			requires: {tech: ["orbitalEngineering"]},
@@ -1389,8 +1386,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "satnav",
 			prices: [
-				{name: "alloy",   val: 750},
-				{name: "science", val: 200000}
+				{name: "science", val: 200000},
+				{name: "alloy",   val: 750}
 			],
 			requires: {upgrades: ["hubbleTelescope"]},
 			effects: {
@@ -1399,8 +1396,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "satelliteRadio",
 			prices: [
-				{name: "alloy",   val: 5000},
-				{name: "science", val: 225000}
+				{name: "science", val: 225000},
+				{name: "alloy",   val: 5000}
 			],
 			requires: {tech: ["orbitalEngineering"]},
 			effects: {
@@ -1417,8 +1414,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "mWReactor",
 			prices: [
-				{name: "eludium", val: 50},
-				{name: "science", val: 150000}
+				{name: "science", val: 150000},
+				{name: "eludium", val: 50}
 			],
 			effects: {
 				"lunarOutpostRatio": 0.75
@@ -1427,8 +1424,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "eludiumCracker",
 			prices: [
-				{name: "eludium", val: 250},
-				{name: "science", val: 275000}
+				{name: "science", val: 275000},
+				{name: "eludium", val: 250}
 			],
 			requires: {tech: ["advExogeology"]},
 			effects: {
@@ -1438,11 +1435,11 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "thoriumEngine",
 			prices: [
-				{name: "ship",     val: 10000},
+				{name: "science",  val: 400000},
 				{name: "gear",     val: 40000},
 				{name: "alloy",    val: 2000},
-				{name: "thorium",  val: 100000},
-				{name: "science",  val: 400000}
+				{name: "ship",     val: 10000},
+				{name: "thorium",  val: 100000}
 			],
 			requires: {tech: ["thorium"]},
 			effects: {
@@ -1452,8 +1449,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "oilRefinery",
 			prices: [
 				{name: "titanium", val: 1250},
-				{name: "gear",     val: 500},
-				{name: "science",  val: 125000}
+				{name: "science",  val: 125000},
+				{name: "gear",     val: 500}
 			],
 			requires: {tech: ["combustion"]},
 			effects: {
@@ -1475,8 +1472,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "factoryProcessing",
 			prices: [
 				{name: "titanium", val: 7500},
-				{name: "concrate", val: 125},
-				{name: "science",  val: 195000}
+				{name: "science",  val: 195000},
+				{name: "concrate", val: 125}
 			],
 			requires: {tech: ["oilProcessing"]},
 			effects: {
@@ -1486,18 +1483,18 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "voidAspiration",
 			prices: [
-				{name: "timeCrystal", val: 15},
-				{name: "antimatter",  val: 2000}
+				{name: "antimatter",  val: 2000},
+				{name: "timeCrystal", val: 15}
 			],
 			// unlocks: {voidSpace: ["voidHoover", "voidRift"]},
 			requires: {tech: ["voidSpace"]}
 		}, {
 			name: "distorsion",
 			prices: [
-				{name: "timeCrystal", val: 25},
 				{name: "antimatter",  val: 2000},
-				{name: "void",        val: 1000},
-				{name: "science",     val: 300000}
+				{name: "science",     val: 300000},
+				{name: "timeCrystal", val: 25},
+				{name: "void",        val: 1000}
 			],
 			requires: {tech: ["paradoxalKnowledge"]},
 			effects: {
@@ -1508,9 +1505,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			name: "turnSmoothly", // chronosurge
 			prices: [
 				{name: "unobtainium",  val: 100000},
+				{name: "temporalFlux", val: 6500},
 				{name: "timeCrystal",  val: 25},
-				{name: "void",         val: 750},
-				{name: "temporalFlux", val: 6500}
+				{name: "void",         val: 750}
 			],
 			requires: {voidSpace: ["chronocontrol"]},
 			effects: {
@@ -1522,10 +1519,10 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "invisibleBlackHand",
 			prices: [
-				{name: "void",         val: 32},
-				{name: "blackcoin",    val: 64},
+				{name: "temporalFlux", val: 4096},
 				{name: "timeCrystal",  val: 128},
-				{name: "temporalFlux", val: 4096}
+				{name: "void",         val: 32},
+				{name: "blackcoin",    val: 64}
 			],
 			requires: {tech: ["blackchain"]}
 		}
@@ -1568,8 +1565,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "steel",
 			prices: [
-				{name: "iron", val: 100},
-				{name: "coal", val: 100}
+				{name: "coal", val: 100},
+				{name: "iron", val: 100}
 			],
 			unlocked: false,
 			requires: {tech: ["steel"]},
@@ -1596,8 +1593,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "alloy",
 			prices: [
-				{name: "steel",    val: 75},
-				{name: "titanium", val: 10}
+				{name: "titanium", val: 10},
+				{name: "steel",    val: 75}
 			],
 			unlocked: false,
 			requires: {tech: ["chemistry"]},
@@ -1606,8 +1603,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "eludium",
 			prices: [
-				{name: "alloy",       val: 2500},
-				{name: "unobtainium", val: 1000}
+				{name: "unobtainium", val: 1000},
+				{name: "alloy",       val: 2500}
 			],
 			unlocked: false,
 			requires: {tech: ["advExogeology"]},
@@ -1624,9 +1621,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "ship",
 			prices: [
-				{name: "scaffold",  val: 100},
+				{name: "starchart", val: 25},
 				{name: "plate",     val: 150},
-				{name: "starchart", val: 25}
+				{name: "scaffold",  val: 100}
 			],
 			unlocked: false,
 			requires: {tech: ["navigation"]},
@@ -1636,8 +1633,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "tanker",
 			prices: [
-				{name: "ship",      val: 200},
 				{name: "alloy",     val: 1250},
+				{name: "ship",      val: 200},
 				{name: "blueprint", val: 5}
 			],
 			unlocked: false,
@@ -1666,8 +1663,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "manuscript",
 			prices: [
-				{name: "parchment", val: 25},
-				{name: "culture",   val: 400}
+				{name: "culture",   val: 400},
+				{name: "parchment", val: 25}
 			],
 			unlocked: true,
 			progressHandicap: 2,
@@ -1675,8 +1672,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "compedium",
 			prices: [
-				{name: "manuscript", val: 50},
-				{name: "science",    val: 10000}
+				{name: "science",    val: 10000},
+				{name: "manuscript", val: 50}
 			],
 			unlocked: false,
 			requires: {tech: ["philosophy"]},
@@ -1685,8 +1682,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "blueprint",
 			prices: [
-				{name: "compedium", val: 25},
-				{name: "science",   val: 25000}
+				{name: "science",   val: 25000},
+				{name: "compedium", val: 25}
 			],
 			unlocked: false,
 			requires: {tech: ["physics"]},
@@ -1704,8 +1701,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "megalith",
 			prices: [
-				{name: "slab",  val: 50},
 				{name: "beam",  val: 25},
+				{name: "slab",  val: 50},
 				{name: "plate", val: 5}
 			],
 			unlocked: true,
@@ -1724,8 +1721,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	],
 
 	effectsBase: {
-		"scienceMax": 0,
 		"oilMax":     0,
+		"scienceMax": 0,
 		"cultureMax": 0
 	},
 
@@ -1754,7 +1751,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			}
 		});
 		this.registerMetaItems(this.craftData, classes.KGSaveEdit.CraftMeta, "crafts");
-		this.meta.push(this.upgrades);
+		this.addMeta(this.upgrades);
 	},
 
 	renderTabBlock: function () {
@@ -1820,8 +1817,15 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	},
 
 	getCraftPrice: function (craft) {
-		if (craft.name !== "ship") {
+		if (craft.name !== "ship" && craft.name !== "manuscript") {
 			return craft.prices;
+		}
+
+		if (craft.name === "manuscript" && this.game.science.getPolicy("tradition").owned()) {
+			return [
+				{name: "parchment", val: 20},
+				{name: "culture", val: 300}
+			];
 		}
 
 		//special ship hack
@@ -1829,7 +1833,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		for (var i = prices.length - 1; i >= 0; i--) {
 			if (prices[i].name === "starchart") {
 				prices[i].val = prices[i].val *
-					(1 - this.game.getHyperbolicEffect(this.getEffect("satnavRatio") * this.game.space.getProgram("sattelite").val, 0.75));
+					(1 - this.game.getLimitedDR(this.getEffect("satnavRatio") * this.game.space.getProgram("sattelite").val, 0.75));
 				break;
 			}
 		}
@@ -1868,7 +1872,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		//iw compedia cap is set to 1000% instead of 100%
 		var iwScienceCapRatio = this.game.ironWill ? 10 : 1;
 
-		if (this.game.prestige.getPerk("codexLeviathanianus").researched) {
+		if (this.game.prestige.getPerk("codexLeviathanianus").owned()) {
 			var blackLibrary = this.game.religion.getTU("blackLibrary");
 			var ttBoostRatio = (
 				0.05 * (
@@ -1878,17 +1882,22 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 						this.game.getEffect("blackLibraryBonus"))
 				)
 			);
-			iwScienceCapRatio *= (1 + ttBoostRatio * this.game.religion.getTranscendenceLevel());
+			iwScienceCapRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
 		}
 
 		if (compendiaScienceMax > (scienceMaxBuilding * iwScienceCapRatio + scienceMaxCompendiaCap) && !this.game.opts.ch40krun) {
 			compendiaScienceMax = (scienceMaxBuilding * iwScienceCapRatio + scienceMaxCompendiaCap);
 		}
 
-		this.effectsBase["scienceMax"] = compendiaScienceMax;
 		this.effectsBase["oilMax"] = Math.floor(this.game.resPool.get("tanker").value * 500);
+		this.effectsBase["scienceMax"] = compendiaScienceMax;
+		//this.effectsBase["scienceMax"] = Math.min(compendiaScienceMax, scienceMax);
 		var cultureBonusRaw = Math.floor(this.game.resPool.get("manuscript").value);
-		this.effectsBase["cultureMax"] = this.game.getTriValue(cultureBonusRaw, 0.01);
+		this.effectsBase["cultureMax"] = this.game.getUnlimitedDR(cultureBonusRaw, 0.01);
+
+		if (this.game.science.getPolicy("tradition").owned()) {
+			this.effectsBase["cultureMax"] *= 2;
+		}
 
 		this.game.callMethods(this.upgrades, "update", this.hideResearched);
 		this.game.callMethods(this.crafts, "update");

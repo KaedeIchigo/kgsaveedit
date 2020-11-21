@@ -19,7 +19,7 @@
 		<div id="topBar" class="header">
 			<span class="smallText">
 				<a href="https://bitbucket.org/coderpatsy/kgsaveedit">Kittens Game Save Editor</a> by <a href="https://coderpatsy.bitbucket.io/">patsy</a>, with help from Guest93,
-				for <a href="http://bloodrizer.ru/games/kittens/">Kittens Game</a> version <span id="gameVersionSpan">1.4.7.1.b (&gamma;)</span>
+				for <a href="http://bloodrizer.ru/games/kittens/">Kittens Game</a> version <span id="gameVersionSpan">1.4.8.2 (ML)</span>
 				by <a href="http://bloodrizer.ru/">bloodrizer</a>
 			</span>
 
@@ -31,8 +31,8 @@
 					<select id="languageSel"></select>
 				</span>
 				&nbsp;
-				<a id="showImport" href="#" data-lang-key="menu.import">Import</a> |
-				<a id="showExport" href="#" data-lang-key="menu.export">Export</a>
+				<a id="showImport" href="#" data-lang-key="ui.option.import.button">Import</a> |
+				<a id="showExport" href="#" data-lang-key="ui.option.export.button">Export</a>
 			</span>
 		</div>
 
@@ -40,29 +40,29 @@
 
 		<div id="editContainer">
 			<div id="importBlock" class="lightbox hidden">
-				Save Import
+				<span data-lang-key="KGSaveEdit.ui.import.header">Save Import</span>
 				<br>
 				<input id="importSaveFile" type="file" accept=".txt,text/plain" class="hidden">
-				<input id="importSaveFileSubmit" type="button" value="Import file">
+				<input id="importSaveFileSubmit" type="button" value="Import file" data-lang-key="KGSaveEdit.ui.import.fromFile">
 				<br><br>
 				<textarea id="importSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 				<br>
-				<input id="importLoadButton" type="button" value="Load">
-				<input id="importCancel" type="button" value="Cancel">
+				<input id="importLoadButton" type="button" value="Load" data-lang-key="ui.option.do.import.button">
+				<input id="importCancel" type="button" value="Cancel" data-lang-key="ui.option.cancel.button">
 				<span id="importDevSpan"></span>
-				<span id="importError" class="error hidden">Unable to import data!</span>
+				<span id="importError" class="error hidden" data-lang-key="KGSaveEdit.ui.import.error">Unable to import data!</span>
 			</div>
 
 			<div id="exportBlock" class="lightbox hidden">
-				Save Export
+				<span data-lang-key="KGSaveEdit.ui.export.header">Save Export</span>
 				<br>
-				<input id="exportSaveFileSimple" type="button" value="Export file (simple name)">
-				<input id="exportSaveFileFull" type="button" value="Export file (full name)">
+				<input id="exportSaveFileSimple" type="button" value="Export file (simple name)" data-lang-key="ui.option.export.simple.file">
+				<input id="exportSaveFileFull" type="button" value="Export file (full name)" data-lang-key="ui.option.export.full.file">
 				<a id="download-link" target="_blank" class="hidden"></a>
 				<br><br>
 				<textarea id="exportSaveArea" class="saveArea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 				<br>
-				<input id="exportCancel" type="button" value="OK">
+				<input id="exportCancel" type="button" value="Close" data-lang-key="ui.option.close.button">
 			</div>
 
 			<div class="blockContainer">
@@ -254,6 +254,8 @@
 
 						game.updateTooltip();
 					});
+
+					console.log("KGSaveEdit loaded");
 				}, 0);
 			}
 		});

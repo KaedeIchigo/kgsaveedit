@@ -61,7 +61,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				}
 			},
 			calculateEnergyProduction: function (game, season) {
-				if (game.challenges.currentChallenge == "winterIsComing") {
+				if (game.challenges.isActive("winterIsComing")) {
 					season = 3;
 				}
 				var energyProduction = 2 * (1 + game.getEffect("solarFarmRatio"));
@@ -69,6 +69,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					energyProduction *= 0.75;
 				} else if (season == 1) {
 					energyProduction /= 0.75;
+					energyProduction *= (1 + game.getLimitedDR(game.getEffect("summerSolarFarmRatio"), 2));
 				}
 
 				var seasonRatio = game.getEffect("solarFarmSeasonRatio");
@@ -92,19 +93,21 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					stageUnlocked: true,
 					// stageRequires: {tech: ["engineering"]},
 					effects: {
-						"catnipRatio": 0.03
+						"catnipRatio":      0.03,
+						"energyProduction": 0
 					},
 					flavor: true
 				}, {
 					stageName: "hydroplant",
 					prices: [
-						{name: "concrate", val: 100},
-						{name: "titanium", val: 2500}
+						{name: "titanium", val: 2500},
+						{name: "concrate", val: 100}
 					],
 					priceRatio: 1.15,
 					stageUnlocked: false,
 					stageRequires: {tech: ["robotics"]},
 					effects: {
+						"catnipRatio":      0,
 						"energyProduction": 5
 					}
 				}
@@ -131,9 +134,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.3,
 			unlockable: true,
 			// unlocks: {tabs: ["village"]},
+			upgrades: {policies: ["authocracy"]},
 			effects: {
-				"maxKittens":  2,
-				"manpowerMax": 75
+				"manpowerMax": 75,
+				"maxKittens":  2
 			},
 			flavor: true
 		}, {
@@ -146,24 +150,26 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.3,
 			// unlocks: {tabs: ["village"]},
 			requires: {tech: ["construction"]},
+			upgrades: {policies: ["authocracy"]},
 			effects: {
-				"maxKittens":  1,
-				"manpowerMax": 50
+				"manpowerMax": 50,
+				"maxKittens":  1
 			},
 			flavor: true
 		}, {
 			name: "mansion",
 			prices: [
+				{name: "titanium", val: 25},
 				{name: "slab",     val: 185},
-				{name: "steel",    val: 75},
-				{name: "titanium", val: 25}
+				{name: "steel",    val: 75}
 			],
 			priceRatio: 1.15,
 			// unlocks: {tabs: ["village"]},
 			requires: {tech: ["architecture"]},
+			upgrades: {policies: ["authocracy"]},
 			effects: {
-				"maxKittens":  1,
-				"manpowerMax": 50
+				"manpowerMax": 50,
+				"maxKittens":  1
 			},
 			flavor: true
 		}, {
@@ -178,24 +184,29 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					],
 					stageUnlocked: true,
 					effects: {
-						"scienceRatio": 0,
-						"scienceMax":   0,
-						"cultureMax":   0
+						"scienceMaxCompendia": 0,
+						"scienceRatio":        0.1,
+						"scienceMax":          250,
+						"cultureMax":          10,
+						"energyConsumption":   0
 					},
 					flavor: true
 				}, {
 					stageName: "dataCenter",
 					prices: [
-						{name: "concrate", val: 10},
-						{name: "steel",    val: 100}
+						{name: "steel",    val: 100},
+						{name: "concrate", val: 10}
 					],
 					stageUnlocked: false,
 					stageRequires: {tech: ["electronics"]},
 					effects: {
 						"scienceMaxCompendia": 1000,
-						"cultureMax":          25,
+						"scienceRatio":        0.1,
+						"scienceMax":          750,
+						"cultureMax":          250,
 						"energyConsumption":   2
 					}
+					// unlockScheme: {name: "computer", threshold: 100}
 				}
 			],
 			priceRatio: 1.15,
@@ -204,18 +215,20 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			calculateEffects: function (self, game) {
 				var stageMeta = self.stages[self.stage];
 				var effects = {
-					"scienceRatio": 0.1,
-					"scienceMax":   250,
-					"cultureMax":   10,
+					"scienceMaxCompendia": 0,
+					"scienceRatio":        0.1,
+					"scienceMax":          250,
+					"cultureMax":          10,
+					"energyConsumption":   0
 				};
 
 				var libraryRatio = game.getEffect("libraryRatio");
 				effects["scienceMax"] *= (1 + game.bld.get("observatory").on * libraryRatio);
 
 				if (self.stage === 1) {
+					effects["scienceMaxCompendia"] = 1000;
 					effects["scienceMax"] *= 3;	//250->750 base science boos for data centers
 					effects["cultureMax"] = 250;
-					effects["scienceMaxCompendia"] = 1000;
 
 					if (game.workshop.get("uplink").owned()) {
 						var biolabBonus = game.bld.get("biolab").on * game.getEffect("uplinkDCRatio");
@@ -224,23 +237,16 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 						effects["cultureMax"] *= (1 + biolabBonus);
 					}
 
-					var energyCons = 2;
-					energyCons = 2;
-					if (game.workshop.get("cryocomputing").owned()) {
-						energyCons = 1;
-					}
-					if (game.challenges.currentChallenge == "energy") {
-						energyCons *= 2;
-					}
-					effects["energyConsumption"] = energyCons;
+					effects["energyConsumption"] = game.workshop.get("cryocomputing").owned() ? 1 : 2;
 
 					if (game.workshop.get("machineLearning").owned()) {
 						var dataCenterAIRatio = game.getEffect("dataCenterAIRatio");
+						dataCenterAIRatio *= (1 + game.getEffect("aiCoreUpgradeBonus") || 0);
 
-						var aiCores = game.bld.get("aiCore").on;
+						var aiCores = game.bld.get("aiCore").getOn();
+						effects["scienceMaxCompendia"] *= (1 + aiCores * dataCenterAIRatio);
 						effects["scienceMax"] *= (1 + aiCores * dataCenterAIRatio);
 						effects["cultureMax"] *= (1 + aiCores * dataCenterAIRatio);
-						effects["scienceMaxCompendia"] *= (1 + aiCores * dataCenterAIRatio);
 					}
 				}
 
@@ -260,17 +266,18 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			effects: {
 				"scienceRatio": 0.2,
 				"skillXP":      0.05,
-				"cultureMax":   25,
-				"scienceMax":   500
+				"scienceMax":   500,
+				"cultureMax":   25
 			},
 			flavor: true
+			// unlockScheme: {name: "school", threshold: 68}
 		}, {
 			name: "observatory",
 			prices: [
-				{name: "scaffold", val: 50},
-				{name: "slab",     val: 35},
 				{name: "iron",     val: 750},
-				{name: "science",  val: 1000}
+				{name: "science",  val: 1000},
+				{name: "slab",     val: 35},
+				{name: "scaffold", val: 50}
 			],
 			priceRatio: 1.10,
 			requires: {tech: ["astronomy"]},
@@ -294,8 +301,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				}
 
 				var ratio = 1 + game.getEffect("observatoryRatio");
-				effects["scienceMax"] *= ratio;
 				effects["scienceRatio"] *= ratio;
+				effects["scienceMax"] *= ratio;
 
 				self.effects = effects;
 			},
@@ -303,21 +310,21 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		}, {
 			name: "biolab",
 			prices: [
+				{name: "science", val: 1500},
 				{name: "slab",    val: 100},
-				{name: "alloy",   val: 25},
-				{name: "science", val: 1500}
+				{name: "alloy",   val: 25}
 			],
 			priceRatio: 1.10,
 			requires: {tech: ["biology"]},
+			upgrades: {buildings: ["library"]},
 			effects: {
 				"scienceRatio": 0.35,
 				"refineRatio": 0.1,
+				"scienceMax": 1500,
 				"catnipPerTickCon": 0,
 				"oilPerTickProd": 0,
-				"scienceMax": 1500,
 				"energyConsumption": 0
 			},
-			upgrades: {buildings: ["library"]},
 			calculateEffects: function (self, game) {
 				self.effects["scienceMax"] = 1500;
 
@@ -327,10 +334,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				if (game.workshop.get("biofuel").owned()) {
 					self.togglable = true;
 					energyCons = 1;
-
-					if (game.challenges.currentChallenge === "energy") {
-						energyCons *= 2;
-					}
 				}
 
 				self.effects["energyConsumption"] = energyCons;
@@ -375,20 +378,20 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"catnipMax":   0,
 				"woodMax":     0,
 				"mineralsMax": 0,
-				"ironMax":     0,
 				"coalMax":     0,
-				"goldMax":     0,
-				"titaniumMax": 0
+				"ironMax":     0,
+				"titaniumMax": 0,
+				"goldMax":     0
 			},
 			calculateEffects: function (self, game) {
 				var effects = {
 					"catnipMax":   5000,
 					"woodMax":     200,
 					"mineralsMax": 250,
-					"ironMax":     50,
 					"coalMax":     60,
-					"goldMax":     10,
-					"titaniumMax": 2
+					"ironMax":     50,
+					"titaniumMax": 2,
+					"goldMax":     10
 				};
 
 				self.effects = game.resPool.addBarnWarehouseRatio(effects);
@@ -406,20 +409,20 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"catnipMax":   0,
 				"woodMax":     0,
 				"mineralsMax": 0,
-				"ironMax":     0,
 				"coalMax":     0,
-				"goldMax":     0,
-				"titaniumMax": 0
+				"ironMax":     0,
+				"titaniumMax": 0,
+				"goldMax":     0
 			},
 			calculateEffects: function (self, game) {
 				var effects = {
 					"catnipMax":   0, //for tooltip order
 					"woodMax":     150,
 					"mineralsMax": 200,
-					"ironMax":     25,
 					"coalMax":     30,
-					"goldMax":     5,
-					"titaniumMax": 10
+					"ironMax":     25,
+					"titaniumMax": 10,
+					"goldMax":     5
 				};
 
 				if (game.workshop.get("silos").owned()) {
@@ -429,12 +432,13 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects = game.resPool.addBarnWarehouseRatio(effects);
 			},
 			flavor: true
+			// unlockScheme: {name: "minimalist", threshold: 10}
 		}, {
 			name: "harbor",
 			prices: [
-				{name: "scaffold", val: 5},
 				{name: "slab",     val: 50},
-				{name: "plate",    val: 75}
+				{name: "plate",    val: 75},
+				{name: "scaffold", val: 5}
 			],
 			priceRatio: 1.15,
 			requires: {tech: ["navigation"]},
@@ -442,20 +446,20 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"catnipMax":   0,
 				"woodMax":     0,
 				"mineralsMax": 0,
-				"ironMax":     0,
 				"coalMax":     0,
-				"goldMax":     0,
-				"titaniumMax": 0
+				"ironMax":     0,
+				"titaniumMax": 0,
+				"goldMax":     0
 			},
 			calculateEffects: function (self, game) {
 				var effects = {
 					"catnipMax":   2500,
 					"woodMax":     700,
 					"mineralsMax": 950,
-					"ironMax":     150,
 					"coalMax":     100,
-					"goldMax":     25,
-					"titaniumMax": 50
+					"ironMax":     150,
+					"titaniumMax": 50,
+					"goldMax":     25
 				};
 
 				effects["coalMax"] *= 1 + game.getEffect("harborCoalRatio");
@@ -466,15 +470,15 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 					//100% to 225% with slow falldown on the 75%
 					var limit = 2.25 + game.getEffect("shipLimit") * game.bld.get("reactor").val;
-					var ratio = 1 + game.getHyperbolicEffect(cargoShips.effects["harborRatio"] * shipVal, limit);
+					var ratio = 1 + game.getLimitedDR(cargoShips.effects["harborRatio"] * shipVal, limit);
 
 					effects["catnipMax"] *=   ratio;
 					effects["woodMax"] *=     ratio;
 					effects["mineralsMax"] *= ratio;
-					effects["ironMax"] *=     ratio;
 					effects["coalMax"] *=     ratio;
-					effects["goldMax"] *=     ratio;
+					effects["ironMax"] *=     ratio;
 					effects["titaniumMax"] *= ratio;
+					effects["goldMax"] *=     ratio;
 				}
 
 				self.effects = game.resPool.addBarnWarehouseRatio(effects);
@@ -507,26 +511,29 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects = effects;
 			},
 			flavor: true
+			// unlockScheme: {name: "anthracite", threshold: 92}
 		}, {
 			name: "quarry",
 			prices: [
-				{name: "scaffold", val: 50},
+				{name: "slab",     val: 1000},
 				{name: "steel",    val: 125},
-				{name: "slab",     val: 1000}
+				{name: "scaffold", val: 50}
 			],
 			priceRatio: 1.15,
 			unlockRatio: 0.3,
 			requires: {tech: ["archeology"]},
 			effects: {
-				"mineralsRatio":   0.35,
-				"coalPerTickBase": 0.015
+				"mineralsRatio":      0.35,
+				"coalPerTickBase":    0.015,
+				"uraniumPerTickBase": 0
 			},
 			calculateEffects: function (self, game) {
 				var effects = {
-					"mineralsRatio": 0.35,
-					"coalPerTickBase": 0.015
+					"mineralsRatio":      0.35,
+					"coalPerTickBase":    0.015,
+					"uraniumPerTickBase": 0
 				};
-				if (game.workshop.get("orbitalGeodesy").researched) {
+				if (game.workshop.get("orbitalGeodesy").owned()) {
 					effects["uraniumPerTickBase"] = 0.0005; //4% of accelerator output
 				}
 				self.effects = effects;
@@ -544,10 +551,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			effects: {
 				"woodPerTickCon":         -0.05,
 				"mineralsPerTickCon":     -0.1,
-				"ironPerTickAutoprod":     0.02,
 				"coalPerTickAutoprod":     0,
-				"goldPerTickAutoprod":     0,
-				"titaniumPerTickAutoprod": 0
+				"ironPerTickAutoprod":     0.02,
+				"titaniumPerTickAutoprod": 0,
+				"goldPerTickAutoprod":     0
 			},
 			action: function (self, game) {
 				var on = this.getOn();
@@ -558,10 +565,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects = {
 					"woodPerTickCon":          0,
 					"mineralsPerTickCon":      0,
-					"ironPerTickAutoprod":     0.02,
 					"coalPerTickAutoprod":     0,
-					"goldPerTickAutoprod":     0,
-					"titaniumPerTickAutoprod": 0
+					"ironPerTickAutoprod":     0.02,
+					"titaniumPerTickAutoprod": 0,
+					"goldPerTickAutoprod":     0
 				};
 
 
@@ -588,12 +595,12 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					{res: "minerals", amt: -self.effects["mineralsPerTickCon"]}],
 					on
 				);
-				self.effects["woodPerTickCon"] *= amt;
-				self.effects["mineralsPerTickCon"] *= amt;
-				self.effects["ironPerTickAutoprod"] *= amt;
-				self.effects["goldPerTickAutoprod"] *= amt;
-				self.effects["coalPerTickAutoprod"] *= amt;
+				self.effects["woodPerTickCon"] *=          amt;
+				self.effects["mineralsPerTickCon"] *=      amt;
+				self.effects["coalPerTickAutoprod"] *=     amt;
+				self.effects["ironPerTickAutoprod"] *=     amt;
 				self.effects["titaniumPerTickAutoprod"] *= amt;
+				self.effects["goldPerTickAutoprod"] *=     amt;
 
 				return amt;
 			},
@@ -601,30 +608,27 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		}, {
 			name: "calciner",
 			prices: [
-				{name: "steel",     val: 100},
 				{name: "titanium",  val: 15},
-				{name: "blueprint", val: 1},
-				{name: "oil",       val: 500}
+				{name: "oil",       val: 500},
+				{name: "steel",     val: 100},
+				{name: "blueprint", val: 1}
 			],
 			priceRatio: 1.15,
 			requires: {tech: ["chemistry"]},
 			togglable: true,
 			effects: {
 				"mineralsPerTickCon":     -1.5,
-				"oilPerTickCon":          -0.024,
+				"coalPerTickCon":          0,
+				"ironPerTickCon":          0,
 				"ironPerTickAutoprod":     0.15,
 				"titaniumPerTickAutoprod": 0.0005,
-				"energyConsumption":       0,
-				"ironPerTickCon":          0,
-				"coalPerTickCon":          0,
-				"steelPerTickProd":        0
+				"oilPerTickCon":          -0.024,
+				"steelPerTickProd":        0,
+				"energyConsumption":       0
 			},
 			isAutomationEnabled: true,
 			calculateEffects: function (self, game) {
 				self.effects["energyConsumption"] = 1;
-				if (game.challenges.currentChallenge === "energy") {
-					self.effects["energyConsumption"] *= 2;
-				}
 				self.showAutomation = Boolean(game.getEffect("calcinerSteelRatio"));
 			},
 			action: function (self, game) {
@@ -633,26 +637,26 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					return;
 				}
 
-				self.effects["oilPerTickCon"] = -0.024; //base + 0.01
 				self.effects["mineralsPerTickCon"] = -1.5;
+				self.effects["oilPerTickCon"] = -0.024; //base + 0.01
 				var calcinerRatio = game.getEffect("calcinerRatio");
-				self.effects["titaniumPerTickAutoprod"] = 0.0005 * (1 + calcinerRatio * 3);
 				self.effects["ironPerTickAutoprod"] = 0.15 * (1 + calcinerRatio);
+				self.effects["titaniumPerTickAutoprod"] = 0.0005 * (1 + calcinerRatio * 3);
 
 				var amt = game.resPool.getAmtDependsOnStock(
-					[{res: "oil",     amt: -self.effects["oilPerTickCon"]},
-					{res: "minerals", amt: -self.effects["mineralsPerTickCon"]}],
+					[{res: "minerals", amt: -self.effects["mineralsPerTickCon"]},
+					{res: "oil",     amt: -self.effects["oilPerTickCon"]}],
 					on
 				);
-				self.effects["oilPerTickCon"] *= amt;
 				self.effects["mineralsPerTickCon"] *= amt;
 				self.effects["ironPerTickAutoprod"] *= amt;
 				self.effects["titaniumPerTickAutoprod"] *= amt;
+				self.effects["oilPerTickCon"] *= amt;
 
 				var amtFinal = amt;
 
-				self.effects["ironPerTickCon"] = 0;
 				self.effects["coalPerTickCon"] = 0;
+				self.effects["ironPerTickCon"] = 0;
 				self.effects["steelPerTickProd"] = 0;
 
 				var steelRatio = game.getEffect("calcinerSteelRatio");
@@ -671,17 +675,22 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 						game.calendar.cycleEffectsFestival(effectsTemp);
 						difference = effectsTemp["iron"];
 
-						self.effects["ironPerTickCon"] = -difference;
+						//necrocracy global effect
+						difference *= (1 + (game.resPool.get("sorrow").value * game.getEffect("blsProductionBonus")));
+						//policy ratio effects
+						difference *= (1 + game.getEffect("ironPolicyRatio"));
+
 						self.effects["coalPerTickCon"] = -difference;
+						self.effects["ironPerTickCon"] = -difference;
 						self.effects["steelPerTickProd"] = difference / 100;
 
 						amt = game.resPool.getAmtDependsOnStock(
-							[{res: "iron", amt: -self.effects["ironPerTickCon"]},
-							{res: "coal",  amt: -self.effects["coalPerTickCon"]}],
+							[{res: "coal",  amt: -self.effects["coalPerTickCon"]},
+							{res: "iron", amt: -self.effects["ironPerTickCon"]}],
 							on
 						);
-						self.effects["ironPerTickCon"] *= amt;
 						self.effects["coalPerTickCon"] *= amt;
+						self.effects["ironPerTickCon"] *= amt;
 						// Automated production, metallurgist leader won't help here
 						self.effects["steelPerTickProd"] *= (amt *
 							(1 + game.getCraftRatio() * game.getEffect("calcinerSteelCraftRatio") +
@@ -705,10 +714,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			togglable: true,
 			togglableOnOff: true,
 			effects: {
-				"magnetoBoostRatio":     0.15,
 				"coalRatioGlobal":      -0.8,
+				"manuscriptPerTickProd": 0,
 				"energyProduction":      1,
-				"manuscriptPerTickProd": 0
+				"magnetoBoostRatio":     0.15
 			},
 			jammed: false,
 			isAutomationEnabled: true,
@@ -733,8 +742,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		}, {
 			name: "magneto",
 			prices: [
-				{name: "alloy",     val: 10},
 				{name: "gear",      val: 5},
+				{name: "alloy",     val: 10},
 				{name: "blueprint", val: 1}
 			],
 			priceRatio: 1.25,
@@ -742,15 +751,15 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			togglable: true,
 			effects: {
 				"oilPerTick":      -0.05,
-				"magnetoRatio":     0.02,
-				"energyProduction": 5
+				"energyProduction": 5,
+				"magnetoRatio":     0.02
 			}
 		}, {
 			name: "lumberMill",
 			prices: [
 				{name: "wood",     val: 100},
-				{name: "iron",     val: 50},
-				{name: "minerals", val: 250}
+				{name: "minerals", val: 250},
+				{name: "iron",     val: 50}
 			],
 			priceRatio: 1.15,
 			unlockRatio: 0.3,
@@ -797,9 +806,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 					if (self.isAutomationEnabled) {
 						energyCons = 1;
-						if (game.challenges.currentChallenge === "energy") {
-							energyCons *= 2;
-						}
 
 					} else {
 						oilRatio -= pumpjack.effects["oilWellRatio"];
@@ -811,6 +817,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects = effects;
 			},
 			flavor: true
+			// unlockScheme: {name: "oil", threshold: 73}
 		}, {
 			name: "workshop",
 			prices: [
@@ -835,6 +842,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			priceRatio: 1.15,
 			requires: {tech: ["mechanization"]},
 			togglable: true,
+			// unlocks: {policies: ["liberalism", "communism", "fascism"]},
 			effects: {
 				"craftRatio":        0,
 				"energyConsumption": 0
@@ -849,12 +857,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					effects["craftRatio"] = 0.06;
 				}
 
-				if (game.challenges.currentChallenge === "energy") {
-					effects["energyConsumption"] *= 2;
-				}
-				// if (game.workshop.get("neuralNetworks").owned()) {
-				// 	effects["energyConsumption"] *= 2;
-				// }
+				effects["craftRatio"] *= (1 + game.getEffect("environmentFactoryCraftBonus"));
 				self.effects = effects;
 			}
 		}, {
@@ -868,6 +871,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			priceRatio: 1.15,
 			requires: {tech: ["nuclearFission"]},
 			togglable: true,
+			upgrades: {buildings: ["harbor"]},
 			effects: {
 				"uraniumPerTick":   0,
 				"thoriumPerTick":   0,
@@ -875,7 +879,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"uraniumMax":       250,
 				"energyProduction": 0
 			},
-			upgrades: {buildings: ["harbor"]},
 			isAutomationEnabled: true,
 			calculateEffects: function (self, game) {
 				self.effects["uraniumPerTick"] = -0.001 * (1 - game.getEffect("uraniumRatio"));
@@ -897,8 +900,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			name: "accelerator",
 			prices: [
 				{name: "titanium", val: 7500},
-				{name: "concrate", val: 125},
-				{name: "uranium",  val: 25}
+				{name: "uranium",  val: 25},
+				{name: "concrate", val: 125}
 			],
 			priceRatio: 1.15,
 			requires: {tech: ["particlePhysics"]},
@@ -906,21 +909,18 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			effects: {
 				"titaniumPerTickCon":     0,
 				"uraniumPerTickAutoprod": 0,
-				"scienceMax":             0,
 				"catnipMax":              0,
 				"woodMax":                0,
 				"mineralsMax":            0,
-				"ironMax":                0,
 				"coalMax":                0,
-				"goldMax":                0,
+				"ironMax":                0,
 				"titaniumMax":            0,
+				"goldMax":                0,
+				"scienceMax":             0,
 				"energyConsumption":      0
 			},
 			calculateEffects: function (self, game) {
 				self.effects["energyConsumption"] = 2;
-				if (game.challenges.currentChallenge === "energy") {
-					self.effects["energyConsumption"] *= 2;
-				}
 
 				self.effects["scienceMax"] = 0;
 				if (game.workshop.get("lhc").owned()) {
@@ -936,10 +936,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects["catnipMax"]   = 30000 * capRatio;
 				self.effects["woodMax"]     = 20000 * capRatio;
 				self.effects["mineralsMax"] = 25000 * capRatio;
-				self.effects["ironMax"]     =  7500 * capRatio;
 				self.effects["coalMax"]     =  2500 * capRatio;
-				self.effects["goldMax"]     =   250 * capRatio;
+				self.effects["ironMax"]     =  7500 * capRatio;
 				self.effects["titaniumMax"] =   750 * capRatio;
+				self.effects["goldMax"]     =   250 * capRatio;
 			},
 			action: function (self, game) {
 				self.effects["titaniumPerTickCon"] =    -0.015;
@@ -973,28 +973,15 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"standingRatio":     0
 			},
 			calculateEffects: function (self, game) {
-				var effects = {
-					"fursDemandRatio":  -0.04,
-					"ivoryDemandRatio": -0.04,
-					"spiceDemandRatio": -0.04,
-					"tradeRatio":        0.015,
-					"standingRatio":     0
-				};
-
-				var seri = game.workshop.get("caravanserai");
-				if (seri.owned()) {
-					effects["standingRatio"] = seri.effects["standingRatio"];
-				}
-
-				self.effects = effects;
+				self.effects["standingRatio"] = game.workshop.get("caravanserai").owned() ? 0.0035 : 0;
 			},
 			flavor: true
 		}, {
 			name: "mint",
 			prices: [
 				{name: "minerals", val: 5000},
-				{name: "plate",    val: 200},
-				{name: "gold",     val: 500}
+				{name: "gold",     val: 500},
+				{name: "plate",    val: 200}
 			],
 			priceRatio: 1.15,
 			requires: {tech: ["architecture"]},
@@ -1008,8 +995,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			},
 			calculateEffects: function (self, game) {
 				self.effects = {
-					"manpowerPerTickCon": 0,
 					"goldPerTickCon":     0,
+					"manpowerPerTickCon": 0,
 					"fursPerTickProd":    0,
 					"ivoryPerTickProd":   0,
 					"goldMax":            100 * (1 + game.getEffect("warehouseRatio"))
@@ -1020,8 +1007,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				if (on < 1) {
 					return;
 				}
-				self.effects["manpowerPerTickCon"] = -0.75;
 				self.effects["goldPerTickCon"] =     -0.005; //~5 smelters
+				self.effects["manpowerPerTickCon"] = -0.75;
 
 				var manpower = game.resPool.get("manpower");
 				var mpratio = (manpower.maxValue * 0.007) / 100;
@@ -1033,17 +1020,56 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects["ivoryPerTickProd"] = mpratio * 0.3;  //1.5
 
 				var amt = game.resPool.getAmtDependsOnStock(
-					[{res: "manpower", amt: -self.effects["manpowerPerTickCon"]},
-					{res: "gold",      amt: -self.effects["goldPerTickCon"]}],
+					[{res: "gold",      amt: -self.effects["goldPerTickCon"]},
+					{res: "manpower", amt: -self.effects["manpowerPerTickCon"]}],
 					on
 				);
+				self.effects["goldPerTickCon"] *=     amt;
 				self.effects["manpowerPerTickCon"] *= amt;
-				self.effects["goldPerTickCon"] *= amt;
-				self.effects["fursPerTickProd"] *= amt;
-				self.effects["ivoryPerTickProd"] *= amt;
+				self.effects["fursPerTickProd"] *=    amt;
+				self.effects["ivoryPerTickProd"] *=   amt;
 
 				return amt;
 			}
+			// unlockScheme: {name: "gold", threshold: 24}
+		}, {
+			name: "brewery",
+			unlockRatio: 0.2,
+			prices: [
+				{name: "wood",      val: 1000},
+				{name: "culture",   val: 750},
+				{name: "spice",     val: 5},
+				{name: "parchment", val: 375}
+			],
+			priceRatio: 1.5,
+			requires: {tech: ["drama"]},
+			togglable: true,
+			effects: {
+				"catnipPerTickCon":    -1,
+				"spicePerTickCon":     -0.1,
+				"festivalRatio":        0.01,
+				"festivalArrivalRatio": 0.0001
+			},
+			action: function (self, game) {
+				self.effects = {
+					"catnipPerTickCon":    -1,
+					"spicePerTickCon":     -0.1,
+					"festivalRatio":        0.01,
+					"festivalArrivalRatio": 0.001
+				};
+				var amt = game.resPool.getAmtDependsOnStock(
+					[{res: "catnip", amt: -self.effects["catnipPerTickCon"]},
+					{res: "spice", amt: -self.effects["spicePerTickCon"]}],
+					self.on
+				);
+				self.effects["catnipPerTickCon"] *=     amt;
+				self.effects["spicePerTickCon"] *=      amt;
+				self.effects["festivalRatio"] *=        amt;
+				self.effects["festivalArrivalRatio"] *= amt;
+				return amt;
+			},
+			flavor: true
+			// unlockScheme: {name: "chocolate", threshold: 10}
 		}, {
 			name: "amphitheatre",
 			stage: 0,
@@ -1074,8 +1100,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					stageUnlocked: false,
 					stageRequires: {tech: ["electronics"]},
 					effects: {
-						"culturePerTickBase": 1,
 						"unhappinessRatio":  -0.75,
+						"culturePerTickBase": 1,
 						"cultureMax":         300
 					}
 				}
@@ -1085,8 +1111,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				//very ugly and crappy stuff
 				var btower = self.stages[1];
 
-				btower.effects["cultureMax"] =         300;
 				btower.effects["culturePerTickBase"] = 1;
+				btower.effects["cultureMax"] =         300;
 
 				var energyRatio = (game.resPool.energyProd / game.resPool.energyCons);
 				if (energyRatio > 1) {
@@ -1100,8 +1126,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				var broadcastTowerRatio = game.getEffect("broadcastTowerRatio");
 				var totalRatio = game.space.getProgram("sattelite").getOn() * broadcastTowerRatio;
 
-				btower.effects["cultureMax"] *= (1 + totalRatio);
 				btower.effects["culturePerTickBase"] *= (1 + totalRatio);
+				btower.effects["cultureMax"] *=         (1 + totalRatio);
 			}
 		}, {
 			name: "chapel",
@@ -1123,7 +1149,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					"faithPerTickBase":   0,
 					"cultureMax":         200
 				};
-				if (game.challenges.currentChallenge !== "atheism") {
+				if (!game.challenges.isActive("atheism")) {
 					effects["faithPerTickBase"] = 0.005;
 				}
 				self.effects = effects;
@@ -1131,9 +1157,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		}, {
 			name: "temple",
 			prices: [
+				{name: "gold",       val: 50},
 				{name: "slab",       val: 25},
 				{name: "plate",      val: 15},
-				{name: "gold",       val: 50},
 				{name: "manuscript", val: 10}
 			],
 			priceRatio: 1.15,
@@ -1158,7 +1184,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					"faithMax":           0
 				};
 
-				if (game.challenges.currentChallenge !== "atheism") {
+				if (!game.challenges.isActive("atheism")) {
 					effects["faithMax"] = 100;
 
 					var theology = game.science.get("theology");
@@ -1178,8 +1204,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 					var sunAltar = game.religion.getRU("sunAltar");
 					if (sunAltar.owned()) {
-						effects["faithMax"] += 50 * sunAltar.val;
 						effects["happiness"] = 0.4 + 0.1 * sunAltar.val;
+						effects["faithMax"] += 50 * sunAltar.val;
 					}
 
 					var goldenSpire = game.religion.getRU("goldenSpire");
@@ -1189,8 +1215,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 					var basilica = game.religion.getRU("basilica");
 					if (basilica.owned()) {
-						effects["cultureMax"] = 75 + 50 * basilica.val;
 						effects["culturePerTickBase"] += 0.2 + 0.05 * (basilica.val - 1);
+						effects["cultureMax"] = 75 + 50 * basilica.val;
 					}
 
 					var templars = game.religion.getRU("templars");
@@ -1218,9 +1244,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		}, {
 			name: "ziggurat",
 			prices: [
-				{name: "megalith",  val: 50},
 				{name: "scaffold",  val: 50},
-				{name: "blueprint", val: 1}
+				{name: "blueprint", val: 1},
+				{name: "megalith",  val: 50}
 			],
 			priceRatio: 1.25,
 			unlockRatio: 0.01,
@@ -1237,23 +1263,19 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			name: "chronosphere",
 			prices: [
 				{name: "unobtainium", val: 2500},
+				{name: "science",     val: 250000},
 				{name: "timeCrystal", val: 1},
-				{name: "blueprint",   val: 100},
-				{name: "science",     val: 250000}
+				{name: "blueprint",   val: 100}
 			],
 			priceRatio: 1.25,
 			requires: {tech: ["chronophysics"]},
+			upgrades: {voidSpace: ["cryochambers"]},
 			effects: {
 				"resStasisRatio":         0.015, //1.5% of resources will be preserved
-				"energyConsumption":      20,
-				"temporalFluxProduction": 0
+				"temporalFluxProduction": 0,
+				"energyConsumption":      20
 			},
-			upgrades: {voidSpace: ["cryochambers"]},
 			calculateEffects: function (self, game) {
-				self.effects["energyConsumption"] = 20;
-				if (game.challenges.currentChallenge === "energy") {
-					self.effects["energyConsumption"] *= 2;
-				}
 				self.effects["temporalFluxProduction"] = game.getEffect("temporalFluxProductionChronosphere");
 			}
 		}, {
@@ -1267,11 +1289,11 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			priceRatio: 1.15,
 			unlockRatio: 0.01,
 			requires: {tech: ["ai"]},
-			effects: {
-				"energyConsumption": 2,
-				"gflopsPerTickBase": 0.02
-			},
 			upgrades: {spaceBuilding: ["moonBase"], buildings: ["library"]},
+			effects: {
+				"gflopsPerTickBase": 0.02,
+				"energyConsumption": 2
+			},
 			// TODO Actually "action" is almost always just updating effects (unclear from the name), better separate the 2 concerns: update effects (can be done several times per tick) and perform specific action (only once per tick!)
 			// TODO Separation of concerns currently done only for AI Core and Time Boilers (REQUIRED by non-proportional effect!), will be systematized later
 			updateEffects: function (self, game) {
@@ -1281,10 +1303,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				// Core #4: 6.5; Total: 17  ; Average: 4.25 = 17/4 = (3*4+5)/4
 				// etc.
 				self.effects["energyConsumption"] = (3 * self.on + 5) / 4;
-				if (game.challenges.currentChallenge == "energy") {
-					self.effects["energyConsumption"] *= 2;
-				}
 
+				var gflopsPerTickBase = 0.02 * (1 + game.getEffect("aiCoreProductivness"));
+				self.effects["gflopsPerTickBase"] = gflopsPerTickBase;
 				self.effects["aiLevel"] = Math.round(Math.log(Math.max(game.resPool.get("gflops").value, 1)));
 			},
 			action: function (self, game) {
@@ -1293,6 +1314,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			},
 			forceAction: true,
 			flavor: "buildings.aicore.flavor" // different capitalization in key
+			// unlockScheme: {name: "cyber", threshold: 10}
 		}, {
 			name: "zebraOutpost",
 			prices: [
@@ -1302,7 +1324,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.01,
 			requires: {tech: ["animal"]},
 			zebraRequired: 5,
-			effects: {}
+			effects: {
+				"hunterRatio": 0.05
+			}
 		}, {
 			name: "zebraWorkshop",
 			prices: [
@@ -1343,7 +1367,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		},
 		togglable: {
 			name: "togglable",
-			title: "Togglable",
+			titleKey: "ui.filter.togglable",
 			filterFn: function (bld) {
 				return bld.togglable;
 			},
@@ -1384,7 +1408,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		},
 		other: {
 			name: "other",
-			buildings: ["workshop", "tradepost", "mint", "unicornPasture"]
+			buildings: ["workshop", "tradepost", "mint", "unicornPasture", "brewery"]
 		},
 		megastructures: {
 			name: "megastructures",
@@ -1402,7 +1426,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 	twoRows: false,
 
 	effectsBase: {
-		"manpowerMax":    100,
 		"catnipMax":      5000,
 		"woodMax":        200,
 		"mineralsMax":    250,
@@ -1411,12 +1434,13 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		"titaniumMax":    2,
 		"goldMax":        10,
 		"oilMax":         1500,
-		"scienceMax":     250,
-		"faithMax":       100,
-		"cultureMax":     100,
 		"uraniumMax":     250,
 		"unobtainiumMax": 150,
-		"antimatterMax":  100
+		"antimatterMax":  100,
+		"manpowerMax":    100,
+		"scienceMax":     250,
+		"cultureMax":     100,
+		"faithMax":       100
 	},
 
 	buildings: null,
@@ -1448,7 +1472,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				this.buildingGroups.iw.buildings.push(bld.name);
 			}
 		});
-		this.meta.push(this.buildings);
+		this.addMeta(this.buildings);
 	},
 
 	renderTabBlock: function () {
@@ -1540,7 +1564,6 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 	calculateEffectsBase: function () {
 		var effects = {
-			"manpowerMax":    100,
 			"catnipMax":      5000,
 			"woodMax":        200,
 			"mineralsMax":    250,
@@ -1549,12 +1572,13 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			"titaniumMax":    2,
 			"goldMax":        10,
 			"oilMax":         1500,
-			"scienceMax":     250,
-			"faithMax":       100,
-			"cultureMax":     100,
 			"uraniumMax":     250,
 			"unobtainiumMax": 150,
-			"antimatterMax":  100
+			"antimatterMax":  100,
+			"manpowerMax":    100,
+			"scienceMax":     250,
+			"cultureMax":     100,
+			"faithMax":       100
 		};
 
 		if (this.game.ironWill) {
@@ -1570,25 +1594,31 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		this.effectsBase = this.game.resPool.addBarnWarehouseRatio(effects);
 	},
 
-	getEffect: function (name, withoutBase) {
-		var totalEffect = 0;
-		if (!withoutBase) { // because the game adds in effectsBase in another place, and that effects compendium scienceMax calculations
-			totalEffect = this.getEffectBase(name);
+	getEffect: function (effectName, withoutBase) {
+		if (!this.effectNames[effectName]) {
+			return 0;
 		}
 
-		totalEffect = num(totalEffect + this.getEffectCached(name));
+		var totalEffect = 0;
+		if (!withoutBase) { // because the game adds in effectsBase in another place, and that effects compendium scienceMax calculations
+			totalEffect = this.getEffectBase(effectName);
+		}
+
+		totalEffect = num(totalEffect + this.getEffectCached(effectName));
 
 		// Previously, catnip demand (or other buildings that both effected the same resource)
 		// could have theoretically had more than 100% reduction because they diminished separately,
 		// this takes the total effect and diminishes it as a whole.
-		if (this.game.isHyperbolic(name) && totalEffect < 0) {
-			totalEffect = this.game.getHyperbolicEffect(totalEffect, 1.0);
+		if (this.game._hasLimitedDiminishingReturn(effectName) && totalEffect < 0) {
+			totalEffect = this.game.getLimitedDR(totalEffect, 1.0);
 		}
 
 		//probably not the best place to handle this mechanics
 		//----------- move to separate part? -----------
-		if ((name === "productionRatio" || name === "magnetoRatio") &&
-		this.game.resPool.energyCons > this.game.resPool.energyProd) {
+		if (
+			(effectName === "productionRatio" || effectName === "magnetoRatio") &&
+			this.game.resPool.energyCons > this.game.resPool.energyProd
+		) {
 			var delta = this.game.resPool.getEnergyDelta();
 			totalEffect *= delta;
 		}
@@ -1616,20 +1646,21 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		var autoProdRatio = 1;
 
 		// faith
-		autoProdRatio *= 1 + (this.game.religion.getProductionBonus() / 100);
+		autoProdRatio *= 1 + this.game.religion.getSolarRevolutionRatio();
 		// SW
 		var steamworks = this.get("steamworks");
 		var steamworksOn = steamworks.getOn();
 		var swRatio = steamworksOn > 0 ? 1 + steamworks.effects["magnetoBoostRatio"] * steamworksOn : 1;
-		autoProdRatio *= 1 + this.getEffect("magnetoRatio") * swRatio;
+		autoProdRatio *= 1 + this.game.getEffect("magnetoRatio") * swRatio;
 
 		// paragon (25%)
-		autoProdRatio *= 1 + this.game.prestige.getParagonProductionRatio() * 0.25;
+		autoProdRatio *= 1 + this.game.prestige.getParagonProductionRatio() * 0.05;
 
 		// reactors
-		autoProdRatio *= 1 + this.getEffect("productionRatio");
+		autoProdRatio *= 1 + this.game.getEffect("productionRatio");
 
 		return autoProdRatio;
+		//This function must stay atm for Steel Plants
 	},
 
 	getPriceRatio: function (bldName) {
@@ -1642,7 +1673,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			this.game.getEffect("priceRatio") +
 			this.game.getEffect("mapPriceReduction");
 
-		ratioDiff = this.game.getHyperbolicEffect(ratioDiff, ratioBase);
+		ratioDiff = this.game.getLimitedDR(ratioDiff, ratioBase);
 
 		return ratio + ratioDiff;
 	},
@@ -1740,7 +1771,7 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 				{
 					value: "^",
 					class: "stageBtn hidden",
-					title: "Upgrade building"
+					title: $I("KGSaveEdit.buildings.upgrade.title")
 				}, td, function () {
 					if (self.stage < self.stages.length - 1 && self.stages[self.stage + 1].stageUnlocked) {
 						self.stage++;
@@ -1754,7 +1785,7 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 				{
 					value: "V",
 					class: "stageBtn hidden",
-					title: "Downgrade building"
+					title: $I("KGSaveEdit.buildings.downgrade.title")
 				}, td, function () {
 					if (self.stage > 0) {
 						self.stage--;
@@ -1842,8 +1873,13 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 
 		if (!simple) {
 			var ratio = this.game.bld.getPriceRatio(this.name);
+			var pricesDiscount = this.game.getLimitedDR((this.game.getEffect(this.get("name") + "CostReduction")), 1);
+			var priceModifier = 1 - pricesDiscount;
+
 			for (var i = 0, len = prices.length; i < len; i++) {
-				prices[i].val *= Math.pow(ratio, this.val);
+				var resPriceDiscount = this.game.getLimitedDR(this.game.getEffect(prices[i].name + "CostReduction"), 1);
+				var resPriceModifier = 1 - resPriceDiscount;
+				prices[i].val *= Math.pow(ratio, this.val) * priceModifier * resPriceModifier;
 			}
 		}
 		return prices;

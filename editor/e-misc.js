@@ -1,6 +1,6 @@
-/* global require, dojo, classes, $I */
+/* global require, dojo, classes, $I, num */
 
-require(["dojo/on", "dojo/mouse"], function (on, mouse) {
+require(["dojo/on"], function (on) {
 "use strict";
 
 
@@ -8,89 +8,98 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 	options: [
 		{
 			name: "useWorkers",
-			desc: "Use web worker (game works correctly in background tab, may cause performance issues)"
+			descKey: "ui.option.workers"
 		}, {
 			name: "forceHighPrecision",
-			desc: "Use high precision for resource values",
+			descKey: "ui.option.force.high.precision",
 			src: "game.opts"
 		}, {
 			name: "usePerSecondValues",
-			desc: "Use per second values <i>(per tick otherwise)</i>",
+			descKey: "ui.option.use.per.second.values",
 			src: "game.opts"
 		}, {
 			name: "usePercentageResourceValues",
-			desc: "Use percentage resource production values",
+			descKey: "ui.option.use.percentage.resource.values",
 			src: "game.opts"
 		}, {
 			name: "showNonApplicableButtons",
-			desc: "Always show festivals/trade/sacrifice/shatter buttons even if not applicable",
+			descKey: "ui.option.show.non.applicable.buttons",
 			src: "game.opts"
 		}, {
 			name: "usePercentageConsumptionValues",
-			desc: "Use percentage values for craft/trade/sacrifice buttons",
+			descKey: "ui.option.use.percentage.consumption.values",
 			src: "game.opts"
 		}, {
 			name: "highlightUnavailable",
-			desc: "Highlight buildings limited by storage space",
+			descKey: "ui.option.highlight.unavailable",
 			src: "game.opts"
 		}, {
 			name: "hideSell",
-			desc: "Hide 'sell' buttons",
+			descKey: "ui.option.hide.sell",
 			src: "game.opts"
 		}, {
 			name: "hideDowngrade",
-			desc: "Hide 'downgrade' buttons",
+			descKey: "ui.option.hide.downgrade",
 			src: "game.opts"
 		}, {
 			name: "hideBGImage",
-			desc: "Hide background image (for color schemes where applicable)",
+			descKey: "ui.option.hide.bgimage",
 			src: "game.opts"
 		}, {
 			name: "tooltipsInRightColumn",
-			desc: "Move tooltips in right column",
-			src: "game.opts"
-		}, {
-			name: "forceLZ",
-			desc: "Always compress save files <i>(experimental)</i>",
-			src: "game.opts"
-		}, {
-			name: "compressSaveFile",
-			desc: "Compress exported save file <i>(experimental)</i><br>&nbsp; &nbsp; &nbsp; &nbsp;WARNING: it generates save files that are NOT COMPATIBLE with older versions, like mobile versions.",
-			src: "game.opts"
+			descKey: "ui.option.tooltips.right",
+			src: "game.opts",
+			class: "bottom-margin"
 		}, {
 			name: "noConfirm",
-			desc: "Do not confirm when clearing all jobs or when buying or selling all (Shift-click)",
+			descKey: "ui.option.no.confirm",
 			src: "game.opts"
 		}, {
 			name: "IWSmelter",
-			desc: "Smelters turn off at 95% max Iron in Iron Will mode",
+			descKey: "ui.option.iw.smelter",
 			src: "game.opts"
 		}, {
 			name: "disableTelemetry",
-			desc: "Disable game telemetry.",
-			class: "bottom-margin"
+			descKey: "ui.option.disable.telemetry"
 		}, {
 			name: "enableRedshift",
-			desc: "Enable offline progression",
+			descKey: "ui.option.enable.redshift",
+			src: "game.opts"
+		}, {
+			name: "enableRedshiftGflops",
+			desc: "Enable offline gflops production",
+			// descKey: "ui.option.enable.redshiftGflops",
 			src: "game.opts"
 		}, {
 			name: "batchSize",
-			desc: "Batch size of Ctrl-click",
+			descKey: "ui.option.batch.size",
 			type: "int",
 			parseFn: function (val) {
 				return Math.max(Math.min(val, 9999), 1) || 10;
 			},
 			src: "game.opts"
 		}, {
+			name: "forceLZ",
+			descKey: "ui.option.force.lz",
+			src: "game.opts"
+		}, {
+			name: "compressSaveFile",
+			descKey: "ui.option.compress.savefile",
+			src: "game.opts",
+			class: "bottom-margin"
+		}, {
 			name: "isCMBREnabled",
 			desc: "Global donate bonus enabled",
 			class: "hidden"
 		}, {
 			name: "ironWill",
-			desc: $I("challendge.ironWill.label")
+			descKey: "challendge.ironWill.label",
+			inputHandler: function () {
+				this.game.calculateAllEffects();
+			}
 		}, {
 			name: "cheatMode",
-			desc: $I("KGSaveEdit.opts.cheatMode"),
+			descKey: "KGSaveEdit.opts.cheatMode",
 			class: "bottom-margin"
 		}
 	],
@@ -100,6 +109,11 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		{name: "dark"},
 		{name: "grassy"},
 		{name: "sleek"},
+		{name: "black"},
+		{name: "wood"},
+		{name: "bluish"},
+		{name: "grayish"},
+		{name: "greenish"},
 		{
 			name: "gold",
 			condition: function () {
@@ -109,11 +123,6 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			name: "space",
 			condition: function () {
 				return this.game.space.getProgram("sattelite").val >= 24;
-			}
-		}, {
-			name: "wood",
-			condition: function () {
-				return this.game.bld.get("lumberMill").val >= 100;
 			}
 		}, {
 			name: "school",
@@ -145,9 +154,42 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			condition: function () {
 				return this.game.religion.getZU("unicornUtopia").val >= 1;
 			}
+		}, {
+			name: "anthracite",
+			condition: function () {
+				return this.game.bld.get("mine").val >= 92;
+			}
+		}, {
+			name: "chocolate",
+			condition: function () {
+				return this.game.bld.get("brewery").val >= 10;
+			}
+		}, {
+			name: "vintage",
+			condition: function () {
+				return this.game.time.getVSU("chronocontrol").val >= 1;
+			}
+		}, {
+			name: "computer",
+			condition: function () {
+				var bld = this.game.bld.get("library");
+				return bld.stage === 1 && bld.val >= 100;
+			}
+		}, {
+			name: "arctic",
+			condition: function () {
+				return this.game.space.getBuilding("cryostation").val >= 10;
+			}
+		}, {
+			name: "cyber",
+			condition: function () {
+				return this.game.bld.get("aiCore").val >= 5;
+			}
 		}
 	],
 	schemes: null,
+
+	notations: ["si", "e", "sie"],
 
 	tabName: "Options &amp; Settings",
 
@@ -168,7 +210,7 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 
 		// schemes
 		var table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
-		dojo.create("tr", {innerHTML: '<th colspan="3">Color schemes</th>'}, table);
+		dojo.create("tr", {innerHTML: '<th colspan="3">' + $I("KGSaveEdit.opts.colorScheme.header") + "</th>"}, table);
 
 		for (var i = 0; i < this.schemes.length; i++) {
 			var scheme = this.schemes[i];
@@ -181,37 +223,70 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			scheme.domNode = tr;
 			scheme.nameNode = tr.children[0];
 
-			var input = this.game._createCheckbox("Active", tr.children[1]);
+			var input = game._createCheckbox($I("KGSaveEdit.opts.colorScheme.active"), tr.children[1]);
 			input.cbox.type = "radio";
 			input.cbox.name = "colorScheme";
 			scheme.activeNode = input.cbox;
 
-			if (this.game.colorScheme === scheme.name || scheme.name === "default") {
+			if (game.colorScheme === scheme.name || scheme.name === "default") {
 				scheme.activeNode.checked = true;
 			}
 
 			if (scheme.condition) {
-				this.game._createCheckbox("Unlocked", tr.children[2], scheme, "unlocked");
+				game._createCheckbox($I("KGSaveEdit.label.unlocked"), tr.children[2], scheme, "unlocked");
 			}
 		}
+
+		var div = dojo.create("div", {
+			class: "bottom-margin",
+			innerHTML: $I("KGSaveEdit.opts.notation") + " "
+		}, this.tabBlockNode);
+
+		var select = dojo.create("select", null, div);
+		for (i = 0; i < this.notations.length; i++) {
+			var notation = this.notations[i];
+			dojo.create("option", {value: notation, innerHTML: $I("opts.notation." + notation)}, select);
+		}
+		select.defaultVal = "si";
+		game._pairInput(select, game.opts, "notation");
+		game.setSelectByValue(select, game.opts.notation || select.defaultVal);
+
+		on(select, "change", function () {
+			game.opts.notation = this.value || this.defaultVal;
+			game._refreshAbbrInputs();
+			game.update();
+		});
+
+		game.opts.notationNode = select;
 
 		for (i = 0; i < this.options.length; i++) {
 			var option = this.options[i];
 			var ref = option.src === "game.opts" ? game.opts : game;
 
-			var div = dojo.create("div", {
+			div = dojo.create("div", {
 				"data-option-name": option.name
 			}, this.tabBlockNode);
 
+			var desc = option.desc || "";
+			if (option.descKey) {
+				desc = $I(option.descKey);
+			}
+			desc = desc.split("<br>")[0]; // trim off 'need to reload' part for web workers at least
+
 			if (option.type === "int") {
-				div.textContent = " " + option.desc;
+				div.textContent = " ";
+				dojo.create("span", {innerHTML: desc}, div);
 				input = game._createInput({class: "integerInput"}, div, ref, option.name, "first");
 				if (option.parseFn) {
 					input.parseFn = option.parseFn;
 				}
 
 			} else {
-				game._createCheckbox(option.desc, div, ref, option.name);
+				input = game._createCheckbox(desc, div, ref, option.name).cbox;
+			}
+
+			if (option.inputHandler) {
+				input.handler = option.inputHandler;
 			}
 
 			if (option.class) {
@@ -238,17 +313,17 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		dojo.place(document.createTextNode(" " + $I("resources.karma.title")), td);
 
 		game.karmaKittensNode.handler = function () {
-			var value = this.game.getTriValue(this.parsedValue, 5);
-			this.game.setInput(this.game.karmaKittensKarma, value, true);
-			this.game.resPool.get("karma").set("value", value, true);
+			var value = game.getUnlimitedDR(this.parsedValue, 5);
+			game.setInput(game.karmaKittensKarma, value, true);
+			game.resPool.get("karma").set("value", value, true);
 		};
 
 		game.karmaKittensKarma.parseFn = function (value) {
-			return this.game.getTriValue(Math.round(this.game.getTriValueOrigin(value, 5)), 5);
+			return game.getUnlimitedDR(Math.round(game.getInverseUnlimitedDR(value, 5)), 5);
 		};
 		game.karmaKittensKarma.handler = function () {
-			this.game.resPool.get("karma").set("value", this.parsedValue, true);
-			this.game.setInput(this.game.karmaKittensNode, Math.round(this.game.getTriValueOrigin(this.parsedValue, 5)), true);
+			game.resPool.get("karma").set("value", this.parsedValue, true);
+			game.setInput(game.karmaKittensNode, Math.round(game.getInverseUnlimitedDR(this.parsedValue, 5)), true);
 		};
 
 		tr = dojo.create("tr", {innerHTML: "<td>karmaZebras</td><td><td>"}, table);
@@ -335,11 +410,10 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	cycles: [
 		{
 			name: "charon",
-			title: "Charon",
 			glyph: "&#9049;",
 			effects: {
-				"entangler-gflopsConsumption":         2,
-				"moonOutpost-unobtainiumPerTickSpace": 0.9
+				"moonOutpost-unobtainiumPerTickSpace": 0.9,
+				"entangler-gflopsConsumption":         2
 			},
 			festivalEffects: {
 				"catnip":   1.5,
@@ -348,12 +422,11 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "umbra",
-			title: "Umbra",
 			glyph: "&#9062;",
 			effects: {
-				"hrHarvester-energyProduction":           1.5,
+				"hydrofracturer-oilPerTickAutoprodSpace": 0.75,
 				"planetCracker-uraniumPerTickSpace":      0.9,
-				"hydrofracturer-oilPerTickAutoprodSpace": 0.75
+				"hrHarvester-energyProduction":           1.5
 			},
 			festivalEffects: {
 				"coal":     1.5,
@@ -363,7 +436,6 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "yarn",
-			title: "Yarn",
 			glyph: "&#9063;",
 			effects: {
 				"hydroponics-catnipRatio":                  2,
@@ -374,18 +446,17 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "helios",
-			title: "Helios",
 			glyph: "&#8978;",
 			effects: {
-				"sunlifter-energyProduction": 1.5,
 				"cryostation-woodMax":        0.9,
 				"cryostation-mineralsMax":    0.9,
-				"cryostation-ironMax":        0.9,
 				"cryostation-coalMax":        0.9,
-				"cryostation-uraniumMax":     0.9,
+				"cryostation-ironMax":        0.9,
 				"cryostation-titaniumMax":    0.9,
 				"cryostation-oilMax":         0.9,
-				"cryostation-unobtainiumMax": 0.9
+				"cryostation-uraniumMax":     0.9,
+				"cryostation-unobtainiumMax": 0.9,
+				"sunlifter-energyProduction": 1.5
 			},
 			festivalEffects: {
 				"faith":    2,
@@ -393,21 +464,20 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "cath",
-			title: "Cath",
 			glyph: "&#9022;",
 			effects: {
-				"spaceElevator-prodTransferBonus":       2,
-				"sattelite-starchartPerTickBaseSpace":   2,
-				"sattelite-observatoryRatio":            2,
 				"spaceStation-scienceRatio":             1.5,
-				"spaceBeacon-starchartPerTickBaseSpace": 0.1
+				"sattelite-observatoryRatio":            2,
+				"sattelite-starchartPerTickBaseSpace":   2,
+				"spaceBeacon-starchartPerTickBaseSpace": 0.1,
+				"spaceElevator-prodTransferBonus":       2
 			},
 			festivalEffects: {
 				"manpower": 2
 			}
 		}, {
 			name: "redmoon",
-			title: "Redmoon",
+			titleKey: "space.planet.moon.label",
 			glyph: "&#9052;",
 			effects: {
 				"moonOutpost-unobtainiumPerTickSpace": 1.2,
@@ -418,11 +488,10 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "dune",
-			title: "Dune",
 			glyph: "&#9067;",
 			effects: {
-				"planetCracker-uraniumPerTickSpace":      1.1,
 				"hydrofracturer-oilPerTickAutoprodSpace": 1.5,
+				"planetCracker-uraniumPerTickSpace":      1.1,
 				"hrHarvester-energyProduction":           0.75
 			},
 			festivalEffects: {
@@ -430,27 +499,25 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "piscine",
-			title: "Piscine",
 			glyph: "&#9096;",
 			effects: {
-				"researchVessel-starchartPerTickBaseSpace": 1.5,
-				"hydroponics-catnipRatio":                  0.5
+				"hydroponics-catnipRatio":                  0.5,
+				"researchVessel-starchartPerTickBaseSpace": 1.5
 			},
 			festivalEffects: {
 				"science": 2
 			}
 		}, {
 			name: "terminus",
-			title: "Terminus",
 			glyph: "&#9053;",
 			effects: {
 				"cryostation-woodMax":        1.2,
 				"cryostation-mineralsMax":    1.2,
-				"cryostation-ironMax":        1.2,
 				"cryostation-coalMax":        1.2,
-				"cryostation-uraniumMax":     1.2,
+				"cryostation-ironMax":        1.2,
 				"cryostation-titaniumMax":    1.2,
 				"cryostation-oilMax":         1.2,
+				"cryostation-uraniumMax":     1.2,
 				"cryostation-unobtainiumMax": 1.2,
 				"sunlifter-energyProduction": 0.5
 			},
@@ -459,14 +526,13 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			}
 		}, {
 			name: "kairo",
-			title: "Kairo",
 			glyph: "&#8483;",
 			effects: {
-				"spaceBeacon-starchartPerTickBaseSpace": 5,
-				"spaceElevator-prodTransferBonus":       0.5,
-				"sattelite-starchartPerTickBaseSpace":   0.75,
+				"spaceStation-scienceRatio":             0.75,
 				"sattelite-observatoryRatio":            0.75,
-				"spaceStation-scienceRatio":             0.75
+				"sattelite-starchartPerTickBaseSpace":   0.75,
+				"spaceBeacon-starchartPerTickBaseSpace": 5,
+				"spaceElevator-prodTransferBonus":       0.5
 			},
 			festivalEffects: {
 				"starchart": 5
@@ -478,6 +544,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	daysPerSeason: 100,
 	seasonsPerYear: null,
 	yearsPerCycle: null,
+	darkFutureBeginning: 40000,
 
 	refYear: 0, //to be used to calculate millenium paragon
 
@@ -499,18 +566,34 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	cryptoPrice: 1000,
 
 	getCurSeason: function () {
-		if (this.game.challenges.currentChallenge === "winterIsComing") {
+		if (this.game.challenges.isActive("winterIsComing")) {
 			return this.seasons[3]; //eternal winter
 		}
 		return this.seasons[this.season];
 	},
 
-	getWeatherMod: function () {
-		var mod = 0;
-		if (this.weather === "warm") {
-			mod =  0.15;
-		} else if (this.weather === "cold") {
-			mod = -0.15;
+	getWeatherMod: function (res) {
+		var season = this.getCurSeason();
+		var mod = season.modifiers[res.name] || 1;
+
+		if (res.name !== "catnip") {
+			return mod;
+		}
+
+		if (this.game.science.getPolicy("communism").owned() && season.name === "winter" && this.weather === "cold") {
+			return 0;
+		}
+
+		if (this.weather == "warm") {
+			mod +=  0.15;
+		} else if (this.weather == "cold") {
+			mod += -0.15;
+		}
+		if (this.game.challenges.getChallenge("winterIsComing").on && this.weather === "cold") {
+			mod *= 1 + this.game.getLimitedDR(this.game.getEffect("coldHarshness"), 1);
+		}
+		if (this.getCurSeason().name == "spring") {
+			mod *= (1 + this.game.getLimitedDR(this.game.getEffect("springCatnipBonus"), 2));
 		}
 		return mod;
 	},
@@ -523,7 +606,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	},
 
 	getSeasonTitle: function (season) {
-		var hasCome = this.game.challenges.currentChallenge === "winterIsComing";
+		var hasCome = this.game.challenges.isActive("winterIsComing");
 		var titleSeason = this.seasons[hasCome ? 3 : season];
 		var title = $I("calendar.season." + titleSeason.name);
 		if (hasCome) {
@@ -580,6 +663,8 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 
 		for (i = 0, len = self.cycles.length; i < len; i++) {
 			var cycle = self.cycles[i];
+			cycle.title = $I(cycle.titleKey || "space.planet." + cycle.name + ".label");
+
 			dojo.create("option", {
 				value: i,
 				innerHTML: cycle.glyph + " " + cycle.title
@@ -621,14 +706,15 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.opts.calendar.weather") + "</td><td></td>"
 		}, table);
-		self.weatherSel = dojo.create("select", {
+		var select = dojo.create("select", {
 			id: "weatherSel",
 			innerHTML: '<option value="">---</option><option value="warm">' + $I("calendar.weather.warm") + '</option><option value="cold">' + $I("calendar.weather.cold") + '</option>'
 		}, tr.children[1]);
-		self.weatherSel.defaultVal = "";
+		select.defaultVal = "";
+		game._pairInput(select, self, "weather");
 
-		on(self.weatherSel, "change", function () {
-			self.weather = self.weatherSel.value || null;
+		on(select, "change", function () {
+			self.weather = this.value || null;
 			game.update();
 		});
 
@@ -683,6 +769,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 				var effect_cycle = effect;
 				if (typeof list_festivalEffects_cycle[effect_cycle] !== "undefined") {
 					effects[effect] *= list_festivalEffects_cycle[effect_cycle];
+					effects[effect] *= 1 + this.game.getEffect("festivalRatio");
 				}
 			}
 		}
@@ -724,11 +811,8 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	},
 
 	darkFutureYears: function (withImpedance) {
-		var impedance = 0;
-		if (withImpedance) {
-			impedance = this.game.getEffect("timeImpedance");
-		}
-		return this.year - (40000 + impedance);
+		var darkFutureActualBeginning = this.darkFutureBeginning + (withImpedance ? this.game.getEffect("timeImpedance") : 0);
+		return this.year - darkFutureActualBeginning;
 	},
 
 	getTooltip: function (node) {
@@ -762,7 +846,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 		if (this.game.prestige.getPerk("numeromancy").owned() && this.festivalDays > 0) {
 			// Cycle Festival Effects
 			cycleSpan = dojo.create("div", {
-				innerHTML: "Cycle Festival Effects:",
+				innerHTML: $I("cycle.effects.festival.title"),
 				class: "center"
 			}, tooltip);
 
@@ -786,6 +870,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	save: function (saveData) {
 		saveData.calendar = this.game.filterMetaObj(this, ["year", "day", "season", "weather",
 			"festivalDays", "cycle", "cycleYear", "futureSeasonTemporalParadox", "cryptoPrice"]);
+		saveData.calendar.weather = saveData.calendar.weather || null;
 	},
 
 	load: function (saveData) {
@@ -794,9 +879,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 		}
 		var data = saveData.calendar;
 
-		this.game.loadMetaFields(this, data, ["year", "day", "festivalDays"]);
-		this.game.setSelectByValue(this.weatherSel, data.weather);
-		this.weather = this.weatherSel.value || null;
+		this.game.loadMetaFields(this, data, ["year", "day", "weather", "festivalDays"]);
 		this.game.setSelectByValue(this.seasonNode, data.season);
 		this.season = this.seasonNode.selectedIndex;
 		this.game.setSelectByValue(this.cycleNode, data.cycle);
@@ -809,22 +892,24 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	}
 });
 
+
 dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 	game: null,
 	domNode: null,
 
 	filtersData: {
-		"astronomicalEvent":  {title: "Astronomical Events", enabled: true, unlocked: false},
-		"hunt":               {title: "Hunts",               enabled: true, unlocked: false},
-		"trade":              {title: "Trade",               enabled: true, unlocked: false},
-		"craft":              {title: "Craft",               enabled: true, unlocked: false},
-		"workshopAutomation": {title: "Workshop Automation", enabled: true, unlocked: false},
-		"meteor":             {title: "Meteors",             enabled: true, unlocked: false},
-		"ivoryMeteor":        {title: "Ivory Meteors",       enabled: true, unlocked: false},
-		"unicornRift":        {title: "Unicorn Rifts",       enabled: true, unlocked: false},
-		"alicornRift":        {title: "Alicorn Rifts",       enabled: true, unlocked: false},
-		"tc":                 {title: "Time Crystals",       enabled: true, unlocked: false},
-		"faith":              {title: "Faith",               enabled: true, unlocked: false}
+		"astronomicalEvent":  {enabled: true, unlocked: false},
+		"hunt":               {enabled: true, unlocked: false},
+		"trade":              {enabled: true, unlocked: false},
+		"craft":              {enabled: true, unlocked: false},
+		"workshopAutomation": {enabled: true, unlocked: false},
+		"meteor":             {enabled: true, unlocked: false},
+		"ivoryMeteor":        {enabled: true, unlocked: false},
+		"unicornRift":        {enabled: true, unlocked: false},
+		"alicornRift":        {enabled: true, unlocked: false},
+		"alicornCorruption":  {enabled: true, unlocked: false, title: "Alicorn Corruption"},
+		"tc":                 {enabled: true, unlocked: false},
+		"faith":              {enabled: true, unlocked: false}
 	},
 
 	filters: null,
@@ -844,14 +929,19 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 		this.domNode = dojo.create("table", {
 			id: "logFiltersBlock",
 			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">Log filters</th></tr>'
+			innerHTML: '<tr><th colspan="2">' + $I("KGSaveEdit.console.filter.header") + "</th></tr>"
 		});
 		for (var tag in this.filters) {
 			var filter = this.filters[tag];
 
+			var title = filter.title;
+			if (!title) {
+				title = $I("console.filter." + tag);
+			}
+
 			var tr = dojo.create("tr", {
 				class: "logFilter",
-				innerHTML: "<td>" + filter.title + "</td><td></td>"
+				innerHTML: "<td>" + title + "</td><td></td>"
 			}, this.domNode);
 			game._createCheckbox($I("KGSaveEdit.label.unlocked"), tr.children[1], filter, "unlocked");
 			game._createCheckbox($I("KGSaveEdit.opts.msgfilter.enabled"), tr.children[1], filter, "enabled");
@@ -861,7 +951,7 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 	save: function (saveData) {
 		var saveFilters = {};
 		for (var tag in this.filters) {
-			saveFilters[tag] = this.game.filterMetaObj(this.filters[tag], ["title", "enabled", "unlocked"]);
+			saveFilters[tag] = this.game.filterMetaObj(this.filters[tag], ["enabled", "unlocked"]);
 		}
 
 		saveData.console = {
@@ -887,14 +977,51 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 
 dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, classes.KGSaveEdit.Manager], {
 	raceData: [
-		{name: "lizards"},
-		{name: "sharks"},
-		{name: "griffins"},
-		{name: "nagas",      hidden: true},
-		{name: "zebras",     hidden: true},
-		{name: "spiders",    hidden: true},
-		{name: "dragons",    hidden: true},
-		{name: "leviathans", hidden: true, energy: 0, duration: 0}
+		{
+			name: "lizards",
+			embassyPrices: [{
+				name: "culture", val: 100
+			}]
+		}, {
+			name: "sharks",
+			embassyPrices: [{
+				name: "culture", val: 100
+			}]
+		}, {
+			name: "griffins",
+			embassyPrices: [{
+				name: "culture", val: 1000
+			}]
+		}, {
+			name: "nagas",
+			embassyPrices: [{
+				name: "culture", val: 500
+			}],
+			hidden: true
+		}, {
+			name: "zebras",
+			embassyPrices: [{
+				name: "culture", val: 25000
+			}],
+			hidden: true
+		}, {
+			name: "spiders",
+			embassyPrices: [{
+				name: "culture", val: 5000
+			}],
+			hidden: true
+		}, {
+			name: "dragons",
+			embassyPrices: [{
+				name: "culture", val: 7500
+			}],
+			hidden: true
+		}, {
+			name: "leviathans",
+			hidden: true,
+			energy: 0,
+			duration: 0
+		}
 	],
 
 	tabName: "Trade",
@@ -904,12 +1031,7 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 
 	constructor: function () {
 		this.i18nKeys = {tabName: "tab.name.trade"};
-		this.registerMetaItems(this.raceData, classes.KGSaveEdit.GenericItem, "races", function (race) {
-			race.unlocked = Boolean(race.unlocked);
-			race.collapsed = Boolean(race.collapsed);
-			race.duration = 0;
-			race.energy = 0;
-		});
+		this.registerMetaItems(this.raceData, classes.KGSaveEdit.DiplomacyRaceMeta, "races");
 	},
 
 	renderTabBlock: function () {
@@ -926,6 +1048,16 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 
 			this.game._createCheckbox($I("KGSaveEdit.label.unlocked"), race.domNode.children[1], race, "unlocked");
 			this.game._createCheckbox($I("KGSaveEdit.trade.collapsed"), race.domNode.children[1], race, "collapsed");
+			this.game._createCheckbox($I("trade.embassy.pinned"), race.domNode.children[1], race, "pinned");
+			if (race.embassyPrices) {
+				race.embassySpan = dojo.create("span", {
+					innerHTML: $I("KGSaveEdit.trade.embassyLevel") + " "
+				}, race.domNode.children[2]);
+
+				this.game._createInput({class: "integerInput"}, race.embassySpan, race, "embassyLevel");
+				race.registerTooltip(race.embassySpan);
+				race.registerHighlight(race.embassySpan);
+			}
 		}
 
 		race = this.get("leviathans");
@@ -984,7 +1116,7 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 
 	save: function (saveData) {
 		saveData.diplomacy = {
-			races: this.game.filterMetadata(this.races, ["name", "unlocked", "energy", "duration", "collapsed"], function (saveRace) {
+			races: this.game.filterMetadata(this.races, ["name", "embassyLevel", "unlocked", "collapsed", "energy", "duration", "pinned"], function (saveRace) {
 				saveRace.energy = saveRace.energy || 0;
 				saveRace.duration = saveRace.duration || 0;
 			})
@@ -995,7 +1127,9 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 		if (saveData.diplomacy) {
 			this.loadMetadata(saveData, "diplomacy.races", "get", function (race, saveRace) {
 				race.set("unlocked", Boolean(saveRace.unlocked));
+				race.set("embassyLevel", saveRace.embassyLevel || 0);
 				race.set("collapsed", Boolean(saveRace.collapsed));
+				race.set("pinned", Boolean(saveRace.pinned));
 				race.set("duration", saveRace.duration || 0);
 				race.set("energy", saveRace.energy || 0);
 			}, true);
@@ -1004,9 +1138,49 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 });
 
 
-dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager, {
-	currentChallenge: null,
+dojo.declare("classes.KGSaveEdit.DiplomacyRaceMeta", classes.KGSaveEdit.MetaItem, {
+	constructor: function () {
+		this.unlocked = Boolean(this.unlocked);
+		this.embassyLevel = 0;
+		this.collapsed = Boolean(this.collapsed);
+		this.pinned = false;
+		this.duration = 0;
+		this.energy = 0;
+	},
 
+	getPrices: function () {
+		if (!this.embassyPrices) {
+			return;
+		}
+
+		var prices = dojo.clone(this.embassyPrices);
+		var priceCoeficient = 1;
+		priceCoeficient -= this.game.getEffect("embassyCostReduction");
+		for (var i = 0; i < prices.length; i++) {
+			prices[i].val *= priceCoeficient * Math.pow(1.15, this.embassyLevel);
+		}
+		return prices;
+	},
+
+	getTooltip: function (node) {
+		if (node !== this.embassySpan || !this.embassyPrices) {
+			return;
+		}
+
+		var tooltip = dojo.byId("tooltipBlock");
+		tooltip.className = "button_tooltip";
+
+		dojo.create("div", {
+			class: "tooltipDesc tooltipDescBottom",
+			innerHTML: $I("trade.embassy.desc")
+		}, tooltip);
+
+		this.game.renderPrices(tooltip, this.getPrices());
+	}
+});
+
+
+dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab, classes.KGSaveEdit.Manager], {
 	challengesData: [
 		{
 			name: "ironWill",
@@ -1014,91 +1188,197 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager,
 			invisible: true
 		}, {
 			name: "winterIsComing",
-			condition: function () {
-				return this.game.space.getPlanet("helios").reached;
+			unlocked: true,
+			effects: {
+				"springCatnipRatio":    0.05,
+				"summerSolarFarmRatio": 0.05,
+				"coldChance":           0,
+				"coldHarshness":        0
 			},
-			unlocked: true
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["springCatnipRatio"] =    0;
+					self.effects["summerSolarFarmRatio"] = 0;
+					self.effects["coldChance"] =           0.05;
+					self.effects["coldHarshness"] =       -0.02;
+				} else {
+					self.effects["springCatnipRatio"] =    0.05;
+					self.effects["summerSolarFarmRatio"] = 0.05;
+					self.effects["coldChance"] =           0;
+					self.effects["coldHarshness"] =        0;
+				}
+			},
+			checkCompletionCondition: function (game) {
+				return game.space.getPlanet("helios").reached;
+			}
 		}, {
 			name: "anarchy",
-			condition: function () {
-				return this.game.bld.get("aiCore").owned();
+			unlocked: true,
+			effects: {
+				"masterSkillMultiplier": 0.2,
+				"kittenLaziness":        0
 			},
-			unlocked: true
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["masterSkillMultiplier"] = 0;
+					self.effects["kittenLaziness"] =        0.05;
+				} else {
+					self.effects["masterSkillMultiplier"] = 0.2;
+				}
+			},
+			checkCompletionCondition: function (game) {
+				return game.bld.get("aiCore").owned();
+			}
 		}, {
 			name: "energy",
 			requires: function (game) {
 				return game.resPool.energyCons !== 0 || game.resPool.energyProd !== 0;
 			},
-			condition: function () {
+			upgrades: {
+				buildings: ["library", "biolab", "calciner", "oilWell", "factory", "accelerator", "chronosphere", "aiCore"],
+				spaceBuilding: ["sattelite", "spaceStation", "moonOutpost", "moonBase", "orbitalArray", "containmentChamber"],
+				voidSpace: ["chronocontrol"]
+			},
+			effects: {
+				"energyConsumptionRatio":   -0.02,
+				"energyConsumptionIncrease": 0
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["energyConsumptionRatio"] =    0;
+					self.effects["energyConsumptionIncrease"] = 0.1;
+				} else {
+					self.effects["energyConsumptionRatio"] =   -0.02;
+					self.effects["energyConsumptionIncrease"] = 0;
+				}
+			},
+			checkCompletionCondition: function (game) {
 				return (
-					(this.game.bld.get("pasture").owned() && this.game.bld.get("pasture").stage === 1) &&
-					(this.game.bld.get("aqueduct").owned() && this.game.bld.get("aqueduct").stage === 1) &&
-					this.game.bld.get("steamworks").owned() &&
-					this.game.bld.get("magneto").owned() &&
-					this.game.bld.get("reactor").owned() &&
-					(this.game.space.getBuilding("sattelite").owned() && this.game.workshop.get("solarSatellites").owned()) &&
-					this.game.space.getBuilding("sunlifter").owned() &&
-					this.game.space.getBuilding("tectonic").owned() &&
-					this.game.space.getBuilding("hrHarvester").owned()
+					(game.bld.get("pasture").owned() && game.bld.get("pasture").stage === 1) &&
+					(game.bld.get("aqueduct").owned() && game.bld.get("aqueduct").stage === 1) &&
+					game.bld.get("steamworks").owned() &&
+					game.bld.get("magneto").owned() &&
+					game.bld.get("reactor").owned() &&
+					(game.space.getBuilding("sattelite").owned() && game.workshop.get("solarSatellites").owned()) &&
+					game.space.getBuilding("sunlifter").owned() &&
+					game.space.getBuilding("tectonic").owned() &&
+					game.space.getBuilding("hrHarvester").owned()
 				);
 			}
 		}, {
 			name: "atheism",
-			requires: {tech: ["voidSpace"]}
+			requires: {tech: ["voidSpace"]},
+			effects: {
+				"faithSolarRevolutionBoost": 0.1,
+				"cultureMaxChallenge":       0,
+				"scienceMaxChallenge":       0,
+				"manpowerMaxChallenge":      0,
+				"challengeHappiness":        0
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["faithSolarRevolutionBoost"] = 0;
+					self.effects["cultureMaxChallenge"] =      -250;
+					self.effects["scienceMaxChallenge"] =      -500;
+					self.effects["challengeHappiness"] =       -0.5;
+					self.effects["manpowerMaxChallenge"] =     -125;
+				} else {
+					self.effects["faithSolarRevolutionBoost"] = 0.1;
+					self.effects["cultureMaxChallenge"] =       0;
+					self.effects["scienceMaxChallenge"] =       0;
+					self.effects["challengeHappiness"] =        0;
+					self.effects["manpowerMaxChallenge"] =      0;
+				}
+			},
+			reserveDelay: true
 		}, {
 			name: "1000Years",
-			condition: function () {
-				return this.game.calendar.year >= 1000;
+			// requires shattering a time crystal to unlock and to complete so
+			effects: {
+				"shatterCostReduction":        -0.02,
+				"shatterCostIncreaseChallenge": 0,
+				"shatterVoidCost":              0
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["shatterCostReduction"] =         0;
+					self.effects["shatterCostIncreaseChallenge"] = 0.5;
+					self.effects["shatterVoidCost"] =              0.4;
+				} else {
+					self.effects["shatterCostReduction"] =        -0.02;
+					self.effects["shatterCostIncreaseChallenge"] = 0;
+					self.effects["shatterVoidCost"] =              0;
+				}
+			}
+		}, {
+			name: "blackSky",
+			requires: function (game) {
+				var elders = game.diplomacy.get("leviathans");
+				return elders.unlocked && elders.duration > 0; // game only checks unlocked but
+			},
+			effects: {
+				"corruptionBoostRatioChallenge": 0.1
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["corruptionBoostRatioChallenge"] = 0;
+				} else {
+					self.effects["corruptionBoostRatioChallenge"] = 0.1;
+				}
+			},
+			checkCompletionCondition: function (game) {
+				return game.space.getBuilding("spaceBeacon").val > (game.challenges.getChallenge("blackSky").on || 0);
 			}
 		}
 	],
 
+	challenges: null,
+	challengesByName: null,
+
+	tabName: "Challenges",
+	getVisible: function () {
+		return this.game.prestige.getPerk("adjustmentBureau").owned();
+	},
+
 	constructor: function () {
-		this.challenges = [];
+		this.i18nKeys = {tabName: "tab.name.challenges"};
+		this.reserveKittens = [];
 
 		this.registerMetaItems(this.challengesData, classes.KGSaveEdit.ChallengeMeta, "challenges");
+
+		this.addMeta(this.challenges);
 	},
 
 	getChallenge: function (name) {
-		return this.getMeta(name, this.challenges);
+		var challenge = this.challengesByName[name];
+		if (name && !challenge) {
+			console.error("Challenge not found", name);
+		}
+		return challenge;
 	},
 
-	setCurrentChallenge: function (name, soft) {
-		var setChallenge = this.getChallenge(name);
-		if (setChallenge && setChallenge.researched) {
-			setChallenge = null;
-		}
+	isActive: function (name) {
+		return this.getChallenge(name).active;
+	},
 
-		for (var i = this.challenges.length - 1; i >= 0; i--) {
-			var challenge = this.challenges[i];
-			challenge.activeChallengeNode.checked = challenge === setChallenge;
-			if (!soft) {
-				challenge.activeChallengeNode.prevChecked = challenge === setChallenge;
-			}
-		}
-		this.currentChallenge = setChallenge ? setChallenge.name : null;
+	renderTabBlock: function () {
+		this.challengesBlock = dojo.create("table", {
+			id: "challengesBlock",
+			innerHTML: '<tr><th colspan="3">' + $I("challendge.panel.label") + "</th></tr>"
+		}, this.tabBlockNode);
 	},
 
 	render: function () {
-		this.domNode = dojo.create("table", {
-			id: "challengesBlock",
-			innerHTML: '<tr><th colspan="2">' + $I("challendge.panel.label") + "</th></tr>"
-		}, this.game.science.tabBlockNode);
-		this.domNodeHeader = this.domNode.children[0];
+		this.domNodeHeader = this.challengesBlock.children[0];
 
 		for (var i = 0, len = this.challenges.length; i < len; i++) {
 			var challenge = this.challenges[i];
 			challenge.render();
-			dojo.place(challenge.domNode, this.domNode);
+			dojo.place(challenge.domNode, this.challengesBlock);
 		}
 	},
 
 	update: function () {
-		var currentChallenge = this.getChallenge(this.currentChallenge);
-		if (currentChallenge && currentChallenge.researched) {
-			this.setCurrentChallenge(null, true);
-		}
-
 		this.game.callMethods(this.challenges, "update");
 		dojo.toggleClass(this.domNodeHeader, "spoiler", !this.game.prestige.getPerk("adjustmentBureau").owned());
 
@@ -1108,29 +1388,46 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager,
 	updateTabMarker: function () {
 		var hasNew = false;
 		for (var i = this.challenges.length - 1; i >= 0; i--) {
-			if (this.challenges[i].isNew) {
+			if (this.challenges[i].won) {
 				hasNew = true;
 				break;
 			}
 		}
-		this.game._toggleNewMarker(this.game.science.tabWrapper, hasNew);
+		this.game._toggleNewMarker(this.tabWrapper, hasNew);
 	},
 
 	save: function (saveData) {
 		saveData.challenges = {
-			challenges: this.game.filterMetadata(this.challenges, ["name", "researched", "unlocked"]),
-			currentChallenge: this.currentChallenge
+			challenges: this.game.filterMetadata(this.challenges, ["name", "researched", "on", "unlocked", "active"]),
+			reserves: {
+				reserveKittens: this.game.village.saveReserveKittens(),
+				reserveResources: this.game.resPool.getReserves()
+			}
 		};
 	},
 
 	load: function (saveData) {
-		if (saveData.challenges) {
+		var challengeData = saveData.challenges;
+		if (challengeData) {
 			this.loadMetadata(saveData, "challenges.challenges", "getChallenge", function (challenge, saveChallenge) {
-				challenge.set("researched", Boolean(saveChallenge.researched));
+				var researched = saveChallenge.researched ? 1 : 0;
+				challenge.set("on", Math.max(num(saveChallenge.on), researched));
 				challenge.set("unlocked", Boolean(saveChallenge.unlocked));
-				challenge.isNew = false;
+				challenge.set("active", Boolean(saveChallenge.active));
 			}, true);
-			this.setCurrentChallenge(saveData.challenges.currentChallenge);
+
+			if (challengeData.currentChallenge) {
+				var challenge = this.getChallenge(challengeData.currentChallenge);
+				if (challenge) {
+					challenge.set("active", true);
+				}
+			}
+
+			var reservesData = challengeData.reserves;
+			if (reservesData) {
+				this.game.village.loadReserveKittens(reservesData.reserveKittens || []);
+				this.game.resPool.setReserves(reservesData.reserveResources);
+			}
 		}
 	}
 });
@@ -1139,6 +1436,8 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", classes.KGSaveEdit.Manager,
 dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 	unlocked: false,
 	researched: false,
+	active: false,
+	on: 0,
 
 	isNew: false,
 
@@ -1151,25 +1450,37 @@ dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 		};
 	},
 
+	handler: function () {
+		this.game.calculateAllEffects();
+	},
+
+	getEffect: function (effectName) {
+		var effects = this.getEffects();
+		return num(effects[effectName]) * this.on;
+	},
+
 	getName: function () {
 		var name = this.label || this.name;
-		if (this.name === this.game.challenges.currentChallenge) {
-			name += " (Current)";
-		} else if (this.researched) {
-			name += " (Complete)";
+		if (this.active || this.name === this.game.challenges.active) {
+			name = $I("challendge.btn.name.current", [name]);
+		} else if (this.on > 0) {
+			name = $I("challendge.btn.name.complete", [name]);
+		}
+		// if (this.pending) {
+		// 	name += " (" + $I("challendge.pending") + ")";
+		// }
+		if (this.on) {
+			name += " (" + this.on + ")";
 		}
 		return name;
 	},
 
 	getDescription: function () {
-		var start = this.description || "";
-		if (this.researched) {
-			start += "<br><br>Gain: " + this.effectDesc;
-		} else {
-			// var msgChronosphere = this.game.bld.get("chronosphere").val > 0 ? "<br />You won't gain reset bonus from chronospheres." : "";
-			// start += "<br><br>Your game will be reset in order to enable this challenge." + msgChronosphere;
-		}
-		return start;
+		var msgChronosphere = "";
+		// if (this.game.bld.get("chronosphere").owned()) {
+		// 	msgChronosphere = this.name === "ironWill" ? $I("challendge.btn.chronosphere.with.ironWill.desc") : $I("challendge.btn.chronosphere.desc");
+		// }
+		return (this.description || "") + $I("challendge.btn.desc", [this.effectDesc, msgChronosphere]);
 	},
 
 	getTooltip: function () {
@@ -1185,7 +1496,8 @@ dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 
 		var tr = dojo.create("tr", {
 			class: "challengeNode",
-			innerHTML: '<td class="nameNode">' + (self.label || self.name) + "</td><td></td>"
+			innerHTML: '<td class="nameNode">' + (self.label || self.name) + "</td><td></td><td>&nbsp;" +
+				$I("KGSaveEdit.challenge.completions") + " </td>"
 		});
 		self.domNode = tr;
 
@@ -1195,57 +1507,39 @@ dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 
 		self.nameNode = tr.children[0];
 
-		on(self.nameNode, mouse.enter, function () {
-			if (self.isNew) {
-				self.isNew = false;
-				dojo.removeClass(self.nameNode, "newMarker");
-				self.metaObj.updateTabMarker();
-			}
-		});
-
 		self.game._createCheckbox($I("KGSaveEdit.label.unlocked"), tr.children[1], self, "unlocked");
-		self.game._createCheckbox($I("KGSaveEdit.challenge.complete"), tr.children[1], self, "researched");
+		self.game._createCheckbox($I("KGSaveEdit.challenge.active"), tr.children[1], self, "active");
+		self.game._createInput({class: "integerInput"}, tr.children[2], self, "on");
 
-		var input = self.game._createCheckbox($I("KGSaveEdit.challenge.active"), tr.children[1], self);
-		self.activeChallengeNode = input.cbox;
-		input.cbox.handler = function () {
-			self.game.challenges.setCurrentChallenge(this.checked ? self.name : null);
+		dojo.place(document.createTextNode(" "), tr.children[2]);
+
+		self.completeNode = self.game._createButton({value: $I("KGSaveEdit.challenge.complete"), class: "invisible"}, tr.children[2], function () {
+			if (self.active) {
+				self.set("on", self.on + 1);
+				self.set("active", false);
+			}
 			self.game.calculateAllEffects();
-		};
+			self.game.update();
+		});
 
 		self.registerTooltip(self.domNode);
 	},
 
 	update: function () {
+		this.researched = this.on > 0;
 		var req = this.game.checkRequirements(this, this.defaultUnlocked);
 		this.unlocked = req || this.unlockedNode.prevChecked;
 		this.unlockedNode.checked = this.unlocked;
 		this.game.toggleDisabled(this.unlockedNode, req);
 		dojo.toggleClass(this.nameNode, "spoiler", !this.unlocked);
 
-		var challenges = this.game.challenges;
-
-		if (dojo.isFunction(this.condition)) {
-			var won = this.condition();
-
-			if (won && this.activeChallengeNode.checked && !this.researched) {
-				this.researched = true;
-				this.researchedNode.checked = true;
-
-				challenges.setCurrentChallenge(null, true);
-				this.isNew = true;
-
-			} else if (!won && this.researched && !this.researchedNode.prevChecked && this.activeChallengeNode.prevChecked) { //fluh
-				this.researched = false;
-				this.researchedNode.checked = false;
-
-				challenges.setCurrentChallenge(this.name);
-				this.isNew = false;
-			}
+		this.won = false;
+		if (this.active && this.checkCompletionCondition) {
+			this.won = this.checkCompletionCondition(this.game);
 		}
 
-		this.game.toggleDisabled(this.activeChallengeNode, this.researched);
-		this.game._toggleNewMarker(this.nameNode, this.isNew);
+		dojo.toggleClass(this.completeNode, "invisible", !this.won);
+		this.game._toggleNewMarker(this.nameNode, this.won);
 	}
 });
 
@@ -1325,11 +1619,14 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 		//----------------------
 		var resHappiness = 0;
 		var resources = this.game.resPool.resources;
+		var happinessPerLuxury = 10;
+		//philosophy epicurianism effect
+		happinessPerLuxury += this.game.getEffect("luxuryHappinessBonus");
 		for (var i = resources.length - 1; i >= 0; i--) {
 			var res = resources[i];
 			if (res.type !== "common" && res.owned()) {
 				if (res.name !== "elderBox" || !this.game.resPool.get("wrappingPaper").owned()) {
-					resHappiness += 10;
+					resHappiness += happinessPerLuxury;
 				}
 			}
 		}
@@ -1344,13 +1641,19 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 			html += $I("village.happiness.festival") + ": +30%<br>";
 		}
 
-		var unhappiness = (this.game.village.getKittens() - 5) * 2;
-
+		var unhappiness = this.game.village.getUnhappiness() / (1 + this.game.getEffect("unhappinessRatio"));
 		var unhappinessReduction = unhappiness * this.game.getEffect("unhappinessRatio", true);
+		var environmentEffect = this.game.village.getEnvironmentEffect();
+		var challengeEffect = this.game.getEffect("challengeHappiness");
+
 		html += $I("village.happiness.penalty") + ": -" + this.game.getDisplayValueExt(unhappiness + unhappinessReduction, false, false, 0) + "%<br>";
 
 		html += "* " + $I("village.happiness.penalty.base") + ": -" + this.game.getDisplayValueExt(unhappiness, false, false, 0) + "%<br>";
 		html += "* " + $I("village.happiness.penalty.mitigated") + ": " + this.game.getDisplayValueExt(-unhappinessReduction, false, false, 0) + "%<br>";
+		html += $I("village.happiness.environment") + ": " + this.game.getDisplayValueExt(environmentEffect, false, false, 0) + "%<br>";
+		if (challengeEffect) {
+			html += $I("village.happiness.challenges") + ": " + this.game.getDisplayValueExt(challengeEffect, false, false, 0) + "%<br>";
+		}
 
 		var overpopulation = this.game.village.getKittens() - this.game.village.maxKittens;
 		if (overpopulation > 0) {
@@ -1385,9 +1688,10 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarEnergy", classes.KGSaveEdit.u
 		var penalty = "";
 		if (energy < 0) {
 			var delta = this.game.resPool.getEnergyDelta();
-			penalty = '<br><br>Production modifier: <span class="red">-' + Math.floor((1 - delta) * 100) + "%</span>";
+			penalty = "<br><br>" + $I("navbar.energy.penalty") + '<span class="red">-' + Math.floor((1 - delta) * 100) + "%</span>";
 		}
 
+		//TODO i18n these when the game fixes them
 		tooltip.innerHTML = 'Production: <span class="green">' +
 			this.game.getDisplayValueExt(resPool.energyProd, true, false) +
 			"Wt</span>" + '<br>Consumption: <span style="color:#d00000;">-' +

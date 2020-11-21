@@ -98,8 +98,15 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 		this.isVisible = this.getVisible();
 		dojo.toggleClass(this.tabWrapper, "spoiler", !this.isVisible);
 		var showBonus = false;
-		if (this.leaderBonuses && this.game.village.leader) {
-			showBonus = this.leaderBonuses.indexOf(this.game.village.leader.trait.name) > -1;
+		if (this.leaderBonuses) {
+			var leader = this.game.village.getLeader();
+
+			for (var i = this.leaderBonuses.length - 1; i >= 0; i--) {
+				var bonusName = this.leaderBonuses[i];
+				var isLeaderBonus = leader && leader.trait.name === bonusName;
+				dojo.toggleClass(this.tabNameNode, bonusName, isLeaderBonus);
+				showBonus = showBonus || isLeaderBonus;
+			}
 		}
 		dojo.toggleClass(this.tabNameNode, "traitLeaderBonus", showBonus);
 	}
@@ -107,6 +114,7 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 
 dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 	game: null,
+	effectNames: null,
 	effectsCached: null,
 	meta: null,
 
@@ -114,16 +122,15 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 		this.game = game;
 
 		this.effectsCached = {};
+		this.effectNames = {};
 		this.meta = [];
+
+		this.registerEffectNames(this.effectsBase);
 	},
 
 	render: function () {
 		this.seti18n();
 	},
-
-	/* registerMeta: function (meta) {
-		this.meta.push(meta);
-	}, */
 
 	/**
 	 * Loops through `dataArray`, and creates new `ClassObj`s out of its data
@@ -148,6 +155,22 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 		}
 	},
 
+	registerEffectNames: function (effects) {
+		if (effects) {
+			for (var effectName in effects) {
+				this.effectNames[effectName] = true;
+				this.game.globalEffectNames[effectName] = true;
+			}
+		}
+	},
+
+	addMeta: function (metaList) {
+		this.meta.push(metaList);
+		for (var i = 0; i < metaList.length; i++) {
+			this.registerEffectNames(metaList[i].get("effects"));
+		}
+	},
+
 	getMeta: function (name, metadata) {
 		for (var i = metadata.length - 1; i >= 0; i--) {
 			var meta = metadata[i];
@@ -166,38 +189,42 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 
 	calculateEffectsBase: function () { },
 
-	getEffect: function (name) {
-		return num(this.getEffectBase(name)) + num(this.getEffectCached(name));
+	getEffect: function (effectName) {
+		return num(this.getEffectBase(effectName)) + num(this.getEffectCached(effectName));
 	},
 
 	getEffectBase: function () {
 		return 0;
 	},
 
-	getEffectCached: function (name) {
-		var cached = this.effectsCached[name];
+	getEffectCached: function (effectName) {
+		if (!this.effectNames[effectName]) {
+			return 0;
+		}
+
+		var cached = this.effectsCached[effectName];
 		if (!isNaN(cached)) {
 			return cached;
 		}
 
 		var effect = 0;
 		for (var i = this.meta.length - 1; i >= 0; i--) {
-			var effectMeta = this.getMetaEffect(name, this.meta[i]);
+			var effectMeta = this.getMetaEffect(effectName, this.meta[i]);
 			effect += effectMeta;
 		}
 
-		this.effectsCached[name] = effect;
+		this.effectsCached[effectName] = effect;
 		return effect;
 	},
 
-	getMetaEffect: function (name, metadata) {
+	getMetaEffect: function (effectName, metadata) {
 		var totalEffect = 0;
 		if (!metadata.length) {
 			return 0;
 		}
 
 		for (var i = metadata.length - 1; i >= 0; i--) {
-			totalEffect += num(metadata[i].getEffect(name));
+			totalEffect += num(metadata[i].getEffect(effectName));
 		}
 
 		return totalEffect || 0;
@@ -449,16 +476,23 @@ dojo.declare("classes.KGSaveEdit.MetaItemStackable", classes.KGSaveEdit.MetaItem
 		return label;
 	},
 
-	getEffect: function (name) {
+	getEffect: function (effectName) {
 		var effects = this.getEffects();
-		return num(effects[name] * this.getOn());
+		return num(effects[effectName] * this.getOn());
 	},
 
 	getPrices: function () {
 		var prices = dojo.clone(this.prices) || [];
 		var ratio = this.priceRatio || 1;
-		for (var i = prices.length - 1; i >= 0; i--) {
-			prices[i].val *= Math.pow(ratio, this.val);
+
+		var pricesDiscount = this.game.getLimitedDR((this.game.getEffect(this.name + "CostReduction")), 1);
+		var priceModifier = 1 - pricesDiscount;
+
+		for (var i = 0; i < prices.length; i++) {
+			var resPriceDiscount = this.game.getEffect(prices[i].name + "CostReduction");
+			resPriceDiscount = this.game.getLimitedDR(resPriceDiscount, 1);
+			var resPriceModifier = 1 - resPriceDiscount;
+			prices[i].val *= Math.pow(ratio, this.val) * resPriceModifier * priceModifier;
 		}
 		return prices;
 	}

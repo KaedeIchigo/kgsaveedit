@@ -35,8 +35,8 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			heat: 0,
 			isAutomationEnabled: false,
 			effects: {
-				"heatMax":     100,
-				"heatPerTick": 0.02
+				"heatPerTick": 0.02,
+				"heatMax":     100
 			},
 			unlocked: true,
 			// unlocks: {chronoforge: ["timeBoiler"]},
@@ -116,16 +116,16 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		{
 			name: "cryochambers",
 			prices: [
+				{name: "karma",       val: 1},
 				{name: "timeCrystal", val: 2},
-				{name: "void",        val: 100},
-				{name: "karma",       val: 1}
+				{name: "void",        val: 100}
 			],
 			priceRatio: 1.25,
 			// unlocks: {tabs: ["village"]},
 			requires: {tech: ["voidSpace"]},
 			effects: {
 				"maxKittens": 1
-			},
+			}
 			// handled elsewhere
 			// calculateEffects: function (self, game) {
 			// 	self.on = Math.min(self.val, game.bld.get("chronosphere").val);
@@ -138,9 +138,9 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		}, {
 			name: "voidHoover",
 			prices: [
+				{name: "antimatter",  val: 1000},
 				{name: "timeCrystal", val: 10},
-				{name: "void",        val: 250},
-				{name: "antimatter",  val: 1000}
+				{name: "void",        val: 250}
 			],
 			priceRatio: 1.25,
 			requires: {upgrades: ["voidAspiration"]},
@@ -155,16 +155,16 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			priceRatio: 1.3,
 			requires: {upgrades: ["voidAspiration"]},
 			effects: {
-				"globalResourceRatio": 0.02,
-				"umbraBoostRatio":     0.1
+				"umbraBoostRatio":     0.1,
+				"globalResourceRatio": 0.02
 			},
 			upgrades: {spaceBuilding: ["hrHarvester"]}
 		}, {
 			name: "chronocontrol",
 			prices: [
+				{name: "temporalFlux", val: 3000},
 				{name: "timeCrystal",  val: 30},
-				{name: "void",         val: 500},
-				{name: "temporalFlux", val: 3000}
+				{name: "void",         val: 500}
 			],
 			priceRatio: 1.25,
 			// unlocks: {upgrades: ["turnSmoothly"]},
@@ -179,16 +179,13 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 					"temporalParadoxDay": 1 + game.getEffect("temporalParadoxDayBonus"),
 					"energyConsumption": 15
 				};
-				if (game.challenges.currentChallenge === "energy") {
-					self.effects["energyConsumption"] *= 2;
-				}
 			}
 		}, {
 			name: "voidResonator",
 			prices: [
-				{name: "void",        val: 50},
 				{name: "timeCrystal", val: 1000},
-				{name: "relic",       val: 10000}
+				{name: "relic",       val: 10000},
+				{name: "void",        val: 50}
 			],
 			priceRatio: 1.25,
 			requires: {tech: ["paradoxalKnowledge"]},
@@ -204,9 +201,9 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 	},
 
 	effectsBase: {
-		"temporalFluxMax": 60 * 10 * 5,  //10 minutes (5 == this.game.ticksPerSecond)
+		"heatPerTick":     0.01,
 		"heatMax":         100,
-		"heatPerTick":     0.01
+		"temporalFluxMax": 60 * 10 * 5  //10 minutes (5 == this.game.ticksPerSecond)
 	},
 
 	getEffectBase: function (name) {
@@ -230,7 +227,8 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			};
 		});
 
-		this.meta.push(this.cfu, this.vsu);
+		this.addMeta(this.cfu);
+		this.addMeta(this.vsu);
 	},
 
 	get: function (name) {
@@ -291,7 +289,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		self.timeBlock = dojo.create("table", {
 			id: "timeBlock",
 			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="3">Time</th></tr>'
+			innerHTML: '<tr><th colspan="3">' + $I("tab.name.time") + "</th></tr>"
 		}, self.tabBlockNode);
 
 		// Energy Node
@@ -301,7 +299,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		str += " (" + (seconds < 1 ? "0s" : this.game.toDisplaySeconds(seconds)) + " / " + this.game.toDisplaySeconds(temporalFlux.maxValue / this.game.ticksPerSecond) + ")";
 
 		var tr = dojo.create("tr", {
-			innerHTML: '<td><span class="nameNode">Temporal Flux</span></td><td></td><td>' + str + "</td>"
+			innerHTML: '<td><span class="nameNode">' + $I("time.flux") + "</span></td><td></td><td>" + str + "</td>"
 		}, self.timeBlock);
 
 		// dojo.place(temporalFlux.valueNode, tr.children[1]);
@@ -347,7 +345,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		}, self.tabBlockNode);
 
 		self.chronoforgeHeader = dojo.create("tr", {
-			innerHTML: '<th colspan="3">Chronoforge</th>'
+			innerHTML: '<th colspan="3">' + $I("workshop.chronoforge.label") + "</th>"
 		}, self.chronoforgeBlock);
 
 		for (var i = 0; i < self.cfu.length; i++) {
@@ -369,7 +367,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		}, self.tabBlockNode);
 
 		self.voidspaceHeader = dojo.create("tr", {
-			innerHTML: '<th colspan="3">Void Space</th>'
+			innerHTML: '<th colspan="3">' + $I("science.voidSpace.label") + "</th>"
 		}, self.voidspaceBlock);
 
 		for (i = 0; i < self.vsu.length; i++) {
@@ -386,10 +384,18 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		var str = "/" + temporalFlux.maxValue;
 
 		var seconds = temporalFlux.value / this.game.ticksPerSecond;
-		str += " (" + (seconds < 1 ? "0s" : this.game.toDisplaySeconds(seconds)) + " / " + this.game.toDisplaySeconds(temporalFlux.maxValue / this.game.ticksPerSecond) + ")";
+		str += " (" + (seconds < 1 ? "0" + $I("unit.s") : this.game.toDisplaySeconds(seconds)) +
+			" / " + this.game.toDisplaySeconds(temporalFlux.maxValue / this.game.ticksPerSecond) + ")";
 		this.energyMaxBlock.innerHTML = str;
 
-		this.heatBlock.innerHTML = "/" + this.game.getEffect("heatMax");
+		var heatMax = this.game.getEffect("heatMax");
+		str = "/" + heatMax;
+		var heatPerSecond = this.game.getEffect("heatPerTick") * this.game.ticksPerSecond;
+		seconds = this.game.time.heat / heatPerSecond;
+		str += " (" + (seconds < 1 ? "0" + $I("unit.s") : this.game.toDisplaySeconds(seconds)) +
+			" / " + this.game.toDisplaySeconds(heatMax / heatPerSecond) + ")";
+
+		this.heatBlock.innerHTML = str;
 
 		this.game.callMethods(this.cfu, "update");
 		this.game.callMethods(this.vsu, "update");
@@ -453,10 +459,17 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 	getPrices: function () {
 		var prices = this.prices ? dojo.clone(this.prices) : [];
 		var priceRatio = this.priceRatio || 1.25;
-		for (var i = prices.length - 1; i >= 0; i--) {
-			prices[i].val *= Math.pow(priceRatio, this.val);
+
+		var pricesDiscount = this.game.getLimitedDR((this.game.getEffect(this.name + "CostReduction")), 1);
+		var priceModifier = 1 - pricesDiscount;
+
+		for (var i = 0; i < prices.length; i++) {
+			var resPriceDiscount = this.game.getEffect(prices[i].name + "CostReduction");
+			resPriceDiscount = this.game.getLimitedDR(resPriceDiscount, 1);
+			var resPriceModifier = 1 - resPriceDiscount;
+			prices[i].val *= Math.pow(priceRatio, this.val) * resPriceModifier * priceModifier;
 			if (prices[i].name === "karma" && this.name === "cryochambers") {
-				prices[i].val -= prices[i].val * this.game.getHyperbolicEffect(0.01 * this.game.prestige.getBurnedParagonRatio(), 1.0);
+				prices[i].val -= prices[i].val * this.game.getLimitedDR(0.01 * this.game.prestige.getBurnedParagonRatio(), 1.0);
 			}
 		}
 		return prices;
@@ -499,7 +512,7 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 		}
 
 		if (this.hasOwnProperty("isAutomationEnabled")) {
-			this.game._createCheckbox("Automation enabled", tr.children[2], this, "isAutomationEnabled");
+			this.game._createCheckbox($I("btn.aon.tooltip"), tr.children[2], this, "isAutomationEnabled");
 		}
 
 		if (this.showUnlocked) {

@@ -180,8 +180,8 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			description: "This hat is totally useless",
 			difficulty: "F",
 			condition: function () {
-				var leader = this.game.village.leader;
-				return leader != null && leader.trait.name == "none";
+				var leader = this.game.village.getLeader();
+				return leader && leader.trait.name == "none";
 			}
 		}, {
 			id: 5,
@@ -200,7 +200,7 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			name: "betaHat",
 			title: "Beta Hat",
 			description: "The hat is a bit glitchy and rough around the edges",
-			difficulty: "B",
+			difficulty: "B"
 			// condition: function () {
 			// 	return (this.game.server.donateAmt == 0);
 			// }
@@ -209,7 +209,7 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			name: "silentHat",
 			title: "Silent Hat",
 			description: "This hat is totally silent",
-			difficulty: "S",
+			difficulty: "S"
 			// condition: function () {
 			// 	return (this.game.server.motdContent == "");
 			// }

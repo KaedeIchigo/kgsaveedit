@@ -3,14 +3,24 @@
     "KGSaveEdit.label.researched": "Researched",
     "KGSaveEdit.label.new": " New!",
 
+    "KGSaveEdit.ui.import.header": "Save Import",
+    "KGSaveEdit.ui.import.fromFile": "Import file",
+    "KGSaveEdit.ui.import.error": "Unable to import data!",
+    "KGSaveEdit.ui.export.header": "Save Export",
+
     "KGSaveEdit.achievements.earned": "Earned",
 
     "KGSaveEdit.buildings.val.title": "Number of buildings",
     "KGSaveEdit.buildings.on.title": "Number of active buildings",
     "KGSaveEdit.buildings.steamworks.jammed": "Jammed",
+    "KGSaveEdit.buildings.upgrade.title": "Upgrade building",
+    "KGSaveEdit.buildings.downgrade.title": "Downgrade building",
 
     "KGSaveEdit.challenge.complete": "Complete",
     "KGSaveEdit.challenge.active": "Active",
+    "KGSaveEdit.challenge.completions": "Completions",
+
+    "KGSaveEdit.console.filter.header": "Log filters",
 
     "KGSaveEdit.opts.tab": "Options &amp; Settings",
     "KGSaveEdit.opts.calendar.header": "Calendar",
@@ -23,6 +33,9 @@
     "KGSaveEdit.opts.calendar.festivalDays": "Festival days",
     "KGSaveEdit.opts.calendar.paradoxTimer": "Paradox timer",
     "KGSaveEdit.opts.calendar.paradoxTimer.title": "Seasons until temporal paradox",
+    "KGSaveEdit.opts.colorScheme.header": "Color schemes",
+    "KGSaveEdit.opts.colorScheme.active": "Active",
+    "KGSaveEdit.opts.notation": "Notation",
     "KGSaveEdit.opts.cryptoPrice": "Blackcoin price",
     "KGSaveEdit.opts.cheatMode": "Cheat mode",
     "KGSaveEdit.opts.deadKittens": "Dead kittens",
@@ -31,12 +44,19 @@
     "KGSaveEdit.opts.saveID.new": "New ID",
     "KGSaveEdit.opts.saveID.new.confirm": "Are you sure you want to create a new save ID?",
 
+    "KGSaveEdit.res.show": "Show",
+    "KGSaveEdit.res.locked": "Resources locked",
+    "KGSaveEdit.res.locked.title": "Show hidden resources on mouseover (ingame only)",
+    "KGSaveEdit.res.perTick": "Per tick",
+    "KGSaveEdit.res.props": "Properties",
+    "KGSaveEdit.res.reserve": "Reserves",
+    "KGSaveEdit.res.hidden": "Hidden",
+
     "KGSaveEdit.religion.complete": "Complete",
     "KGSaveEdit.religion.totalFaith": "Total faith",
     "KGSaveEdit.religion.apocryphaBonus": "Apocrypha bonus",
     "KGSaveEdit.religion.corruptionTimer": "Corruption timer",
-    "KGSaveEdit.religion.transcendenceRatio": "Transcendence ratio",
-    "KGSaveEdit.religion.transcendenceLevel": "Transcendence level",
+    "KGSaveEdit.religion.transcendenceTier": "Transcendence tier",
 
     "KGSaveEdit.space.launched": "Launched",
     "KGSaveEdit.space.flightTime": "Flight time",
@@ -51,8 +71,11 @@
     "KGSaveEdit.trade.collapsed": "Collapsed",
     "KGSaveEdit.trade.elders.daysRemaining": "Days left",
     "KGSaveEdit.trade.elders.energy": "Energy",
+    "KGSaveEdit.trade.embassyLevel": "Embassy level",
 
     "KGSaveEdit.village.leader.unassignJob": "Unassign leader job",
+    "KGSaveEdit.village.census.source.villageKittens": "Village kittens",
+    "KGSaveEdit.village.census.source.reserveKittens": "Reserve kittens",
     "KGSaveEdit.village.census.empty": "No kittens found",
     "KGSaveEdit.village.census.select.selected": "Selected",
     "KGSaveEdit.village.census.selectedKittens.one": "1 kitten selected",
@@ -81,7 +104,7 @@
     "KGSaveEdit.village.edit.exp.expected": "Expected: {0}",
     "KGSaveEdit.village.edit.jobSkills": "Job skills",
     "KGSaveEdit.village.massedit.header.one": "Editing 1 kitten",
-    "KGSaveEdit.village.massedit.header.many": "Editing {0} kitten",
+    "KGSaveEdit.village.massedit.header.many": "Editing {0} kittens",
     "KGSaveEdit.village.massedit.editProperty": "Edit property",
     "KGSaveEdit.village.massedit.random.all": "Randomize all",
     "KGSaveEdit.village.massedit.exp.setExpected": "Set all expected exp",

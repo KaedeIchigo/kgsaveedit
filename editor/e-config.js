@@ -4,7 +4,7 @@ require([], function () {
 
 dojo.declare("classes.KGSaveEdit.KGConfig", null, {
 	statics: {
-		locales: ["br", "cz", "es", "fr", "ja", "pl", "ru", "zh"]
+		locales: ["br", "cz", "de", "es", "fr", "ja", "pl", "ru", "zh"]
 	}
 });
 
@@ -36,14 +36,16 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 
 		var localeLabels = {
 			"en": "English",
-			"ru": "Русский",
-			"zh": "中文",
-			"ja": "日本語",
+
 			"br": "Português",
+			"cz": "Čeština",
+			"de": "Deutsch",
 			"es": "Español",
 			"fr": "Français",
-			"cz": "Čeština",
-			"pl": "Polski"
+			"ja": "日本語",
+			"pl": "Polski",
+			"ru": "Русский",
+			"zh": "中文"
 		};
 
 		this.availableLocaleLabels = {};
@@ -196,14 +198,30 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 			throw "Couldn't load user locale '" + lang + "'";
 		});
 
-		// using deferred because it should always resolve, error or not
+		var fetchCrowdini18n = null;
+		if (lang !== "en") {
+			// using deferred because it should always resolve, error or not
+			fetchCrowdini18n = $.Deferred();
+			$.getJSON("res/i18n/crowdin/" + lang + ".json?v=" + editorVersion).fail(function (e) {
+				console.error("Couldn't load user crowdin locale '" + lang + "'", e);
+
+			}).always(function (data) {
+				fetchCrowdini18n.resolve(data);
+			});
+		}
+
 		var fetchEditori189 = $.Deferred();
 		$.getJSON("editor/i18n/" + lang + ".json?v=" + editorVersion).always(function (data) {
 			fetchEditori189.resolve(data);
 		});
 
-		return $.when(fetchGamei18n, fetchEditori189).done(function (gameData, editorData) {
+		return $.when(fetchGamei18n, fetchCrowdini18n, fetchEditori189).done(function (gameData, crowdinData, editorData) {
 			gameData = gameData[0];
+
+			if (crowdinData) {
+				gameData = $.extend(gameData, crowdinData[0]);
+			}
+
 			if (editorData) {
 				gameData = $.extend(gameData, editorData);
 			}

@@ -34,8 +34,8 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 			// unlocks: {"perks": ["codexAgrum", "codexLeviathanianus"]},
 			requires: {perks: ["codexVox"]},
 			effects: {
-				"compediumCraftRatio":        0.25,
 				"manuscriptGlobalCraftRatio": 0.05,
+				"compediumCraftRatio":        0.25,
 				"compediumGlobalCraftRatio":  0.05
 			}
 		}, {
@@ -45,9 +45,9 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 			],
 			requires: {perks: ["codexLogos"]},
 			effects: {
-				"blueprintCraftRatio":        0.25,
 				"manuscriptGlobalCraftRatio": 0.05,
 				"compediumGlobalCraftRatio":  0.05,
+				"blueprintCraftRatio":        0.25,
 				"blueprintGlobalCraftRatio":  0.05
 			}
 		}, {
@@ -88,7 +88,7 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 			// unlocks: {"perks": ["vitruvianFeline"]},
 			requires: {perks: ["goldenRatio"]},
 			effects: {
-				"priceRatio": -0.017
+				"priceRatio": -16 / 900
 			}
 		}, {
 			name: "vitruvianFeline",
@@ -114,8 +114,11 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 			prices: [
 				{name: "paragon", val: 5}
 			],
+			unlocked: true,
 			// unlocks: {"perks": ["zebraDiplomacy"]},
-			unlocked: true
+			effects: {
+				"standingRatio": 0.1
+			}
 		}, {
 			name: "zebraDiplomacy",
 			prices: [
@@ -128,7 +131,14 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 			prices: [
 				{name: "paragon", val: 75}
 			],
+			// unlocks: {"perks": ["navigationDiplomacy"]},
 			requires: {perks: ["zebraDiplomacy"]}
+		}, {
+			name: "navigationDiplomacy",
+			prices: [
+				{name: "paragon", val: 300}
+			],
+			requires: {perks: ["zebraCovenant"]}
 		}, {
 			name: "chronomancy",
 			prices: [
@@ -331,7 +341,7 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 				prestige.i18nKeys.flavor = "prestige." + prestige.name + ".flavor";
 			}
 		});
-		this.meta.push(this.perks);
+		this.addMeta(this.perks);
 	},
 
 	getPerk: function (name) {
@@ -367,18 +377,18 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 	},
 
 	getBurnedParagonRatio: function () {
-		return this.game.getTriValue(this.game.resPool.get("burnedParagon").value, 500);
+		return this.game.getUnlimitedDR(this.game.resPool.get("burnedParagon").value, 500);
 	},
 
 	getParagonProductionRatio: function () {
 		var paragonRatio = this.getParagonRatio();
 
 		var productionRatioParagon = (this.game.resPool.get("paragon").value * 0.010) * paragonRatio;
-		productionRatioParagon = this.game.getHyperbolicEffect(productionRatioParagon, 2 * paragonRatio);
+		productionRatioParagon = this.game.getLimitedDR(productionRatioParagon, 2 * paragonRatio);
 
 		var ratio = this.game.calendar.darkFutureYears() >= 0 ? 4 : 1;
 		var productionRatioBurnedParagon = this.game.resPool.get("burnedParagon").value * 0.010 * paragonRatio;
-		productionRatioBurnedParagon = this.game.getHyperbolicEffect(productionRatioBurnedParagon, ratio * paragonRatio);
+		productionRatioBurnedParagon = this.game.getLimitedDR(productionRatioBurnedParagon, ratio * paragonRatio);
 
 		return productionRatioParagon + productionRatioBurnedParagon;
 	},
