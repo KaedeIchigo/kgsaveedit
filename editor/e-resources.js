@@ -123,7 +123,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				this.game.setInput(this.game.time.temporalFluxNode, this.parsedValue, true);
 			},
 			// hardMaxLimit: true,
-			invisible: true
+			invisible: true,
+			reservable: false
 		}, {
 			name: "gflops",
 			title: "gigaflops",
@@ -188,14 +189,17 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "paragon",
 			color: "#6141cd",
 			relockIfZero: true,
-			inputClass: "integerInput abbrInput"
+			inputClass: "integerInput abbrInput",
+			reservable: false
 		}, {
 			name: "burnedParagon",
 			color: "#493099",
-			inputClass: "integerInput abbrInput"
+			inputClass: "integerInput abbrInput",
+			reservable: false
 		}, {
 			name: "timeCrystal",
-			color: "#14cd61"
+			color: "#14cd61",
+			reservable: false
 		}, {
 			name: "sorrow",
 			visible: false,
@@ -203,7 +207,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			getMaxValue: function () {
 				return 12 + this.game.getEffect("blsLimit");
 			},
-			hardMaxLimit: true
+			hardMaxLimit: true,
+			reservable: false
 		}, {
 			name: "relic",
 			type: "exotic",
@@ -236,7 +241,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
 				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
 			}, */
-			relockIfZero: true
+			relockIfZero: true,
+			reservable: false
 		}, {
 			name: "wrappingPaper",
 			type: "exotic",
@@ -246,7 +252,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				"-moz-animation":    "neon-pink 1.5s ease-in-out infinite alternate",
 				"-o-animation":      "neon-pink 1.5s ease-in-out infinite alternate",
 				animation:           "neon-pink 1.5s ease-in-out infinite alternate"
-			} */
+			} */,
+			reservable: false
 		}, {
 			name: "blackcoin",
 			type: "exotic",
