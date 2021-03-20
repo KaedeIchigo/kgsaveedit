@@ -185,6 +185,11 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			condition: function () {
 				return this.game.bld.get("aiCore").val >= 5;
 			}
+		}, {
+			name: "factory",
+			condition: function () {
+				return this.game.bld.get("factory").val >= 20;
+			}
 		}
 	],
 	schemes: null,

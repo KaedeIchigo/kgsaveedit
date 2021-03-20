@@ -849,7 +849,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "science", val: 175000},
 				{name: "alloy",   val: 200}
 			],
-			requires: {tech: ["robotics"]},
+			requires: {tech: ["nanotechnology"]},
 			effects: {
 				"calcinerRatio": 1
 			}
