@@ -12,14 +12,21 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 		for (var key in this.statics.effectMeta) {
 			var effectMeta = this.statics.effectMeta[key];
 			if (!effectMeta.titleKey) {
-				effectMeta.titleKey = "effectsMgr.statics." + (effectMeta.title || key) + ".title";
+				if (effectMeta.type === "hidden") {
+					effectMeta.title = key;
+				} else {
+					effectMeta.titleKey = "effectsMgr.statics." + (effectMeta.title || key) + ".title";
+				}
 			}
 		}
 	},
 
 	seti18n: function () {
 		for (var key in this.statics.effectMeta) {
-			this.statics.effectMeta[key].title = $I(this.statics.effectMeta[key].titleKey);
+			var effectMeta = this.statics.effectMeta[key];
+			if (effectMeta.titleKey) {
+				effectMeta.title = $I(effectMeta.titleKey);
+			}
 		}
 	},
 
@@ -28,10 +35,10 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 		for (var i = 0; i < game.resPool.resources.length; i++) {
 			var res = game.resPool.resources[i];
 			if (effectName.indexOf(res.name) === 0) {
-				var resname = res.name;
-				var restitle = res.title || resname;
+				var resName = res.name;
+				var restitle = res.title || resName;
 				restitle = restitle[0].toUpperCase() + restitle.slice(1);
-				var type = effectName.substring(resname.length, effectName.length);
+				var type = effectName.substring(resName.length, effectName.length);
 			}
 		}
 
@@ -42,43 +49,49 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 					//title to be displayed for effect, id if not defined
 					title: restitle,
 					//effect will be hidden if resource is not unlocked
-					resname: resname,
+					resname: resName,
 					//value will be affected by opts.usePerSecondValues
 					type: "perTick"
 				};
 			case "PerTick":
 				return {
 					title: restitle,
-					resname: resname,
+					resname: resName,
 					type: "perTick"
+				};
+			case "PerTickRatio":
+				return {
+					title: $I("effectsMgr.type.resRatio", [restitle]),
+					resName: resName,
+					type: "ratio"
 				};
 			case "Max":
 				return {
 					title: $I("effectsMgr.type.resMax", [restitle]),
-					resname: resname
+					resname: resName
 				};
 			case "MaxChallenge": //for when challenges change Max of resources; LDR to all other sources of Max
 				return {
 					title: $I("effectsMgr.type.resMax", [restitle]),
-					resName: resname
+					resName: resName
 				};
 			case "Ratio":
 				return {
 					title: $I("effectsMgr.type.resRatio", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "ratio"
 				};
 			case "DemandRatio":
 				return {
 					title: $I("effectsMgr.type.resDemandRatio", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "ratio"
 				};
 			case "PerTickBase":
 			case "PerTickBaseSpace":
 				return {
 					title: $I("effectsMgr.type.resProduction", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "perTick"
 				};
 			case "PerTickCon":
@@ -88,19 +101,19 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			case "PerTickAutoprodSpace":
 				return {
 					title: $I("effectsMgr.type.resConversion", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "perTick"
 				};
 			case "CraftRatio":
 				return {
 					title: $I("effectsMgr.type.resCraftRatio", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "ratio"
 				};
 			case "GlobalCraftRatio":
 				return {
 					title: $I("effectsMgr.type.resGlobalCraftRatio", [restitle]),
-					resname: resname,
+					resname: resName,
 					type: "ratio"
 				};
 			default:
@@ -828,7 +841,11 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			//philosophy
-			"luxuryConsuptionReduction": {
+			"luxuryDemandRatio": {
+				type: "ratio"
+			},
+
+			"breweryConsumptionRatio": {
 				type: "ratio"
 			},
 
@@ -841,6 +858,22 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			},
 
 			"mysticismBonus": {
+				type: "ratio"
+			},
+
+			"festivalLuxuryConsumptionRatio": {
+				type: "ratio"
+			},
+
+			"consumableLuxuryHappiness": {
+				type: "fixed"
+			},
+
+			"hapinnessConsumptionRatio": {
+				type: "ratio"
+			},
+
+			"mintRatio": {
 				type: "ratio"
 			},
 
@@ -938,7 +971,28 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "fixed"
 			},
 
-			"challengeHappiness": {}
+			"challengeHappiness": {},
+
+			"tradeKnowledge": {},
+
+			"steamworksFakeBought": {},
+
+			"embassyFakeBought": {},
+
+			"policyFakeBought": {},
+
+			"cathPollutionPerTickProd": {
+				type: "hidden"
+			},
+
+			"cathPollutionPerTickCon": {
+				type: "hidden"
+			},
+
+			"cathPollutionRatio": {
+				title: "pollutionRatio",
+				type: "ratio"
+			}
 		}
 	}
 });
@@ -1047,6 +1101,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		value = Math.max(value, num(ele.minValue));
 		if (isFinite(ele.maxValue)) {
 			value = Math.min(value, ele.maxValue);
+		}
+		if (ele.minParseValue && value < ele.minParseValue) {
+			value = 0;
 		}
 		return value || 0;
 	},
@@ -1504,12 +1561,14 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		// TODO: delegate this to managers? Can't be done in load unfortunately.
 		this.upgradeItems({
+			challenges: this.challenges.challenges,
+			upgrades: this.workshop.upgrades,
 			policies: this.science.policies,
 			jobs: this.village.jobs,
 			buildings: this.bld.buildings,
-			spaceBuilding: this.space.allPrograms,
-			challenges: this.challenges.challenges
+			spaceBuilding: this.space.allPrograms
 		});
+		this.upgradeItems({policies: ["authocracy"]});
 	},
 
 	// Unlimited Diminishing Return
@@ -1561,7 +1620,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 			var amt = this.bld.get("factory").on;
 
-			ratio *= (1 + amt * fRatio * 0.75);	//25% penalty
+			ratio *= (1 + amt * fRatio * 0.75); //25% penalty
 		}
 
 		//get resource specific craft ratio (like factory bonus)
@@ -1670,6 +1729,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		for (var effectName in effectsList) {
 			var effectMeta = this.getEffectMeta(effectName) || {};
+			if (effectMeta.type === "hidden") {
+				continue;
+			}
+
 			var effectValue = effectMeta.calculation === "constant"
 				? effectsList[effectName]
 				: effectsList[effectName] * valMultiplier;
@@ -1854,12 +1917,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	getStackElemString: function (stackElem) {
-		var resString = stackElem.name + ":&nbsp;<div style=\"float: right;\">";
+		var resString = stackElem.name + ':&nbsp;<div class="floatRight">';
 
-		if (stackElem.type === "fixed") {
+		if (stackElem.type == "fixed") {
 			resString += this.getDisplayValueExt(stackElem.value, true, true);
-		} else {
+		} else if (stackElem.type == "ratio") {
 			resString += this.getDisplayValueExt((stackElem.value * 100).toFixed(), true) + "%";
+		} else if (stackElem.type == "multiplier") {
+			resString += "×" + this.getDisplayValueExt((stackElem.value * 100).toFixed()) + "%";
+		} else if (stackElem.type == "ratioIndent") {
+			resString = "|->" + resString + this.getDisplayValueExt((stackElem.value * 100).toFixed(), true) + "%";
 		}
 
 		resString += "</div><br>";
@@ -1940,6 +2007,11 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		perTick *= 1 + paragonProductionRatio;
 
+		// *POLLUTION MODIFIER
+		if (resName === "catnip") {
+			perTick *= 1 + this.bld.pollutionEffects["catnipPollutionRatio"];
+		}
+
 		//ParagonSpaceProductionRatio definition 1/4
 		var paragonSpaceProductionRatio = 1 + paragonProductionRatio * 0.05;
 
@@ -1973,7 +2045,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		// +*FAITH BONUS
 		var religionProductionBonus = this.religion.getSolarRevolutionRatio();
-		perTick *= 1 + religionProductionBonus;
+		perTick *= 1 + religionProductionBonus * (1 + ((resName === "wood" || resName === "catnip") ? this.bld.pollutionEffects["solarRevolutionPollution"] : 0));
 
 		//+COSMIC RADIATION
 		if (!this.opts.disableCMBR && resName !== "coal") {
@@ -2002,14 +2074,14 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		perTick = effects[resName];
 
 		// +BUILDING AND SPACE PerTick
-		perTick += this.getEffect(resName + "PerTick");
+		perTick += this.getEffect(resName + "PerTick") * (1 + this.getEffect(resName + "PerTickRatio"));
 
 		// -EARTH CONSUMPTION
 		var resMapConsumption = this.village.getResConsumption();
 		var resConsumption = resMapConsumption[resName] || 0;
 		resConsumption *= 1 + this.getEffect(resName + "DemandRatio");
 		if (resName === "catnip" && this.village.kittens.length > 0 && this.village.happiness > 1) {
-			var hapinnessConsumption = Math.max(this.village.happiness - 1, 0);
+			var hapinnessConsumption = Math.max(this.village.happiness * (1 + this.getEffect("hapinnessConsumptionRatio")) - 1, 0);
 			if (this.challenges.isActive("anarchy")) {
 				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
 			} else {
@@ -2139,6 +2211,15 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			value: paragonProductionRatio
 		});
 
+		// *POLLUTION MODIFIER
+		if (resName === "catnip") {
+			stack.push({
+				name: $I("res.stack.pollution"),
+				type: "ratio",
+				value: this.bld.pollutionEffects["catnipPollutionRatio"]
+			});
+		}
+
 		//ParagonSpaceProductionRatio definition 1/4
 		var paragonSpaceProductionRatio = 1 + paragonProductionRatio * 0.05;
 		var leader = this.village.getLeader();
@@ -2199,6 +2280,14 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			type: "ratio",
 			value: religionProductionBonus
 		});
+
+		if ((resName === "wood" || resName === "catnip") && religionProductionBonus > 0) {
+			stack.push({
+				name: $I("res.stack.pollution"),
+				type: "ratioIndent",
+				value: this.bld.pollutionEffects["solarRevolutionPollution"]
+			});
+		}
 
 		if (!this.opts.disableCMBR && resName !== "coal") {
 			stack.push({
@@ -2303,6 +2392,12 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			value: this.getEffect(resName + "PerTick")
 		});
 
+		stack.push({
+			name: $I("res.stack.baseline"),
+			type: "ratio",
+			value: this.getEffect(resName + "PerTickRatio")
+		});
+
 		// +CRAFTING JOB PRODUCTION
 		stack.push({
 			name: $I("res.stack.engineer"),
@@ -2315,7 +2410,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var resConsumption = resMapConsumption[resName] || 0;
 		resConsumption *= 1 + this.getEffect(resName + "DemandRatio");
 		if (resName === "catnip" && this.village.kittens.length > 0 && this.village.happiness > 1) {
-			var hapinnessConsumption = Math.max(this.village.happiness - 1, 0);
+			var hapinnessConsumption = Math.max(this.village.happiness * (1 + this.getEffect("hapinnessConsumptionRatio")) - 1, 0);
 			if (this.challenges.isActive("anarchy")) {
 				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
 			} else {

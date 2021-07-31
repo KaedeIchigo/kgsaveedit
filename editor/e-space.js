@@ -98,9 +98,9 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 		}, {
 			name: "umbraMission",
 			prices: [
-				{name: "science", 	val: 500000},
+				{name: "science",   val: 500000},
 				{name: "starchart", val: 25000},
-				{name: "kerosene", 	val: 25000},
+				{name: "kerosene",  val: 25000},
 				{name: "thorium",   val: 15000}
 			],
 			// unlocks: {planet: ["umbra"], spaceMission: ["charonMission"]},
@@ -108,9 +108,9 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 		}, {
 			name: "charonMission",
 			prices: [
-				{name: "science", 	val: 750000},
+				{name: "science",   val: 750000},
 				{name: "starchart", val: 75000},
-				{name: "kerosene", 	val: 35000},
+				{name: "kerosene",  val: 35000},
 				{name: "thorium",   val: 35000}
 			],
 			// unlocks: {planet: ["charon"]},
@@ -204,6 +204,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 						} else {
 							self.effects["energyConsumption"] = 1;
 						}
+						game.upgradeItems(self.upgrades); //this way observatories won't have to use action
 					}
 				}, {
 					name: "spaceStation",
@@ -554,7 +555,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 					},
 					action: function (self, game) {
 						var rPerDay = game.getEffect("beaconRelicsPerDay");
-						var rrBoost = (1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").val * 0.1);	//10% per BP * BN combo
+						var rrBoost = (1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").val * 0.1); //10% per BP * BN combo
 						// TODO getEffectiveValue
 
 						//lol
@@ -563,7 +564,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 							rrBoost = rrBoost * (amMax / 5000);
 						}
 
-						var entBoost = 1 + game.space.getBuilding("entangler").effects["hashRateLevel"] * 0.25;	//25% per entangler hashrate
+						var entBoost = 1 + game.space.getBuilding("entangler").effects["hashRateLevel"] * 0.25; //25% per entangler hashrate
 
 						self.effects = {
 							"scienceMax":                25000 * (1 + game.getEffect("spaceScienceRatio")),
@@ -684,7 +685,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 						var gflops = game.resPool.get("gflops").value;
 						if (gflops < gflopsPerTick && gflops > 0) {
 							gflopsPerTick = gflops;
-						} else if (gflops == 0) {
+						} else if (gflops === 0) {
 							return;
 						}
 

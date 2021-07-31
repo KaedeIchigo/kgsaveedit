@@ -127,12 +127,10 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			reservable: false
 		}, {
 			name: "gflops",
-			title: "gigaflops",
 			transient: true,
 			reservable: false
 		}, {
 			name: "hashrates",
-			title: "hashrates",
 			transient: true,
 			reservable: false
 		}, {
@@ -205,7 +203,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			visible: false,
 			color: "black",
 			getMaxValue: function () {
-				return 12 + this.game.getEffect("blsLimit");
+				return 16 + this.game.getEffect("blsLimit");
 			},
 			hardMaxLimit: true,
 			reservable: false
@@ -587,7 +585,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			if (delta < 0.25) {
 				delta = 0.25;
 			}
-			if (this.game.challenges.getChallenge("energy").on > 0) {
+			if (this.game.challenges.getChallenge("energy").on > 0 && !this.game.challenges.isActive("energy")) {
 				delta = 1 - (1 - delta) / 2;
 			}
 			return delta;
@@ -777,7 +775,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 			}
 		}
 
-		td = dojo.create("td", {class: "resourceReserves", textContent: "test "}, tr);
+		td = dojo.create("td", {class: "resourceReserves"}, tr);
 		if (this.reservable) {
 			dojo.addClass(tr, "reservable");
 			this.game._createInput({class: this.inputClass || "abbrInput"}, td, this, "reserves");
@@ -786,6 +784,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 		td = dojo.create("td", null, tr);
 		this.game._createInput({class: "ownedInput " + (this.inputClass || "abbrInput")},
 			td, this, "value");
+		this.valueNode.minParseValue = 0.0000000001;
 		if (this.inputParseFn) {
 			this.valueNode.parseFn = this.inputParseFn;
 		}
@@ -908,7 +907,7 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 		var value = this.getValue();
 		return {
 			name: this.name,
-			value: value,
+			value: value >= 0.0000000001 ? value : 0,
 			unlocked: this.unlocked,
 			isHidden: this.isHidden
 		};

@@ -56,7 +56,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			effects: {
 				"goldMaxRatio":          0.01,
 				"unicornsRatioReligion": 0.5,
-				"alicornChance":         10,
+				"alicornChance":         0.0001,
 				"alicornPerTick":        0,
 				"ivoryMeteorRatio":      0.05
 			},
@@ -79,7 +79,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["skyPalace"]},
 			effects: {
 				"unicornsRatioReligion": 2.5,
-				"alicornChance":         15,
+				"alicornChance":         0.00015,
 				"alicornPerTick":        0,
 				"tcRefineRatio":         0.05,
 				"ivoryMeteorRatio":      0.15
@@ -102,7 +102,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {zigguratUpgrades: ["unicornUtopia"]},
 			effects: {
 				"unicornsRatioReligion": 5,
-				"alicornChance":         30,
+				"alicornChance":         0.0003,
 				"alicornPerTick":        0,
 				"tcRefineRatio":         0.1,
 				"ivoryMeteorRatio":      0.5

@@ -274,7 +274,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				{name: "science",   val: 115000},
 				{name: "blueprint", val: 45}
 			],
-			// unlocks: {tech: ["ecology"], upgrades: ["offsetPress", "fuelInjectors", "oilRefinery"]},
+			// unlocks: {tech: ["ecology"], upgrades: ["offsetPress", "fuelInjectors", "oilRefinery"], upgrades: ["carbonSequestration"]},
 			requires: {tech: ["industrialization"]}
 		}, {
 			name: "ecology",
@@ -537,9 +537,14 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			requires: {tech: ["writing"]},
 			blockedBy: ["liberty"]
 			// unlocks: {policies: ["authocracy", "monarchy"]},
-			// blocks: ["liberty"]
+			// blocks: ["liberty"],
+			// effects: {
+			// 	"cultureFromManuscripts":   1,
+			// 	"manuscriptParchmentCost": -5, //visual,
+			// 	"manuscriptCultureCost":   -100 //just for the players
+			// }
 		},
-		//----------------	classical age --------------------
+		//---------------- classical age --------------------
 		{
 			name: "monarchy",
 			prices: [
@@ -569,14 +574,14 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			},
 			calculateEffects: function (self, game) {
 				var uncappedHousing = 0;
-				for (var i = 0; i < game.bld.buildingGroups.length; i++) {
-					if (game.bld.buildingGroups[i].name === "population") {
-						for (var k = 0; k < game.bld.buildingGroups[i].buildings.length; k++) {
-							if (!game.resPool.isStorageLimited(game.bld.getPrices(game.bld.buildingGroups[i].buildings[k]))) {
-								uncappedHousing += 1;
-							}
-						}
-						break;
+				var bought = self.owned();
+				for (var k = 0; k < game.bld.buildingGroups.population.buildings.length; k++) {
+					var building = game.bld.getBuilding(game.bld.buildingGroups.population.buildings[k]);
+					if (!game.resPool.isStorageLimited(building.getPrices())) {
+						uncappedHousing++;
+						building.almostLimited = bought && game.resPool.isStorageLimited(building.getPrices(1));
+					} else {
+						building.almostLimited = false;
 					}
 				}
 				self.effects["rankLeaderBonusConversion"] = 0.004 * uncappedHousing;
@@ -594,7 +599,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				"boostFromLeader": 0.01
 			}
 		},
-		//----------------	meme --------------------
+		//---------------- meme --------------------
 		{
 			name: "socialism",
 			prices: [
@@ -602,7 +607,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			],
 			requires: {policies: ["authocracy", "republic"]}
 		},
-		//----------------	industrial age --------------------
+		//---------------- industrial age --------------------
 		{
 			name: "liberalism",
 			prices: [
@@ -650,7 +655,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				"logHouseCostReduction": 0.5
 			}
 		},
-		//----------------	information age --------------------
+		//---------------- information age --------------------
 		{
 			name: "technocracy",
 			prices: [
@@ -686,7 +691,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				"unobtainiumPolicyRatio": 0.15
 			}
 		},
-		//----------------	tier 5 age --------------------
+		//---------------- tier 5 age --------------------
 		{
 			name: "transkittenism",
 			prices: [
@@ -829,7 +834,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 10000}
 			],
-			requires: {tech: ["sattelites"], spaceBuilding: ["sattelite"]},
+			// requires: {tech: ["sattelites"], spaceBuilding: ["sattelite"]},
+			requires: function (game) {
+				return game.space.getBuilding("sattelite").owned();
+			},
 			blockedBy: ["militarizeSpace"],
 			// blocks: ["militarizeSpace"],
 			effects: {
@@ -840,7 +848,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 10000}
 			],
-			requires: {tech: ["sattelites"], spaceBuilding: ["sattelite"]},
+			// requires: {tech: ["sattelites"], spaceBuilding: ["sattelite"]},
+			requires: function (game) {
+				return game.space.getBuilding("sattelite").owned() && !game.challenges.isActive("pacifism");
+			},
 			blockedBy: ["outerSpaceTreaty"],
 			// blocks: ["outerSpaceTreaty"],
 			effects: {
@@ -855,11 +866,13 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			],
 			requires: {tech: ["philosophy"]},
 			blockedBy: ["epicurianism"],
-			// unlocks: {policies: ["rationality", "mysticism"]},
+			// unlocks: {policies: ["rationality", "mysticism", "rationing", "frugality"]},
 			// blocks: ["epicurianism"],
 			effects: {
-				"luxuryConsuptionReduction": 0.5
-			}
+				"luxuryDemandRatio":       -0.5,
+				"breweryConsumptionRatio": -0.25
+			},
+			upgrades: {buildings: ["brewery"]}
 		}, {
 			name: "epicurianism",
 			prices: [
@@ -867,11 +880,59 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			],
 			requires: {tech: ["philosophy"]},
 			blockedBy: ["stoicism"],
-			// unlocks: {policies: ["rationality", "mysticism"]},
+			// unlocks: {policies: ["rationality", "mysticism", "carnivale", "extravagance"]},
 			// blocks: ["stoicism"],
 			effects: {
 				"luxuryHappinessBonus": 1
 			}
+		}, {
+			name: "carnivale",
+			prices: [
+				{name: "culture", val: 3500}
+			],
+			requires: {policies: ["epicurianism"]},
+			blockedBy: ["extravagance"],
+			// blocks: ["extravagance"],
+			effects: {
+				"festivalArrivalRatio":           0.3,
+				"festivalLuxuryConsumptionRatio": 0.3
+			}
+		}, {
+			name: "extravagance",
+			prices: [
+				{name: "culture", val: 3500}
+			],
+			requires: {policies: ["epicurianism"]},
+			blockedBy: ["carnivale"],
+			// blocks: ["carnivale"],
+			effects: {
+				"luxuryDemandRatio":         2,
+				"consumableLuxuryHappiness": 5
+			}
+		}, {
+			name: "rationing",
+			prices: [
+				{name: "culture", val: 3500}
+			],
+			requires: {policies: ["stoicism"]},
+			blockedBy: ["frugality"],
+			// blocks: ["frugality"],
+			effects: {
+				"hapinnessConsumptionRatio": -0.1,
+				"hunterRatio":                0.1
+			}
+		}, {
+			name: "frugality",
+			prices: [
+				{name: "culture", val: 3500}
+			],
+			requires: {policies: ["stoicism"]},
+			blockedBy: ["rationing"],
+			// blocks: ["rationing"],
+			effects: {
+				"mintRatio": 0.1
+			},
+			upgrades: {buildings: ["mint"]}
 		}, {
 			name: "rationality",
 			prices: [
@@ -882,7 +943,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["mysticism"],
 			effects: {
 				"sciencePolicyRatio": 0.05,
-				"ironPolicyRatio": 0.05
+				"ironPolicyRatio":    0.05
 			}
 		}, {
 			name: "mysticism",
@@ -894,7 +955,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["rationality"],
 			effects: {
 				"culturePolicyRatio": 0.05,
-				"faithPolicyRatio": 0.05
+				"faithPolicyRatio":   0.05
 			}
 		},
 		//----------------   Environmental Policy   --------------------
@@ -909,7 +970,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["clearCutting", "environmentalism"],
 			effects: {
 				"environmentUnhappiness": -2,
-				"mineralsPolicyRatio": 0.3
+				"mineralsPolicyRatio":     0.3,
+				"cathPollutionRatio":      0.05
 			}
 		}, {
 			name: "clearCutting",
@@ -922,7 +984,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["stripMining", "environmentalism"],
 			effects: {
 				"environmentUnhappiness": -2,
-				"woodPolicyRatio": 0.3
+				"woodPolicyRatio":         0.3,
+				"cathPollutionRatio":      0.05
 			}
 		}, {
 			name: "environmentalism",
@@ -934,7 +997,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// unlocks: {policies: ["conservation", "openWoodlands"]},
 			// blocks: ["stripMining", "clearCutting"],
 			effects: {
-				"environmentHappinessBonus": 3
+				"environmentHappinessBonus": 3,
+				"cathPollutionRatio":       -0.05
 			}
 		}, {
 			name: "sustainability",
@@ -948,7 +1012,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["fullIndustrialization"],
 			// blocks: ["fullIndustrialization"],
 			effects: {
-				"environmentHappinessBonus": 5
+				"environmentHappinessBonus": 5,
+				"cathPollutionRatio":       -0.05
 			}
 		}, {
 			name: "fullIndustrialization",
@@ -963,7 +1028,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["sustainability"],
 			upgrades: {buildings: ["factory"]},
 			effects: {
-				"environmentFactoryCraftBonus": 0.05
+				"environmentFactoryCraftBonus": 0.05,
+				"cathPollutionRatio":           0.05
 			}
 		}, {
 			name: "conservation",
@@ -976,7 +1042,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["openWoodlands"],
 			// blocks: ["openWoodlands"],
 			effects: {
-				"environmentHappinessBonus": 5
+				"environmentHappinessBonus": 5,
+				"cathPollutionRatio":       -0.05
 			}
 		}, {
 			name: "openWoodlands",
@@ -1199,6 +1266,15 @@ dojo.declare("classes.KGSaveEdit.PolicyMeta", classes.KGSaveEdit.UpgradeMeta, {
 			return name + " " + $I("btn.complete.capital");
 		}
 		return name;
+	},
+
+	getPrices: function () {
+		var prices = dojo.clone(this.prices) || [];
+		var policyFakeBought = this.game.getEffect("policyFakeBought");
+		for (var i = 0; i < prices.length; i++) {
+			prices.val *= Math.pow(1.25, policyFakeBought);
+		}
+		return prices;
 	},
 
 	handler: function () {

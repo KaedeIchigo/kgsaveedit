@@ -887,7 +887,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 	getResConsumption: function () {
 		var kittens = this.getKittens();
-		var philosophyLuxuryModifier = 1 - this.game.getEffect("luxuryConsuptionReduction");
+		var philosophyLuxuryModifier = (1 + this.game.getEffect("luxuryDemandRatio")) * (1 + ((this.game.calendar.festivalDays) ? this.game.getEffect("festivalLuxuryConsumptionRatio") : 0));
 		var res = {
 			"catnip": this.catnipPerKitten * kittens,
 			"furs":  -0.01 * kittens * philosophyLuxuryModifier,
@@ -942,7 +942,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					} else if (leader) {
 						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
-					diff *= this.happiness;	//alter positive resource production from jobs
+					diff *= this.happiness; //alter positive resource production from jobs
 				}
 
 				if (!res[jobResMod]) {
@@ -971,7 +971,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					} else if (leader) {
 						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
-					diff *= this.happiness;	//alter positive resource production from jobs
+					diff *= this.happiness; //alter positive resource production from jobs
 				}
 
 				if (!res[jobResMod]) {
@@ -996,7 +996,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getEnvironmentEffect: function () {
-		return this.game.getEffect("environmentHappinessBonus") + this.game.getEffect("environmentUnhappiness");
+		return this.game.getEffect("environmentHappinessBonus") + this.game.getEffect("environmentUnhappiness") + this.game.bld.pollutionEffects["pollutionHappines"];
 	},
 
 	updateHappines: function () {
@@ -1018,11 +1018,15 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		var happinessPerLuxury = 10;
 		//philosophy epicurianism effect
 		happinessPerLuxury += this.game.getEffect("luxuryHappinessBonus");
+		var consumableLuxuryBonus = this.game.getEffect("consumableLuxuryHappiness");
 		for (var i = resources.length - 1; i >= 0; i--) {
 			var res = resources[i];
 			if (res.type !== "common" && res.owned()) {
 				if (res.name !== "elderBox" || !this.game.resPool.get("wrappingPaper").owned()) {
 					happiness += happinessPerLuxury;
+				}
+				if (res.type === "uncommon") {
+					happiness += consumableLuxuryBonus;
 				}
 			}
 		}
@@ -2713,7 +2717,7 @@ dojo.declare("classes.KGSaveEdit.villageMap", null, {
 			}
 		}
 
-		this.unlockTile(3, 2);	//unlock village and 3x3 area around it
+		this.unlockTile(3, 2); //unlock village and 3x3 area around it
 	},
 
 	unlockTile: function (x, y) {

@@ -190,6 +190,11 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			condition: function () {
 				return this.game.bld.get("factory").val >= 20;
 			}
+		}, {
+			name: "catnip",
+			condition: function () {
+				return this.game.bld.get("field").val >= 56;
+			}
 		}
 	],
 	schemes: null,
@@ -301,6 +306,14 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 
 		// Dead Kittens & Karma
 		table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
+
+		tr = dojo.create("tr", {
+			innerHTML: "<td>" + $I("pollution.label") + "</td><td>ppm</td>"
+		}, table);
+		input = this.game._createInput({class: "abbrInput"}, tr.children[1], game.bld, "cathPollution", "first");
+		input.displayFn = function (value) {
+			return game.getDisplayValueExt((value / game.bld.getPollutionLevelBase()) * 100);
+		};
 
 		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.opts.deadKittens") + "</td><td></td>"
@@ -598,7 +611,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 			mod *= 1 + this.game.getLimitedDR(this.game.getEffect("coldHarshness"), 1);
 		}
 		if (this.getCurSeason().name == "spring") {
-			mod *= (1 + this.game.getLimitedDR(this.game.getEffect("springCatnipBonus"), 2));
+			mod *= (1 + this.game.getLimitedDR(this.game.getEffect("springCatnipRatio"), 2));
 		}
 		return mod;
 	},
@@ -903,18 +916,21 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 	domNode: null,
 
 	filtersData: {
-		"astronomicalEvent":  {enabled: true, unlocked: false},
-		"hunt":               {enabled: true, unlocked: false},
-		"trade":              {enabled: true, unlocked: false},
-		"craft":              {enabled: true, unlocked: false},
-		"workshopAutomation": {enabled: true, unlocked: false},
-		"meteor":             {enabled: true, unlocked: false},
-		"ivoryMeteor":        {enabled: true, unlocked: false},
-		"unicornRift":        {enabled: true, unlocked: false},
-		"alicornRift":        {enabled: true, unlocked: false},
-		"alicornCorruption":  {enabled: true, unlocked: false, title: "Alicorn Corruption"},
-		"tc":                 {enabled: true, unlocked: false},
-		"faith":              {enabled: true, unlocked: false}
+		"astronomicalEvent":  {},
+		"hunt":               {},
+		"trade":              {},
+		"craft":              {},
+		"workshopAutomation": {},
+		"meteor":             {},
+		"ivoryMeteor":        {},
+		"unicornRift":        {},
+		"unicornSacrifice":   {},
+		"alicornRift":        {},
+		"alicornSacrifice":   {},
+		"alicornCorruption":  {},
+		"tcShatter":          {},
+		"tcRefine":           {},
+		"faith":              {}
 	},
 
 	filters: null,
@@ -924,6 +940,7 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 
 		this.filters = {};
 		for (var tag in this.filtersData) {
+			this.filtersData[tag] = dojo.mixin({enabled: true, unlocked: false}, this.filtersData[tag]);
 			this.filters[tag] = new classes.KGSaveEdit.GenericItem(game, this.filtersData[tag]);
 		}
 	},
@@ -1215,7 +1232,8 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab,
 			},
 			checkCompletionCondition: function (game) {
 				return game.space.getPlanet("helios").reached;
-			}
+			},
+			upgrades: {buildings: ["pasture"]}
 		}, {
 			name: "anarchy",
 			unlocked: true,
@@ -1334,6 +1352,36 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab,
 			checkCompletionCondition: function (game) {
 				return game.space.getBuilding("spaceBeacon").val > (game.challenges.getChallenge("blackSky").on || 0);
 			}
+		}, {
+			name: "pacifism",
+			// requires sending a lot of hunters at once
+			effects: {
+				"alicornPerTickRatio":  0.1,
+				"tradeKnowledge":       1,
+				"weaponEfficency":      0,
+				"policyFakeBought":     0,
+				"embassyFakeBought":    0,
+				"steamworksFakeBought": 0
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["alicornPerTickRatio"] =  0;
+					self.effects["tradeKnowledge"] =       0;
+					self.effects["weaponEfficency"] =     -0.1; //after 10 completions weapons WILL be useles; no LDR >:3
+					self.effects["policyFakeBought"] =     1;
+					self.effects["embassyFakeBought"] =    1;
+					self.effects["steamworksFakeBought"] = Math.floor(1.5 * self.on || 1) / (self.on || 1);
+				} else {
+					self.effects["alicornPerTickRatio"] =  0.1;
+					self.effects["tradeKnowledge"] =       1;
+					self.effects["weaponEfficency"] =      0;
+					self.effects["policyFakeBought"] =     0;
+					self.effects["embassyFakeBought"] =    0;
+					self.effects["steamworksFakeBought"] = 0;
+				}
+				// game.upgradeItems(self.upgrades); // don't need the game's hack
+			},
+			upgrades: {upgrades: ["compositeBow", "crossbow", "railgun"]}
 		}
 	],
 
@@ -1557,6 +1605,7 @@ dojo.declare("classes.KGSaveEdit.ui.Toolbar", null, {
 		this.game = game;
 		this.icons = [];
 
+		this.addIcon(new classes.KGSaveEdit.ui.toolbar.ToolbarPollution(game));
 		this.addIcon(new classes.KGSaveEdit.ui.toolbar.ToolbarHappiness(game));
 		this.addIcon(new classes.KGSaveEdit.ui.toolbar.ToolbarEnergy(game));
 	},
@@ -1605,6 +1654,60 @@ dojo.declare("classes.KGSaveEdit.ui.ToolbarIcon", classes.KGSaveEdit.TooltipItem
 });
 
 
+dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarPollution", classes.KGSaveEdit.ui.ToolbarIcon, {
+	update: function () {
+		var hasEcology = this.game.science.get("ecology").owned();
+		dojo.toggleClass(this.container, "hidden", this.game.bld.cathPollution <= 100000 && !hasEcology);
+		this.container.innerHTML = "🏭" + (hasEcology ? (" " + this.getPollutionMod()) : "");
+	},
+
+	getTooltip: function () {
+		var tooltip = dojo.byId("tooltipBlock");
+		tooltip.className = "";
+		var game = this.game;
+
+		var html = "";
+		var eqPol = game.bld.getEquilibriumPollution();
+		var eqPolLvl = game.bld.getPollutionLevel(eqPol);
+		var pollution = game.bld.cathPollution;
+		var polLvl = game.bld.getPollutionLevel();
+		var polLvlShow = game.bld.getPollutionLevel(pollution * 2);
+		if (polLvl >= 4) {
+			html += $I("pollution.level1") + "<br/>" + $I("pollution.level2") + "<br/>" + $I("pollution.level3", [game.getDisplayValueExt(game.villageTab.getVillageTitle(), false, false, 0)]) + "<br/>" + $I("pollution.level4");
+		} else if (polLvlShow === 3) {
+			html += $I("pollution.level1") + "<br/>" + $I("pollution.level2") + "<br/>" + $I("pollution.level3", [game.getDisplayValueExt(game.villageTab.getVillageTitle(), false, false, 0)]);
+		} else if (polLvlShow === 2) {
+			html += $I("pollution.level1") + "<br/>" + $I("pollution.level2");
+		} else if (polLvlShow === 1) {
+			html += $I("pollution.level1");
+		} else {
+			html = $I("pollution.level0");
+		}
+
+		var warnLvl = game.bld.getPollutionLevel(pollution * 4);
+		if (warnLvl >= 1 && warnLvl <= 4 && warnLvl > polLvlShow && warnLvl <= eqPolLvl) {
+			html += "<br/>" + $I("pollution.level" + warnLvl + ".warning");
+		}
+		if (pollution * 1.5 <= eqPol || eqPolLvl > polLvl) {
+			html += "<br/>" + $I("pollution.increasing");
+		} else if (pollution >= 0 && game.bld.cathPollutionPerTick <= 0 && eqPolLvl <= polLvl) {
+			html += "<br/>" + $I("pollution.cleaning");
+		} else if (eqPolLvl === polLvl && eqPol > 0) {
+			html += "<br/>" + $I("pollution.equilibrium");
+		} else {
+			html += "<br/>" + $I("pollution.pristine");
+		}
+		html += "<br/>CO₂: " + (game.science.get("ecology").owned() ? this.getPollutionMod() : $I("pollution.unspecified"));
+
+		tooltip.innerHTML = html;
+	},
+
+	getPollutionMod: function () {
+		return this.game.getDisplayValueExt((this.game.bld.cathPollution / this.game.bld.getPollutionLevelBase()) * 100) + "ppm";
+	}
+});
+
+
 dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdit.ui.ToolbarIcon, {
 	update: function () {
 		dojo.toggleClass(this.container, "hidden", this.game.village.getKittens() <= 5);
@@ -1617,7 +1720,7 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 		tooltip.className = "";
 
 		var base = this.game.getEffect("happiness");
-		//var population = this.game.village.getKittens() *  2;
+		//var population = this.game.village.getKittens() * 2;
 		var html = $I("village.happiness.base") + ": 100%<br>" +
 			$I("village.happiness.buildings") + ": +" + (Math.floor(base)) + "%<br>";
 
@@ -1627,11 +1730,15 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 		var happinessPerLuxury = 10;
 		//philosophy epicurianism effect
 		happinessPerLuxury += this.game.getEffect("luxuryHappinessBonus");
+		var consumableLuxuryBonus = this.game.getEffect("consumableLuxuryHappiness");
 		for (var i = resources.length - 1; i >= 0; i--) {
 			var res = resources[i];
 			if (res.type !== "common" && res.owned()) {
 				if (res.name !== "elderBox" || !this.game.resPool.get("wrappingPaper").owned()) {
 					resHappiness += happinessPerLuxury;
+				}
+				if (resources[i].type === "uncommon") {
+					resHappiness += consumableLuxuryBonus;
 				}
 			}
 		}

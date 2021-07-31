@@ -481,6 +481,14 @@ input.integerInput.timeInput {
     padding-left: 4px;
 }
 
+.nameNode.btnAlmostLimited::before {
+    content: "* ";
+}
+
+.nameNode.btnAlmostLimited::after {
+    content: " *";
+}
+
 #tabBlocks {
     height: 100%;
     width: 100%;

@@ -9,6 +9,8 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 	timestamp: null,
 	isAccelerated: false,
 
+	testShatter: 0, //temporary
+
 	cfu: null,
 	cfuByName: null,
 	vsu: null,
@@ -64,8 +66,9 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 				// TB #3: 50; Total:  90; Average: 30
 				// TB #4: 90; Total: 160; Average: 40
 				// etc.
-				self.effects["heatMaxExpansion"] = 10 * self.on;
-				self.effects["energyConsumption"] = self.on;
+				var on = self.getOn();
+				self.effects["heatMaxExpansion"] = 10 * on;
+				self.effects["energyConsumption"] = on;
 			},
 			action: function (self, game) {
 				self.updateEffects(self, game);
@@ -411,6 +414,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			timestamp: this.timestamp,
 			flux: this.flux,
 			heat: this.heat,
+			testShatter: this.testShatter,
 			isAccelerated: this.isAccelerated,
 			cfu: this.game.mapMethods(this.cfu, "save"),
 			vsu: this.game.mapMethods(this.vsu, "save")
@@ -423,7 +427,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 		}
 
 		var data = saveData.time;
-		this.game.loadMetaFields(this, data, ["flux", "heat", "isAccelerated", "timestamp"]);
+		this.game.loadMetaFields(this, data, ["flux", "heat", "testShatter", "isAccelerated", "timestamp"]);
 
 		this.loadMetadata(data, "cfu", "getCFU", null, true);
 		this.loadMetadata(data, "vsu", "getVSU", null, true);

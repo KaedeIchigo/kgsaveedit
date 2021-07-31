@@ -388,7 +388,7 @@ dojo.declare("classes.KGSaveEdit.MetaItem", [classes.KGSaveEdit.GenericItem, cla
 		on(node, mouse.enter, function () {
 			dojo.query(".highlited").removeClass("highlited");
 
-			var prices = self.getPrices(true);
+			var prices = self.getPrices();
 			var resPool = self.game.resPool;
 			if (prices) {
 				for (var i = prices.length - 1; i >= 0; i--) {

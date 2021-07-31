@@ -593,6 +593,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["construction"]},
 			effects: {
 				"manpowerJobRatio": 0.5
+			},
+			calculateEffects: function (self, game) {
+				self.effects["manpowerJobRatio"] = 0.5 * Math.max(0, (1 + game.getEffect("weaponEfficency")));
 			}
 		}, {
 			name: "crossbow",
@@ -603,6 +606,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["machinery"]},
 			effects: {
 				"manpowerJobRatio": 0.25
+			},
+			calculateEffects: function (self, game) {
+				self.effects["manpowerJobRatio"] = 0.25 * Math.max(0, (1 + game.getEffect("weaponEfficency")));
 			}
 		}, {
 			name: "railgun",
@@ -614,6 +620,9 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["particlePhysics"]},
 			effects: {
 				"manpowerJobRatio": 0.25
+			},
+			calculateEffects: function (self, game) {
+				self.effects["manpowerJobRatio"] = 0.25 * Math.max(0, (1 + game.getEffect("weaponEfficency")));
 			}
 		}, {
 			name: "bolas",
@@ -757,6 +766,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "beam",     val: 35}
 			],
 			requires: {tech: ["steel"]},
+			upgrades: {buildings: ["smelter"]},
 			flavor: true
 		}, {
 			name: "deepMining",
@@ -787,7 +797,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["metalurgy"]},
 			effects: {
 				"smelterRatio": 0.95
-			}
+			},
+			upgrades: {buildings: ["smelter"]}
 		}, {
 			name: "oxidation",
 			prices: [
@@ -797,7 +808,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["metalurgy"]},
 			effects: {
 				"calcinerRatio": 0.95
-			}
+			},
+			upgrades: {buildings: ["calciner"]}
 		}, {
 			name: "steelPlants",
 			prices: [
@@ -842,7 +854,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["robotics"]},
 			effects: {
 				"calcinerRatio": 0.75
-			}
+			},
+			upgrades: {buildings: ["calciner"]}
 		}, {
 			name: "fluidizedReactors",
 			prices: [
@@ -852,14 +865,16 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {tech: ["nanotechnology"]},
 			effects: {
 				"calcinerRatio": 1
-			}
+			},
+			upgrades: {buildings: ["calciner"]}
 		}, {
 			name: "nuclearSmelters",
 			prices: [
 				{name: "uranium", val: 250},
 				{name: "science", val: 165000}
 			],
-			requires: {tech: ["nuclearFission"]}
+			requires: {tech: ["nuclearFission"]},
+			upgrades: {buildings: ["smelter"]}
 		}, {
 			name: "orbitalGeodesy",
 			prices: [
@@ -997,6 +1012,17 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "gear",     val: 250}
 			],
 			requires: {tech: ["electronics"]},
+			upgrades: {buildings: ["factory"]}
+		}, {
+			name: "carbonSequestration",
+			prices: [
+				{name: "titanium", val: 1250},
+				{name: "science",  val: 75000},
+				{name: "gear",     val: 125},
+				{name: "steel",    val: 4000},
+				{name: "alloy",    val: 1000}
+			],
+			requires: {tech: ["ecology"]},
 			upgrades: {buildings: ["factory"]}
 		}, {
 			name: "factoryOptimization",
@@ -1763,7 +1789,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		this.upgradesBlock = dojo.create("table", {
 			id: "upgradesBlock",
 			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("workshop.upgradePanel.label") +  "</th></tr>"
+			innerHTML: '<tr><th colspan="2">' + $I("workshop.upgradePanel.label") + "</th></tr>"
 		}, this.tabBlockNode);
 
 		this.freeEngineersBlock = dojo.create("div", {
@@ -1865,33 +1891,26 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 
 		dojo.toggleClass(this.freeEngineersBlock, "spoiler", !this.game.science.get("mechanization").owned());
 
-		var scienceMaxBuilding = this.game.bld.getEffect("scienceMax", true); // without the default scienceMax, because game adds it in differently
-		var scienceMaxCompendiaCap =  this.game.bld.getEffect("scienceMaxCompendia");
+		var scienceMaxCap = this.game.bld.getEffect("scienceMax", true); // without the default scienceMax, because game adds it in differently
+		if (this.game.ironWill) {
+			scienceMaxCap *= 10;
+		}
 		var compendiaScienceMax = Math.floor(this.game.resPool.get("compedium").value * 10);
-
-		//iw compedia cap is set to 1000% instead of 100%
-		var iwScienceCapRatio = this.game.ironWill ? 10 : 1;
 
 		if (this.game.prestige.getPerk("codexLeviathanianus").owned()) {
 			var blackLibrary = this.game.religion.getTU("blackLibrary");
-			var ttBoostRatio = (
-				0.05 * (
-					1 +
-					blackLibrary.val * (
-						blackLibrary.effects["compendiaTTBoostRatio"] +
-						this.game.getEffect("blackLibraryBonus"))
-				)
-			);
-			iwScienceCapRatio *= (1 + ttBoostRatio * this.game.religion.transcendenceTier);
+			var ttBoostRatio = 1 + blackLibrary.val * (blackLibrary.effects["compendiaTTBoostRatio"] + this.game.getEffect("blackLibraryBonus"));
+			scienceMaxCap *= 1 + 0.05 * ttBoostRatio * this.game.religion.transcendenceTier;
 		}
+		scienceMaxCap += this.game.bld.getEffect("scienceMaxCompendia");
 
-		if (compendiaScienceMax > (scienceMaxBuilding * iwScienceCapRatio + scienceMaxCompendiaCap) && !this.game.opts.ch40krun) {
-			compendiaScienceMax = (scienceMaxBuilding * iwScienceCapRatio + scienceMaxCompendiaCap);
-		}
+		// there is a lot of ongoing discussing about the necessity of compedia unnerf, and the original intention of ch40krun was never to allow it
+		/* // Quadratic increase, so that deep enough run will eventually unnerf the compendia cap
+		var darkFutureRatio = Math.max(this.game.calendar.year / this.game.calendar.darkFutureBeginning, 1);
+		scienceMaxCap *= darkFutureRatio * darkFutureRatio; */
 
 		this.effectsBase["oilMax"] = Math.floor(this.game.resPool.get("tanker").value * 500);
-		this.effectsBase["scienceMax"] = compendiaScienceMax;
-		//this.effectsBase["scienceMax"] = Math.min(compendiaScienceMax, scienceMax);
+		this.effectsBase["scienceMax"] = Math.min(compendiaScienceMax, scienceMaxCap);
 		var cultureBonusRaw = Math.floor(this.game.resPool.get("manuscript").value);
 		this.effectsBase["cultureMax"] = this.game.getUnlimitedDR(cultureBonusRaw, 0.01);
 
