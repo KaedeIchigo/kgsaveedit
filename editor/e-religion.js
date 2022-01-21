@@ -141,11 +141,11 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			priceRatio: 1.15,
 			requires: {perks: ["blackCodex"]},
+			upgrades: {buildings: ["ziggurat"]},
 			effects: {
 				"cultureMaxRatioBonus": 0.01,
 				"blackLibraryBonus":    0.02
-			},
-			upgrades: {buildings: ["ziggurat"]}
+			}
 		}, {
 			name: "unicornNecropolis",
 			prices: [
@@ -169,9 +169,43 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			priceRatio: 1.15,
 			requires: {perks: ["megalomania"]},
-			effects: {},
+			effects: {
+				"pyramidGlobalResourceRatio":   0,
+				"pyramidGlobalProductionRatio": 0,
+				"pyramidFaithRatio":            0,
+				"deficitRecoveryRatio":         0,
+				"blackLibraryBonus":            0
+			},
+			simpleEffectNames: [
+				"GlobalResourceRatio",
+				"GlobalProductionRatio",
+				"FaithRatio"
+			],
+			action: function (self, game) { //sigh
+				self.effects = {
+					"pyramidGlobalResourceRatio":   0,
+					"pyramidGlobalProductionRatio": 0,
+					"pyramidFaithRatio":            0,
+					"deficitRecoveryRatio":         0,
+					"blackLibraryBonus":            0
+				};
+				if (!game.getFeatureFlag("MAUSOLEUM_PACTS")) {
+					return;
+				}
+				var transcendenceTierModifier = Math.max(game.religion.transcendenceTier - 25, 1);
+				var deficitModifier = (1 - game.religion.necrocornDeficit / 50);
+				for (var i = 0; i < self.simpleEffectNames.length; i++) {
+					self.effects["pyramid" + self.simpleEffectNames[i]] = game.getEffect("pact" + self.simpleEffectNames[i]) * transcendenceTierModifier * deficitModifier;
+				}
+				self.effects["deficitRecoveryRatio"] = game.getEffect("pactDeficitRecoveryRatio");
+				var pactBlackLibraryBoost = game.getEffect("pactBlackLibraryBoost") * transcendenceTierModifier;
+				if (pactBlackLibraryBoost) {
+					var unicornGraveyard = game.religion.getZU("unicornGraveyard");
+					self.effects["blackLibraryBonus"] = pactBlackLibraryBoost * unicornGraveyard.effects["blackLibraryBonus"] * (1 + unicornGraveyard.getOn()) * deficitModifier;
+				}
+			},
 			getEffectiveValue: function (game) {
-				return this.val + (game.challenges.getChallenge("blackSky").on > 0 && !game.challenges.isActive("blackSky") ? 1 : 0);
+				return this.val + (game.challenges.getChallenge("blackSky").owned() ? 1 : 0);
 			}
 		}
 	],
@@ -335,8 +369,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			priceRatio: 1.15,
 			effects: {
 				"compendiaTTBoostRatio": 0.02
-			}
-			// flavor: true
+			},
+			flavor: true
 		}, {
 			name: "blackRadiance",
 			prices: [
@@ -355,13 +389,12 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			tier: 15,
 			priceRatio: 1.15,
+			upgrades: {chronoforge: ["temporalImpedance"]},
 			effects: {
 				//Should at least improve impedance scaling by some value (5%? 10%). Probably something else
 				"timeRatio": 0.10,
-				"rrRatio": 0.02
+				"rrRatio":   0.02
 			},
-			unlocked: false,
-			upgrades: {chronoforge: ["temporalImpedance"]},
 			flavor: true
 		}, {
 			name: "darkNova",
@@ -374,8 +407,37 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			effects: {
 				"energyProductionRatio": 0.02
 			},
-			unlocked: false,
 			flavor: true
+		}, {
+			name: "mausoleum",
+			tier: 23,
+			priceRatio: 1.15,
+			prices: [
+				{name: "relic",     val: 50000},
+				{name: "void",      val: 12500},
+				{name: "necrocorn", val: 10}
+			],
+			// unlocks: {pacts: ["pactOfCleansing", "pactOfDestruction",  "pactOfExtermination", "pactOfPurity"]},
+			requires: function (game) {
+				return game.getFeatureFlag("MAUSOLEUM_PACTS");
+			},
+			upgrades: {pacts: ["fractured"]},
+			effects: {
+				"pactsAvailable": 1
+			},
+			calculateEffects: function (self, game) {
+				if (!game.getFeatureFlag("MAUSOLEUM_PACTS")) {
+					self.effects["pactsAvailable"] = 0;
+					// self.unlocked = false;
+					return;
+				}
+				self.effects = {
+					"pactsAvailable": 1 + game.getEffect("mausoleumBonus")
+				};
+				if (game.religion.isFractured) {
+					self.effects["pactsAvailable"] = 0;
+				}
+			}
 		}, {
 			name: "holyGenocide",
 			description: "And tear will not fall down",
@@ -385,11 +447,126 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			tier: 25,
 			priceRatio: 1.15,
-			effects: {},
+			// unlocks: {challenges: ["postApocalypse"]},
+			togglable: true,
+			effects: {
+				"maxKittensRatio": -0.01,
+				"simScalingRatio":  0.02,
+				"activeHG":         0
+			},
+			calculateEffects: function (self, game) {
+				self.effects["activeHG"] = game.religion.activeHolyGenocide;
+			},
 			flavor: true
 		}
 		//Holy Memecide
 	],
+
+	pactsData: [
+		{
+			name: "pactOfCleansing",
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1,
+			// unlocks: {/* "pacts": ["pactOfFanaticism"] */},
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable":          -1,
+				"necrocornPerDay":          0,
+				"pactDeficitRecoveryRatio": 0.003,
+				"pactGlobalResourceRatio":  0.0005
+				// "cathPollutionPerTickCon": -5
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			}
+		}, {
+			name: "pactOfDestruction",
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1,
+			// unlocks: {/* "pacts": ["pactOfGlowing"] */ /* will deal with this later */},
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable":           -1,
+				"necrocornPerDay":           0,
+				"pactDeficitRecoveryRatio": -0.0001,
+				"pactGlobalProductionRatio": 0.0005
+				// "cathPollutionPerTickProd":  10
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			}
+		}, {
+			name: "pactOfExtermination",
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1.02,
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable": -1,
+				"necrocornPerDay": 0,
+				"pactFaithRatio":  0.001
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			}
+		}, {
+			name: "pactOfPurity",
+			label: $I("religion.pact.pactOfPurity.label"),
+			description: $I("religion.pact.pactOfPurity.desc"),
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1,
+			// unlocks: {/* "pacts": ["pactOfFlame", "pactOfFanaticism"] */},
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable":          -1,
+				"necrocornPerDay":          0,
+				"pactDeficitRecoveryRatio": 0.005,
+				"pactBlackLibraryBoost":    0.0005
+				// "cathPollutionPerTickCon": -7
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			}
+		}, {
+			name: "payDebt",
+			prices: [
+				{name: "necrocorn", val: 0}
+			],
+			priceRatio: 1,
+			limitBuild: 1,
+			upgrades: {pacts: ["payDebt"]},
+			effects: {
+				"pactsAvailable": 0
+			},
+			special: true
+		}, {
+			name: "fractured",
+			prices: [
+				{name: "catnip", val: 1}
+			],
+			priceRatio: 1,
+			limitBuild: 1,
+			effects: {
+				"pyramidGlobalResourceRatio":   -0.5,
+				"pyramidGlobalProductionRatio": -0.5,
+				"pyramidFaithRatio":            -0.5,
+				"pactsAvailable":                0
+			},
+			special: true
+		}
+	],
+
+	necrocornDeficit: 0,
+	fractureNecrocornDeficit: 50,
+
+	isFractured: false,
 
 	zigguratUpgrades: null,
 	zigguratUpgradesByName: null,
@@ -397,13 +574,27 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 	religionUpgradesByName: null,
 	transcendenceUpgrades: null,
 	transcendenceUpgradesByName: null,
+	pacts: null,
+	pactsByName: null,
 
 	faith: 0,
 	faithRatio: 0,
 	corruption: 0,
 	transcendenceTier: 0,
 
+	//the amount of currently active HG buildings (typically refils during reset)
+	activeHolyGenocide: 0,
+
 	hasTranscendeceUpgrade: false, //cache for getRU("transcendence").owned()
+
+	effectsBase: {
+		"kittensKarmaPerMinneliaRatio": 0.0001, //unspent pacts can make karma
+		"pactNecrocornConsumption":    -0.0005
+	},
+
+	getEffectBase: function (name) {
+		return num(this.effectsBase[name]);
+	},
 
 	tabName: "Religion",
 	leaderBonuses: ["wise"],
@@ -416,10 +607,12 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.registerMetaItems(this.zigguratUpgradesData, classes.KGSaveEdit.ZigguratMeta, "zigguratUpgrades");
 		this.registerMetaItems(this.religionUpgradesData, classes.KGSaveEdit.ReligionMeta, "religionUpgrades");
 		this.registerMetaItems(this.transcendenceUpgradesData, classes.KGSaveEdit.TranscendenceMeta, "transcendenceUpgrades");
+		this.registerMetaItems.call(this, this.pactsData, classes.KGSaveEdit.PactsMeta, "pacts");
 
 		this.addMeta(this.zigguratUpgrades);
 		this.addMeta(this.religionUpgrades);
 		this.addMeta(this.transcendenceUpgrades);
+		this.addMeta(this.pacts);
 	},
 
 	getZU: function (name) {
@@ -446,8 +639,26 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		return upgrade;
 	},
 
+	getPact: function (name) {
+		var pact = this.pactsByName[name];
+		if (name && !pact) {
+			console.error("Pact not found", name);
+		}
+		return pact;
+	},
+
 	getApocryphaBonus: function () {
 		return this.game.getUnlimitedDR(this.faithRatio, 0.1) * 0.1;
+	},
+
+	getHGScalingBonus: function () {
+		//TODO: test this
+		var scalingRatio = this.game.getLimitedDR(this.game.getEffect("simScalingRatio"), 1);
+		if (!scalingRatio /*|| !this.game.village.maxKittensRatioApplied*/) {
+			return 1;
+		}
+
+		return (1 / (1 - this.game.getLimitedDR(this.game.getEffect("maxKittensRatio"), 1))) * (1 + scalingRatio);
 	},
 
 	_getTranscendTotalPrice: function (tier) {
@@ -463,24 +674,72 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		);
 	},
 
-	renderTabBlock: function () {
-		this.zigguratBlock = dojo.create("table", {
-			id: "zigguratBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("religion.panel.ziggurat.label") + "</th></tr>"
-		}, this.tabBlockNode);
-		this.zigguratBlockHeader = this.zigguratBlock.children[0];
+	pactsMilleniumKarmaKittens: function (millennia) {
+		//pacts karma effect
+		/*
+		unspent pacts generate karma each 1000 years based on kitten numbers
+		pactsAvailable are created by mausoleum cryptotheology and radicalXenophobia
+		this function adds appropriate karmaKittens and returns change in karma; temporary logs karma generation
+		TODO: maybe make HG bonus play into this
+		*/
+		var kittens = this.game.resPool.get("kittens").value;
+		var gain = 0;
+		if (kittens > 35 && this.game.getEffect("pactsAvailable") > 0) {
+			var kittensKarmaPerMinneliaRatio = this.game.getEffect("kittensKarmaPerMinneliaRatio");
+			gain = (millennia * this.game._getKarmaKittens(kittens) * this.game.getUnlimitedDR(kittensKarmaPerMinneliaRatio *
+				Math.max(1 + 0.1 * this.game.religion.transcendenceTier - 25, 1) * (this.game.getEffect("pactsAvailable")), 100));
+		}
+		return gain;
+	},
 
-		var table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
+	getCorruptionPerTick: function () {
+		if (this.game.resPool.get("alicorn").owned()) {
+			//30% bls * 20 Radiance should yield ~ 50-75% boost rate which is laughable but we can always buff it
+			var blsBoost = 1 + Math.sqrt(this.game.resPool.get("sorrow").value * this.game.getEffect("blsCorruptionRatio"));
+			var corruptionBoost = (this.game.resPool.get("necrocorn").owned() ?
+				0.25 * (1 + this.game.getEffect("corruptionBoostRatio")) : // 75% penalty
+				1);
+			return this.game.getEffect("corruptionRatio") * blsBoost * corruptionBoost;
+		}
+		return 0;
+	},
+
+	getNecrocornDeficitConsumptionModifier: function () {
+		if (this.necrocornDeficit <= 0) {
+			return 1;
+		}
+		var necrocornDeficitRepaymentModifier = 1;
+		var necrocornPerDay = this.game.getEffect("necrocornPerDay");
+		necrocornDeficitRepaymentModifier = 1 + 0.15 * (1 + this.game.getEffect("deficitRecoveryRatio") / 2);
+		if ((this.game.resPool.get("necrocorn").value + necrocornPerDay * necrocornDeficitRepaymentModifier) < 0) {
+			necrocornDeficitRepaymentModifier = Math.max((necrocornPerDay * necrocornDeficitRepaymentModifier + this.game.resPool.get("necrocorn").value) / necrocornPerDay, 0);
+		}
+		return necrocornDeficitRepaymentModifier;
+	},
+
+	renderTabBlock: function () {
+		var panel = this.game._createPanel(this.tabBlockNode, {
+			id: "zigguratPanel",
+			class: "bottom-margin"
+		}, $I("religion.panel.ziggurat.label"), true);
+		this.zigguratBlock = dojo.create("table", {id: "zigguratBlock"}, panel.content);
+		this.zigguratBlockHeader = panel.header;
+
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "religionPanel",
+			class: "bottom-margin"
+		}, $I("religion.panel.orderOfTheSun.label"), true);
+
+		var table = dojo.create("table", {class: "bottom-margin"}, panel.content);
 
 		var tr = dojo.create("tr", {
-			innerHTML: "<td>" + $I("KGSaveEdit.religion.totalFaith") + '</td><td></td>'
+			innerHTML: "<td>" + $I("KGSaveEdit.religion.totalFaith") + "</td><td></td>"
 		}, table);
 		this.game._createInput({class: "abbrInput"}, tr.children[1], this, "faith");
 		this.solarBonusSpan = dojo.create("span", {id: "solarBonusSpan", class: "leftSpacer"}, tr.children[1]);
 
 		tr = dojo.create("tr", {
-			innerHTML: "<td>" + $I("KGSaveEdit.religion.apocryphaBonus") + '</td><td></td>'
+			innerHTML: "<td>" + $I("KGSaveEdit.religion.apocryphaBonus") + "</td><td></td>"
 		}, table);
 		this.game._createInput({class: "abbrInput"}, tr.children[1], this, "faithRatio");
 		this.apocryphaBonusSpan = dojo.create("span", {id: "apocryphaBonusSpan", class: "leftSpacer"}, tr.children[1]);
@@ -495,51 +754,90 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		}, table);
 		this.game._createInput({class: "integerInput"}, tr.children[1], this, "transcendenceTier");
 
-		this.religionBlock = dojo.create("table", {
-			id: "religionBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("religion.panel.orderOfTheSun.label") + "</th></tr>"
-		}, this.tabBlockNode);
-		this.religionBlockHeader = this.religionBlock.children[0];
+		this.religionBlock = dojo.create("table", {id: "religionBlock"}, panel.content);
+		this.religionBlockHeader = panel.header;
 
-		this.transcendenceBlock = dojo.create("table", {
-			id: "transcendenceBlock",
-			innerHTML: '<tr><th colspan="2">' + $I("religion.panel.cryptotheology.label") + "</th></tr>"
-		}, this.tabBlockNode);
-		this.transcendenceBlockHeader = this.transcendenceBlock.children[0];
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "transcendencePanel",
+			class: "bottom-margin"
+		}, $I("religion.panel.cryptotheology.label"), true);
+
+		this.transcendenceBlock = dojo.create("table", {id: "transcendenceBlock"}, panel.content);
+		this.transcendenceBlockHeader = panel.header;
+
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "pactsPanel"
+		}, "Pacts", true, !this.game.getFeatureFlag("MAUSOLEUM_PACTS"));
+
+		this.pactsBlock = dojo.create("table", {id: "pactsBlock"}, panel.content);
+		this.pactsBlockHeader = panel.header;
+
+		tr = dojo.create("tr", {
+			innerHTML: "<td>" + $I("KGSaveEdit.religion.necrocornDeficit") + "</td><td></td>" //not using resources.necrocornDeficit.title because capitals
+		}, this.pactsBlock);
+		this.game._createInput({class: "abbrInput"}, tr.children[1], this, "necrocornDeficit");
+
+		var div = dojo.create("div", null, panel.content);
+		this.fracturedNode = this.game._createCheckbox($I("religion.pact.fractured.label"), div, this).cbox;
 	},
 
 	render: function () {
-		for (var i = 0, len = this.zigguratUpgrades.length; i < len; i++) {
-			var zu = this.zigguratUpgrades[i];
+		var self = this;
+		for (var i = 0, len = self.zigguratUpgrades.length; i < len; i++) {
+			var zu = self.zigguratUpgrades[i];
 			zu.render();
-			dojo.place(zu.domNode, this.zigguratBlock);
+			dojo.place(zu.domNode, self.zigguratBlock);
 		}
 
-		for (i = 0, len = this.religionUpgrades.length; i < len; i++) {
-			var ru = this.religionUpgrades[i];
+		for (i = 0, len = self.religionUpgrades.length; i < len; i++) {
+			var ru = self.religionUpgrades[i];
 			ru.render();
-			dojo.place(ru.domNode, this.religionBlock);
+			dojo.place(ru.domNode, self.religionBlock);
 		}
 
-		for (i = 0, len = this.transcendenceUpgrades.length; i < len; i++) {
-			var tu = this.transcendenceUpgrades[i];
+		for (i = 0, len = self.transcendenceUpgrades.length; i < len; i++) {
+			var tu = self.transcendenceUpgrades[i];
 			tu.render();
-			dojo.place(tu.domNode, this.transcendenceBlock);
+			dojo.place(tu.domNode, self.transcendenceBlock);
 		}
+
+		for (i = self.pacts.length - 1; i >= 0; i--) { //reversed on purpose
+			var pact = self.pacts[i];
+			pact.render();
+			if (!pact.special) {
+				dojo.place(pact.domNode, self.pactsBlock, "first");
+			}
+		}
+
+		var hg = self.getTU("holyGenocide");
+		hg.domNode.children[2].innerHTML = " &nbsp;" + $I("effectsMgr.statics.activeHG.title") + " ";
+		var input = self.game._createInput({class: "integerInput"}, hg.domNode.children[2], self, "activeHolyGenocide");
+		input.handler = function () {
+			self.game.upgradeItems({transcendenceUpgrades: ["holyGenocide"]});
+		};
 	},
 
 	update: function () {
 		this.hasTranscendeceUpgrade = this.getRU("transcendence").owned(true);
+
+		var pactsFlag = this.game.getFeatureFlag("MAUSOLEUM_PACTS");
+		var deficitOverrun = this.necrocornDeficit >= this.fractureNecrocornDeficit;
+		this.fracturedNode.checked = deficitOverrun || this.fracturedNode.prevChecked;
+		this.game.toggleDisabled(this.fracturedNode, deficitOverrun);
+		this.isFractured = pactsFlag && this.fracturedNode.checked;
+
 		this.game.callMethods(this.zigguratUpgrades, "update");
 		this.game.callMethods(this.religionUpgrades, "update");
 		this.game.callMethods(this.transcendenceUpgrades, "update");
-
-		var isAtheism = this.game.challenges.isActive("atheism");
+		this.game.callMethods(this.pacts, "update");
 
 		dojo.toggleClass(this.zigguratBlockHeader, "spoiler", !this.game.bld.get("ziggurat").owned());
-		dojo.toggleClass(this.religionBlockHeader, "spoiler", isAtheism);
-		dojo.toggleClass(this.transcendenceBlockHeader, "spoiler", isAtheism || !this.game.science.get("cryptotheology").owned());
+		dojo.toggleClass(this.religionBlockHeader, "spoiler", this.game.challenges.isActive("atheism"));
+		dojo.toggleClass(this.transcendenceBlockHeader, "spoiler", !this.transcendenceTier || !this.game.science.get("cryptotheology").owned());
+
+		var canSeePacts = this.getZU("blackPyramid").owned() && (this.getTU("mausoleum").owned() || this.game.science.getPolicy("radicalXenophobia").owned());
+		canSeePacts = canSeePacts && pactsFlag;
+		dojo.toggleClass(this.pactsBlockHeader, "spoiler", !canSeePacts);
 
 		var text = "";
 
@@ -554,24 +852,31 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 	},
 
 	save: function (saveData) {
-		var isAtheism = this.game.challenges.isActive("atheism");
+		var self = this;
+		var isAtheism = self.game.challenges.isActive("atheism");
 
 		saveData.religion = {
-			// faith: isAtheism ? 0 : this.faith,
-			faith: this.faith,
-			corruption: this.corruption,
-			faithRatio: this.faithRatio,
-			transcendenceTier: this.transcendenceTier,
+			faith: self.faith,
+			corruption: self.corruption,
+			faithRatio: self.faithRatio,
+			transcendenceTier: self.transcendenceTier,
+			activeHolyGenocide: self.activeHolyGenocide,
+			necrocornDeficit: self.necrocornDeficit,
 			// Duplicated save, for older versions like mobile
-			tcratio: this._getTranscendTotalPrice(this.transcendenceTier),
-			zu: this.game.filterMetadata(this.zigguratUpgrades, ["name", "val", "on", "unlocked"]),
-			ru: this.game.filterMetadata(this.religionUpgrades, ["name", "val", "on"], function (saveRU) {
+			tcratio: self._getTranscendTotalPrice(self.transcendenceTier),
+			zu: self.game.filterMetadata(self.zigguratUpgrades, ["name", "val", "on", "unlocked"]),
+			ru: self.game.filterMetadata(self.religionUpgrades, ["name", "val", "on"], function (saveRU) {
 				if (isAtheism) {
 					saveRU.val = 0;
 					saveRU.on = 0;
 				}
 			}),
-			tu: this.game.filterMetadata(this.transcendenceUpgrades, ["name", "val", "on", "unlocked"])
+			tu: self.game.filterMetadata(self.transcendenceUpgrades, ["name", "val", "on", "unlocked"]),
+			pact: self.game.filterMetadata(self.pacts, ["name", "val", "on", "unlocked"], function (savePact) {
+				var on = this.getOn();
+				savePact.val = on;
+				savePact.on =  on;
+			})
 		};
 	},
 
@@ -583,6 +888,8 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.set("faith", num(saveData.religion.faith));
 		this.set("corruption", num(saveData.religion.corruption));
 		this.set("faithRatio", num(saveData.religion.faithRatio));
+		this.set("activeHolyGenocide", num(saveData.religion.activeHolyGenocide));
+		this.set("necrocornDeficit", num(saveData.religion.necrocornDeficit));
 		var transcendenceTier = num(saveData.religion.transcendenceTier);
 		// Read old save
 		if (transcendenceTier == 0 && saveData.religion.tcratio > 0) {
@@ -593,6 +900,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		this.loadMetadata(saveData, "religion.zu", "getZU", null, true);
 		this.loadMetadata(saveData, "religion.ru", "getRU", null, true);
 		this.loadMetadata(saveData, "religion.tu", "getTU", null, true);
+		this.loadMetadata(saveData, "religion.pact", "getPact", null, true);
 	}
 });
 
@@ -629,6 +937,10 @@ dojo.declare("classes.KGSaveEdit.ZigguratMeta", classes.KGSaveEdit.MetaItemStack
 		this.updateEnabled();
 		this.unlocked = this.game.checkRequirements(this);
 		dojo.toggleClass(this.nameNode, "spoiler", !this.unlocked);
+
+		if (this.action) {
+			this.action(this, this.game);
+		}
 	},
 
 	load: function (saveData) {
@@ -695,7 +1007,7 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 
 		this.domNode = dojo.create("tr", {
 			class: "religionUpgrade",
-			innerHTML: "<td>" + (this.label || this.name) + "</td><td></td>"
+			innerHTML: "<td>" + (this.label || this.name) + '</td><td></td><td class="invisible"></td>'
 		});
 		this.nameNode = this.domNode.children[0];
 
@@ -717,6 +1029,18 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 			this.metaObj.on = this.parsedValue;
 		};
 
+		// create dummy elements to prevent the rendering from jumping around as you toggle transcendence
+		dojo.create("input", {
+			type: "checkbox",
+			disabled: true,
+			class: "invisible"
+		}, this.domNode.children[2]);
+		dojo.create("input", {
+			type: "text",
+			disabled: true,
+			class: "invisible"
+		}, this.domNode.children[2]);
+
 		this.registerHighlight(this.domNode);
 		this.registerTooltip(this.domNode);
 	},
@@ -727,7 +1051,7 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 
 		var t = Boolean(this.upgradable && this.game.religion.hasTranscendeceUpgrade);
 		dojo.toggleClass(this.ownedCheckbox.parentNode, "hidden", t);
-		dojo.toggleClass(this.valNode, "invisible", !t);
+		dojo.toggleClass(this.valNode, "hidden", !t);
 	},
 
 	load: function (saveData) {
@@ -737,6 +1061,7 @@ dojo.declare("classes.KGSaveEdit.ReligionMeta", classes.KGSaveEdit.MetaItemStack
 
 
 dojo.declare("classes.KGSaveEdit.TranscendenceMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "transcendenceUpgrades",
 	unlocked: false,
 
 	constructor: function () {
@@ -754,26 +1079,127 @@ dojo.declare("classes.KGSaveEdit.TranscendenceMeta", classes.KGSaveEdit.MetaItem
 
 		this.domNode = dojo.create("tr", {
 			class: "transcendenceUpgrade",
-			innerHTML: "<td>" + (this.label || this.name) + "</td><td></td>"
+			innerHTML: "<td>" + (this.label || this.name) + '</td><td class="rightAlign"></td><td></td>'
 		});
 		this.nameNode = this.domNode.children[0];
+
+		this.onNodeSpan = dojo.create("span", {innerHTML: " / "}, this.domNode.children[1]);
+
+		this.game._createInput({
+			class: "integerInput ownedInput",
+			title: $I("KGSaveEdit.buildings.on.title")
+		}, this.onNodeSpan, this, "on", "first");
 		this.game._createValInput(null, this.domNode.children[1], this);
 
 		this.registerHighlight(this.domNode);
 		this.registerTooltip(this.domNode);
 	},
 
+	getEffect: function (effectName) {
+		var effectValue = this.effects[effectName] || 0;
+		if (this.name === "holyGenocide") {
+			return effectValue * this.game.religion.activeHolyGenocide;
+		}
+		return effectValue * this.getOn();
+	},
+
 	update: function () {
 		this.updateEnabled();
-		this.unlocked = this.game.religion.transcendenceTier >= this.tier;
+		var unlocked = this.game.religion.transcendenceTier >= this.tier;
+		if (unlocked && this.requires) {
+			unlocked = this.game.checkRequirements(this);
+		}
+		this.unlocked = unlocked;
 		dojo.toggleClass(this.nameNode, "spoiler", !this.unlocked);
+		dojo.toggleClass(this.onNodeSpan, "hidden", !this.togglable);
 	},
 
 	load: function (saveData) {
 		this.set("val", num(saveData.val));
+		this.set("on", num(saveData.on));
 		this.set("unlocked", Boolean(saveData.unlocked));
 	}
 });
 
+
+dojo.declare("classes.KGSaveEdit.PactsMeta", classes.KGSaveEdit.MetaItemStackable, {
+	upgradeType: "pacts",
+
+	constructor: function () {
+		this.i18nKeys = {
+			label: "religion.pact." + this.name + ".label",
+			description: "religion.pact." + this.name + ".desc"
+		};
+	},
+
+	owned: function () {
+		return this.getOn() > 0;
+	},
+
+	getOn: function () {
+		if (this.name === "fractured") {
+			return this.game.religion.isFractured ? 1 : 0;
+		}
+		if (this.game.religion.isFractured) {
+			return 0;
+		}
+		if (this.name === "payDebt") {
+			return this.game.religion.necrocornDeficit > 0 ? 1 : 0;
+		}
+		var on = this.val;
+		if (typeof this.limitBuild === "number") {
+			on = Math.min(on, this.limitBuild);
+		}
+		return on;
+	},
+
+	getEffect: function (effectName) {
+		if (!this.game.getFeatureFlag("MAUSOLEUM_PACTS")) {
+			return 0;
+		}
+		return num(this.effects[effectName]) * this.getOn();
+	},
+
+	render: function () {
+		this.seti18n();
+
+		this.domNode = dojo.create("tr", {
+			class: "pact",
+			innerHTML: "<td>" + (this.label || this.name) + '</td><td></td>'
+		});
+		this.nameNode = this.domNode.children[0];
+
+		this.game._createValInput(null, this.domNode.children[1], this);
+
+		if (!this.special) {
+			this.registerHighlight(this.domNode);
+			this.registerTooltip(this.domNode);
+		}
+	},
+
+	updateEnabled: function () {
+		if (!this.special) {
+			var prices = this.getPrices() || [];
+			var limited = this.game.resPool.isStorageLimited(prices);
+			var buildLimited = this.game.religion.isFractured || this.game.getEffect("pactsAvailable") <= 0 || typeof this.limitBuild === "number" && this.limitBuild <= this.val;
+			dojo.toggleClass(this.nameNode, "limited", this.game.opts.highlightUnavailable && limited);
+			dojo.toggleClass(this.nameNode, "btnDisabled", limited || buildLimited || !this.game.resPool.hasRes(prices));
+		}
+	},
+
+	update: function () {
+		this.updateEnabled();
+		if (this.special) {
+			this.unlocked = this.getOn() > 0;
+		} else {
+			this.unlocked = this.game.checkRequirements(this, false);
+			dojo.toggleClass(this.nameNode, "spoiler", this.game.religion.isFractured || !this.unlocked);
+		}
+	},
+
+	load: function (saveData) {
+		this.set("val", num(saveData.val));
+	}
+});
 
 });

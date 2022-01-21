@@ -3,7 +3,6 @@
 require(["dojo/on"], function (on) {
 "use strict";
 
-
 dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 	options: [
 		{
@@ -66,6 +65,10 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			descKey: "ui.option.enable.redshift",
 			src: "game.opts"
 		}, {
+			name: "disablePollution",
+			descKey: "ui.option.pollution",
+			src: "game.opts"
+		}, {
 			name: "enableRedshiftGflops",
 			desc: "Enable offline gflops production",
 			// descKey: "ui.option.enable.redshiftGflops",
@@ -114,86 +117,93 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		{name: "bluish"},
 		{name: "grayish"},
 		{name: "greenish"},
+		{name: "tombstone"},
+		{name: "spooky"},
 		{
 			name: "gold",
-			condition: function () {
-				return this.game.bld.get("mint").val >= 24;
+			condition: function (game) {
+				return game.bld.get("mint").val >= 24;
 			}
 		}, {
 			name: "space",
-			condition: function () {
-				return this.game.space.getProgram("sattelite").val >= 24;
+			condition: function (game) {
+				return game.space.getProgram("sattelite").val >= 24;
 			}
 		}, {
 			name: "school",
-			condition: function () {
-				return this.game.bld.get("academy").val >= 68;
+			condition: function (game) {
+				return game.bld.get("academy").val >= 68;
 			}
 		}, {
 			name: "fluid",
-			condition: function () {
-				return this.game.space.getProgram("hydrofracturer").val >= 10;
+			condition: function (game) {
+				return game.space.getProgram("hydrofracturer").val >= 10;
 			}
 		}, {
 			name: "vessel",
-			condition: function () {
-				return this.game.space.getProgram("researchVessel").val >= 20;
+			condition: function (game) {
+				return game.space.getProgram("researchVessel").val >= 20;
 			}
 		}, {
 			name: "minimalist",
-			condition: function () {
-				return this.game.bld.get("warehouse").val >= 10;
+			condition: function (game) {
+				return game.bld.get("warehouse").val >= 10;
 			}
 		}, {
 			name: "oil",
-			condition: function () {
-				return this.game.bld.get("oilWell").val >= 73;
+			condition: function (game) {
+				return game.bld.get("oilWell").val >= 73;
 			}
 		}, {
 			name: "unicorn",
-			condition: function () {
-				return this.game.religion.getZU("unicornUtopia").val >= 1;
+			condition: function (game) {
+				return game.religion.getZU("unicornUtopia").val >= 1;
 			}
 		}, {
 			name: "anthracite",
-			condition: function () {
-				return this.game.bld.get("mine").val >= 92;
+			condition: function (game) {
+				return game.bld.get("mine").val >= 92;
 			}
 		}, {
 			name: "chocolate",
-			condition: function () {
-				return this.game.bld.get("brewery").val >= 10;
+			condition: function (game) {
+				return game.bld.get("brewery").val >= 10;
 			}
 		}, {
 			name: "vintage",
-			condition: function () {
-				return this.game.time.getVSU("chronocontrol").val >= 1;
+			condition: function (game) {
+				return game.time.getVSU("chronocontrol").val >= 1;
 			}
 		}, {
 			name: "computer",
-			condition: function () {
-				var bld = this.game.bld.get("library");
+			condition: function (game) {
+				var bld = game.bld.get("library");
 				return bld.stage === 1 && bld.val >= 100;
 			}
 		}, {
 			name: "arctic",
-			condition: function () {
-				return this.game.space.getBuilding("cryostation").val >= 10;
+			condition: function (game) {
+				return game.space.getBuilding("cryostation").val >= 10;
 			}
 		}, {
 			name: "cyber",
-			condition: function () {
-				return this.game.bld.get("aiCore").val >= 5;
+			condition: function (game) {
+				return game.bld.get("aiCore").val >= 5;
 			}
 		}, {
 			name: "factory",
-			condition: function () {
-				return this.game.bld.get("factory").val >= 20;
+			condition: function (game) {
+				return game.bld.get("factory").val >= 20;
 			}
 		}, {
 			name: "catnip",
-			condition: function () {
-				return this.game.bld.get("field").val >= 56;
+			condition: function (game) {
+				return game.bld.get("field").val >= 56;
+			}
+		}, {
+			name: "dune",
+			condition: function (game) {
+				return game.space.getBuilding("spiceRefinery").val >= 10;
 			}
 		}
 	],
@@ -219,8 +229,11 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		dojo.place(game.calendar.domNode, this.tabBlockNode);
 
 		// schemes
-		var table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
-		dojo.create("tr", {innerHTML: '<th colspan="3">' + $I("KGSaveEdit.opts.colorScheme.header") + "</th>"}, table);
+		var panel = game._createPanel(this.tabBlockNode, {
+			id: "colorSchemePanel",
+			class: "bottom-margin"
+		}, $I("KGSaveEdit.opts.colorScheme.header"), true);
+		var table = dojo.create("table", {id: "colorSchemeBlock"}, panel.content);
 
 		for (var i = 0; i < this.schemes.length; i++) {
 			var scheme = this.schemes[i];
@@ -247,10 +260,15 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			}
 		}
 
+		panel = game._createPanel(this.tabBlockNode, {
+			id: "optionsPanel",
+			class: "bottom-margin"
+		}, $I("menu.options"), true);
+
 		var div = dojo.create("div", {
 			class: "bottom-margin",
 			innerHTML: $I("KGSaveEdit.opts.notation") + " "
-		}, this.tabBlockNode);
+		}, panel.content);
 
 		var select = dojo.create("select", null, div);
 		for (i = 0; i < this.notations.length; i++) {
@@ -275,7 +293,7 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 
 			div = dojo.create("div", {
 				"data-option-name": option.name
-			}, this.tabBlockNode);
+			}, panel.content);
 
 			var desc = option.desc || "";
 			if (option.descKey) {
@@ -304,8 +322,13 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			}
 		}
 
-		// Dead Kittens & Karma
+		// misc stuff like dead Kittens & Karma
 		table = dojo.create("table", {class: "bottom-margin"}, this.tabBlockNode);
+
+		tr = dojo.create("tr", {
+			innerHTML: "<td>" + $I("KGSaveEdit.opts.lastBackup") + "</td><td></td>"
+		}, table);
+		game._createTimeInput(null, tr.children[1], game, "lastBackup");
 
 		tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("pollution.label") + "</td><td>ppm</td>"
@@ -320,12 +343,10 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		}, table);
 		game._createInput({class: "integerInput"}, tr.children[1], game, "deadKittens");
 
-		tr = dojo.create("tr", {
-			innerHTML: "<td>karmaKittens</td><td>&nbsp; &harr; &nbsp;</td>"
-		}, table);
+		tr = dojo.create("tr", {innerHTML: "<td>karmaKittens</td><td>&nbsp; &harr; &nbsp;</td>"}, table);
 		var td = tr.children[1];
 
-		game._createInput({id: "karmaKittensNode", class: "integerInput"},
+		game._createInput({id: "karmaKittensNode", class: "abbrInput"},
 			td, game, "karmaKittens", "first");
 		game.karmaKittensKarma = game._createInput({class: "abbrInput"}, td);
 		dojo.place(document.createTextNode(" " + $I("resources.karma.title")), td);
@@ -337,11 +358,11 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 		};
 
 		game.karmaKittensKarma.parseFn = function (value) {
-			return game.getUnlimitedDR(Math.round(game.getInverseUnlimitedDR(value, 5)), 5);
+			return game.getKarma(game.getKarmaKittens(value), 5);
 		};
 		game.karmaKittensKarma.handler = function () {
 			game.resPool.get("karma").set("value", this.parsedValue, true);
-			game.setInput(game.karmaKittensNode, Math.round(game.getInverseUnlimitedDR(this.parsedValue, 5)), true);
+			game.setInput(game.karmaKittensNode, game.getKarmaKittens(this.parsedValue), true);
 		};
 
 		tr = dojo.create("tr", {innerHTML: "<td>karmaZebras</td><td><td>"}, table);
@@ -359,7 +380,7 @@ dojo.declare("classes.KGSaveEdit.OptionsTab", classes.KGSaveEdit.UI.Tab, {
 			var scheme = this.schemes[i];
 
 			if (scheme.condition) {
-				var conditionMet = scheme.condition();
+				var conditionMet = scheme.condition(this.game);
 				scheme.set("unlocked", conditionMet || scheme.unlockedNode.prevChecked, true);
 				this.game.toggleDisabled(scheme.unlockedNode, conditionMet);
 			}
@@ -564,7 +585,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	yearsPerCycle: null,
 	darkFutureBeginning: 40000,
 
-	refYear: 0, //to be used to calculate millenium paragon
+	refYear: 0, //to be used to calculate millennium paragon
 
 	season: 0,
 	cycle: 0,
@@ -642,12 +663,13 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 		var game = self.game;
 
 		var i, len;
-		var table = dojo.create("table", {
-			id: "calendarBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("KGSaveEdit.opts.calendar.header") + "</th></tr>"
-		});
-		self.domNode = table;
+
+		var panel = game._createPanel(null, {
+			id: "calendarPanel",
+			class: "bottom-margin"
+		}, $I("KGSaveEdit.opts.calendar.header"), true);
+		self.domNode = panel.panel;
+		var table = dojo.create("table", {id: "calendarBlock"}, panel.content);
 
 		var tr = dojo.create("tr", {
 			innerHTML: "<td>" + $I("KGSaveEdit.opts.calendar.year") + "</td><td></td>"
@@ -658,17 +680,28 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 
 		dojo.place(document.createTextNode(" \u00A0"), td); //insert &nbsp; equivalent
 
-		self.milleniumParagonSpan = dojo.create("a", {
-			id: "milleniumParagonSpan",
+		self.millenniumParagonSpan = dojo.create("a", {
+			id: "millenniumParagonSpan",
 			href: "#",
 			class: "hidden",
 			innerHTML: "(+0 paragon)"
 		}, td);
 
-		on(self.milleniumParagonSpan, "click", function () {
-			var paragon = game.resPool.get("paragon");
-			paragon.set("value", paragon.value + Math.floor(Math.max(self.year - self.refYear, 0) / 1000));
-			self.refYear = self.year;
+		on(self.millenniumParagonSpan, "click", function () {
+			var millennia = Math.floor(Math.max(self.year - self.refYear, 0) / 1000);
+			if (millennia > 0) {
+				var paragon = game.resPool.get("paragon");
+				paragon.set("value", paragon.value + millennia);
+				var paragonStat = game.stats.getStat("totalParagon");
+				paragonStat.set("val", paragonStat.val + millennia);
+
+				var karmaKittensGain = game.religion.pactsMilleniumKarmaKittens(millennia);
+				if (karmaKittensGain > 0) {
+					var karma = game.resPool.get("karma");
+					karma.set("value", game.getKarma(game.karmaKittens + karmaKittensGain));
+				}
+				self.refYear = self.year;
+			}
 			game.update();
 		});
 
@@ -726,7 +759,7 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 		}, table);
 		var select = dojo.create("select", {
 			id: "weatherSel",
-			innerHTML: '<option value="">---</option><option value="warm">' + $I("calendar.weather.warm") + '</option><option value="cold">' + $I("calendar.weather.cold") + '</option>'
+			innerHTML: '<option value="">---</option><option value="warm">' + $I("calendar.weather.warm") + '</option><option value="cold">' + $I("calendar.weather.cold") + "</option>"
 		}, tr.children[1]);
 		select.defaultVal = "";
 		game._pairInput(select, self, "weather");
@@ -873,9 +906,17 @@ dojo.declare("classes.KGSaveEdit.Calendar", classes.KGSaveEdit.TooltipItem, {
 	},
 
 	update: function () {
-		var paragon = Math.floor(Math.max(this.year - this.refYear, 0) / 1000);
-		this.milleniumParagonSpan.innerHTML = "(" + $I("KGSaveEdit.opts.calendar.milleniumParagon", [paragon]) + ")";
-		dojo.toggleClass(this.milleniumParagonSpan, "hidden", !paragon);
+		var millennia = Math.floor(Math.max(this.year - this.refYear, 0) / 1000);
+		var paragonStr = "---";
+		if (millennia > 0) {
+			paragonStr = $I("KGSaveEdit.opts.calendar.millenniumParagon", [millennia]);
+			var karmaKittensGain = this.game.religion.pactsMilleniumKarmaKittens(millennia);
+			if (karmaKittensGain > 0) {
+				paragonStr += ", " + $I("KGSaveEdit.opts.calendar.millenniumKarmaKittens", [this.game.getDisplayValueExt(karmaKittensGain)]);
+			}
+		}
+		this.millenniumParagonSpan.innerHTML = "(" + paragonStr  + ")";
+		dojo.toggleClass(this.millenniumParagonSpan, "hidden", !millennia);
 
 		this.dayNode.minValue = -10 - this.game.getEffect("temporalParadoxDay");
 		this.set("day", this.day); //refresh value
@@ -930,7 +971,8 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 		"alicornCorruption":  {},
 		"tcShatter":          {},
 		"tcRefine":           {},
-		"faith":              {}
+		"faith":              {},
+		"elders":             {}
 	},
 
 	filters: null,
@@ -948,11 +990,13 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 	render: function () {
 		var game = this.game;
 
-		this.domNode = dojo.create("table", {
-			id: "logFiltersBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("KGSaveEdit.console.filter.header") + "</th></tr>"
-		});
+		var panel = game._createPanel(null, {
+			id: "logFiltersPanel",
+			class: "bottom-margin"
+		}, $I("KGSaveEdit.console.filter.header"), true);
+		this.domNode = panel.panel;
+		var table = dojo.create("table", {id: "logFiltersBlock"}, panel.content);
+
 		for (var tag in this.filters) {
 			var filter = this.filters[tag];
 
@@ -964,7 +1008,7 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 			var tr = dojo.create("tr", {
 				class: "logFilter",
 				innerHTML: "<td>" + title + "</td><td></td>"
-			}, this.domNode);
+			}, table);
 			game._createCheckbox($I("KGSaveEdit.label.unlocked"), tr.children[1], filter, "unlocked");
 			game._createCheckbox($I("KGSaveEdit.opts.msgfilter.enabled"), tr.children[1], filter, "enabled");
 		}
@@ -1128,7 +1172,8 @@ dojo.declare("classes.KGSaveEdit.DiplomacyManager", [classes.KGSaveEdit.UI.Tab, 
 		}
 
 		race = this.get("leviathans");
-		var markerCap = this.game.religion.getZU("marker").val * 5 + 5;
+		var markerCap = Math.floor((this.game.religion.getZU("marker").getEffectiveValue(this.game) * 5 + 5) *
+			(1 + this.game.getEffect("leviathansEnergyModifier")));
 		race.energyMaxSpan.textContent = markerCap;
 
 		if (race.energy > markerCap) {
@@ -1317,20 +1362,25 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab,
 		}, {
 			name: "1000Years",
 			// requires shattering a time crystal to unlock and to complete so
+			// unlocks: {chronoforge: ["temporalPress"]},
+			upgrades: {chronoforge: ["temporalPress"]},
 			effects: {
 				"shatterCostReduction":        -0.02,
 				"shatterCostIncreaseChallenge": 0,
-				"shatterVoidCost":              0
+				"shatterVoidCost":              0,
+				"temporalPressCap":             0
 			},
 			calculateEffects: function (self) {
 				if (self.active) {
 					self.effects["shatterCostReduction"] =         0;
 					self.effects["shatterCostIncreaseChallenge"] = 0.5;
 					self.effects["shatterVoidCost"] =              0.4;
+					self.effects["temporalPressCap"] =             0;
 				} else {
 					self.effects["shatterCostReduction"] =        -0.02;
 					self.effects["shatterCostIncreaseChallenge"] = 0;
 					self.effects["shatterVoidCost"] =              0;
+					self.effects["temporalPressCap"] =             5;
 				}
 			}
 		}, {
@@ -1382,6 +1432,26 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab,
 				// game.upgradeItems(self.upgrades); // don't need the game's hack
 			},
 			upgrades: {upgrades: ["compositeBow", "crossbow", "railgun"]}
+		}, {
+			name: "postApocalypse",
+			requires: {transcendenceUpgrades: ["holyGenocide"]},
+			effects: {
+				"arrivalSlowdown":    0, //additive with pollution
+				"cryochamberSupport": 1
+			},
+			calculateEffects: function (self) {
+				if (self.active) {
+					self.effects["arrivalSlowdown"] =    10;
+					self.effects["cryochamberSupport"] = 0;
+				} else {
+					self.effects["arrivalSlowdown"] =    0;
+					self.effects["cryochamberSupport"] = 1;
+				}
+			},
+			checkCompletionCondition: function (game) {
+				return game.bld.cathPollution == 0;
+			},
+			flavor: true
 		}
 	],
 
@@ -1501,10 +1571,17 @@ dojo.declare("classes.KGSaveEdit.ChallengeMeta", classes.KGSaveEdit.MetaItem, {
 			description: "challendge." + this.name + ".desc",
 			effectDesc: "challendge." + this.name + ".effect.desc"
 		};
+		if (this.flavor) {
+			this.i18nKeys.flavor = "challendge." + this.name + ".flavor";
+		}
 	},
 
 	handler: function () {
 		this.game.calculateAllEffects();
+	},
+
+	owned: function () {
+		return this.on > 0 && !this.active;
 	},
 
 	getEffect: function (effectName) {
@@ -1629,13 +1706,15 @@ dojo.declare("classes.KGSaveEdit.ui.ToolbarIcon", classes.KGSaveEdit.TooltipItem
 	game: null,
 	container: null,
 
+	iconClass: null,
+
 	constructor: function (game) {
 		this.game = game;
 	},
 
 	render: function (container) {
 		this.container = dojo.create("span", {
-			className: "toolbarIcon"
+			className: "toolbarIcon" + (this.iconClass ? " " + this.iconClass : "")
 		}, container);
 
 		this.registerTooltip(this.container);
@@ -1655,10 +1734,12 @@ dojo.declare("classes.KGSaveEdit.ui.ToolbarIcon", classes.KGSaveEdit.TooltipItem
 
 
 dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarPollution", classes.KGSaveEdit.ui.ToolbarIcon, {
+	iconClass: "pollutionIcon",
+
 	update: function () {
 		var hasEcology = this.game.science.get("ecology").owned();
-		dojo.toggleClass(this.container, "hidden", this.game.bld.cathPollution <= 100000 && !hasEcology);
-		this.container.innerHTML = "🏭" + (hasEcology ? (" " + this.getPollutionMod()) : "");
+		dojo.toggleClass(this.container, "hidden", this.game.disablePollution || (this.game.bld.cathPollution <= 100000 && !hasEcology));
+		this.container.innerHTML = '<span class="pollutionText">' + (hasEcology ? (" " + this.getPollutionMod()) : "") + "</span>";
 	},
 
 	getTooltip: function () {
@@ -1709,9 +1790,11 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarPollution", classes.KGSaveEdi
 
 
 dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdit.ui.ToolbarIcon, {
+	iconClass: "happiness",
+
 	update: function () {
 		dojo.toggleClass(this.container, "hidden", this.game.village.getKittens() <= 5);
-		this.container.innerHTML = "(:3)&nbsp;" + Math.floor(this.game.village.happiness * 100) + "%";
+		this.container.innerHTML = '<span class="happinessText">' + Math.floor(this.game.village.happiness * 100) + "%</span>";
 		dojo.addClass(this.container, "coral");
 	},
 
@@ -1750,7 +1833,8 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 		}
 
 		if (this.game.calendar.festivalDays > 0) {
-			html += $I("village.happiness.festival") + ": +30%<br>";
+			var festivalHappinessEffect = 30 * (1 + this.game.getEffect("festivalRatio"));
+			html += $I("village.happiness.festival") + ": +" + this.game.getDisplayValueExt(festivalHappinessEffect, false, false, 0) + "%<br>";
 		}
 
 		var unhappiness = this.game.village.getUnhappiness() / (1 + this.game.getEffect("unhappinessRatio"));
@@ -1778,16 +1862,17 @@ dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarHappiness", classes.KGSaveEdi
 
 
 dojo.declare("classes.KGSaveEdit.ui.toolbar.ToolbarEnergy", classes.KGSaveEdit.ui.ToolbarIcon, {
+	iconClass: "energy",
+
 	update: function () {
 		dojo.toggleClass(this.container, "hidden", !this.game.science.get("electricity").owned());
 
 		var resPool = this.game.resPool;
 		var energy = resPool.energyProd - resPool.energyCons;
-		this.container.innerHTML = "&#9889;&nbsp;" + this.game.getDisplayValueExt(energy) + "Wt";
+		this.container.innerHTML = '<span class="energyText">' + this.game.getDisplayValueExt(energy) + "Wt</span>";
 
-		dojo.toggleClass(this.container, "green", energy >= 0 && resPool.energyWinterProd >= resPool.energyCons);
-		dojo.toggleClass(this.container, "coral", energy >= 0 && resPool.energyWinterProd < resPool.energyCons);
-		dojo.toggleClass(this.container, "red", energy < 0);
+		dojo.toggleClass(this.container, "warning", energy < 0);
+		dojo.toggleClass(this.container, "warningWinter", energy >= 0 && resPool.energyWinterProd < resPool.energyCons);
 	},
 
 	getTooltip: function () {
@@ -1831,7 +1916,7 @@ dojo.declare("classes.KGSaveEdit.Telemetry", null, {
 		self.domNode = dojo.create("div", {
 			"id": "telemetryNode",
 			class: "bottom-margin",
-			innerHTML: $I("KGSaveEdit.opts.saveID") + ': <span class="monospace">' + self.guid + '</span> &nbsp;'
+			innerHTML: $I("KGSaveEdit.opts.saveID") + ': <span class="monospace">' + self.guid + "</span> &nbsp;"
 		});
 
 		self.guidNode = self.domNode.children[0];
@@ -1855,8 +1940,8 @@ dojo.declare("classes.KGSaveEdit.Telemetry", null, {
 
 	// See https://www.ietf.org/rfc/rfc4122.txt, section 4.4
 	generateGuid: function () {
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-			return (c == 'x' ? 16 * Math.random() | 0 : 4 * Math.random() | 8).toString(16);
+		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+			return (c == "x" ? 16 * Math.random() | 0 : 4 * Math.random() | 8).toString(16);
 		});
 	},
 

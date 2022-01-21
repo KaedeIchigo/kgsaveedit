@@ -267,10 +267,14 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.3,
 			requires: {tech: ["math"]},
 			effects: {
-				"scienceRatio": 0.2,
-				"skillXP":      0.0005,
-				"scienceMax":   500,
-				"cultureMax":   25
+				"scienceRatio":       0.2,
+				"skillXP":            0.0005,
+				"scienceMax":         500,
+				"cultureMax":         25,
+				"academyMeteorBonus": 0
+			},
+			calculateEffects: function (self, game) {
+				self.effects["academyMeteorBonus"] = game.workshop.getZebraUpgrade("minerologyDepartment").owned() ? 0.01 : 0;
 			},
 			flavor: true
 			// unlockScheme: {name: "school", threshold: 68}
@@ -321,11 +325,11 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			requires: {tech: ["biology"]},
 			upgrades: {buildings: ["library"]},
 			effects: {
-				"scienceRatio": 0.35,
-				"refineRatio": 0.1,
-				"scienceMax": 1500,
-				"catnipPerTickCon": 0,
-				"oilPerTickProd": 0,
+				"scienceRatio":      0.35,
+				"refineRatio":       0.1,
+				"scienceMax":        1500,
+				"catnipPerTickCon":  0,
+				"oilPerTickProd":    0,
 				"energyConsumption": 0
 			},
 			effectsCalculated: {},
@@ -570,12 +574,12 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			effectsCalculated: {},
 			calculateEffects: function (self, game) {
 				self.effects = {
-					"woodPerTickCon":          0,
-					"mineralsPerTickCon":      0,
-					"coalPerTickAutoprod":     0,
-					"ironPerTickAutoprod":     0.02,
-					"titaniumPerTickAutoprod": 0,
-					"goldPerTickAutoprod":     0,
+					"woodPerTickCon":           0,
+					"mineralsPerTickCon":       0,
+					"coalPerTickAutoprod":      0,
+					"ironPerTickAutoprod":      0.02,
+					"titaniumPerTickAutoprod":  0,
+					"goldPerTickAutoprod":      0,
 					"cathPollutionPerTickProd": 0.15
 				};
 
@@ -917,6 +921,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					}
 				}
 
+				if (self.isAutomationEnabled) {
+					effects["energyConsumption"] *= 2;
+				}
 				effects["cathPollutionPerTickProd"] = pollutionProd;
 				effects["cathPollutionPerTickCon"] = pollutionCons;
 
@@ -1049,20 +1056,14 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			requires: {tech: ["architecture"]},
 			togglable: true,
 			effects: {
-				"manpowerPerTickCon": 0,
-				"goldPerTickCon":     0,
-				"fursPerTickProd":    0,
-				"ivoryPerTickProd":   0,
-				"goldMax":            0
+				"goldPerTickCon":     -0.005,
+				"manpowerPerTickCon": -0.75,
+				"fursPerTickProd":     0.00875,
+				"ivoryPerTickProd":    0.0021,
+				"goldMax":             100
 			},
 			calculateEffects: function (self, game) {
-				self.effects = {
-					"goldPerTickCon":     0,
-					"manpowerPerTickCon": 0,
-					"fursPerTickProd":    0,
-					"ivoryPerTickProd":   0,
-					"goldMax":            100 * (1 + game.getEffect("warehouseRatio"))
-				};
+				self.effects["goldMax"] = 100 * (1 + game.getEffect("warehouseRatio"));
 			},
 			action: function (self, game) {
 				var on = self.getOn();
@@ -1083,7 +1084,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				self.effects["ivoryPerTickProd"] = mpratio * 0.3;  //1.5
 
 				var amt = game.resPool.getAmtDependsOnStock(
-					[{res: "gold",      amt: -self.effects["goldPerTickCon"]},
+					[{res: "gold",    amt: -self.effects["goldPerTickCon"]},
 					{res: "manpower", amt: -self.effects["manpowerPerTickCon"]}],
 					on
 				);
@@ -1392,7 +1393,14 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			requires: {tech: ["animal"]},
 			zebraRequired: 5,
 			effects: {
-				"hunterRatio": 0.05
+				"hunterRatio":       0.05,
+				"zebraPreparations": 0
+			},
+			calculateEffects: function (self, game) {
+				self.effects["zebraPreparations"] = 0;
+				if (game.workshop.getZebraUpgrade("darkRevolution").owned()) {
+					self.effects["zebraPreparations"] = game.ironWill ? 1 : 0.1;
+				}
 			}
 		}, {
 			name: "zebraWorkshop",
@@ -1403,7 +1411,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.01,
 			requires: {tech: ["animal"]},
 			zebraRequired: 10,
-			effects: {}
+			// unlocks: {zebraUpgrades:["darkRevolution"]},
+			effects: {
+				// "bloodstoneCraftRatio" : 0.01
+			}
 		}, {
 			name: "zebraForge",
 			prices: [
@@ -1413,7 +1424,65 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			unlockRatio: 0.01,
 			requires: {tech: ["animal"]},
 			zebraRequired: 50,
-			effects: {}
+			// unlocks: {crafts: ["bloodstone", "tMythril"], zebraUpgrades: ["whispers"]},
+			effects: {
+				// "bloodstoneCraftRatio": 0.02,
+				"tMythrilCraftRatio":   0.01
+			}
+		}, {
+			name: "ivoryTemple",
+			label: "Ivory Temple",
+			description: "Mystical temple where ivory is converted into minerals",
+			prices: [
+				{name: "tMythril", val: 1},
+				{name: "ivory",    val: 100}
+			],
+			priceRatio: 1.15,
+			unlockRatio: 0.1,
+			requires: {zebraUpgrades: ["whispers"]},
+			zebraRequired: 50,
+			// /* unlocks: {zebraUpgrades:["darkRevolution"]}, */
+			effects: {
+				"ivoryPerTickCon":     0,
+				"mineralsPerTickProd": 0,
+				"titaniumPerTickCon":  0,
+				"alicornPerTickCon":   0,
+				"tMythrilPerTick":     0
+			},
+			isAutomationEnabled: true,
+			calculateEffects: function (self, game) {
+				self.showAutomation = game.workshop.getZebraUpgrade("whispers").owned() && self.getOn() > 0;
+			},
+			action: function (self, game) {
+				if (self.isAutomationEnabled) {
+					self.effects = {
+						"ivoryPerTickCon":    -200,
+						"mineralsPerTickProd": 2,
+						"titaniumPerTickCon": -2,
+						"alicornPerTickCon":  -0.00002,
+						"tMythrilPerTick":     0.00005
+					};
+				} else {
+					self.effects = {
+						"ivoryPerTickCon":    -100,
+						"mineralsPerTickProd": 1,
+						"titaniumPerTickCon":  0,
+						"alicornPerTickCon":   0,
+						"tMythrilPerTick":     0
+					};
+				}
+				var amt = game.resPool.getAmtDependsOnStock(
+					[{res: "ivory",   amt: -self.effects["ivoryPerTickCon"]},
+					{res: "titanium", amt: -self.effects["titaniumPerTickCon"]},
+					{res: "alicorn",  amt: -self.effects["alicornPerTickCon"]}],
+					self.on
+				);
+				self.effects["ivoryPerTickCon"] *=     amt;
+				self.effects["mineralsPerTickProd"] *= amt;
+				self.effects["titaniumPerTickCon"] *=  amt;
+				self.effects["alicornPerTickCon"] *=   amt;
+				self.effects["tMythrilPerTick"] *=     amt;
+			}
 		}
 	],
 
@@ -1483,7 +1552,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		},
 		zebraBuildings: {
 			name: "zebraBuildings",
-			buildings: ["zebraOutpost", "zebraWorkshop", "zebraForge"]
+			buildings: ["zebraOutpost", "zebraWorkshop", "zebraForge", "ivoryTemple"]
 		}
 	},
 
@@ -1497,21 +1566,24 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 	cathPollutionPerTick: 0,
 
 	effectsBase: {
-		"catnipMax":      5000,
-		"woodMax":        200,
-		"mineralsMax":    250,
-		"coalMax":        60,
-		"ironMax":        50,
-		"titaniumMax":    2,
-		"goldMax":        10,
-		"oilMax":         1500,
-		"uraniumMax":     250,
-		"unobtainiumMax": 150,
-		"antimatterMax":  100,
-		"manpowerMax":    100,
-		"scienceMax":     250,
-		"cultureMax":     100,
-		"faithMax":       100
+		"catnipMax":          5000,
+		"woodMax":            200,
+		"mineralsMax":        250,
+		"coalMax":            60,
+		"ironMax":            50,
+		"titaniumMax":        2,
+		"goldMax":            10,
+		"oilMax":             1500,
+		"uraniumMax":         250,
+		"unobtainiumMax":     150,
+		"antimatterMax":      100,
+		"manpowerMax":        100,
+		"scienceMax":         250,
+		"cultureMax":         100,
+		"faithMax":           100,
+		"hutFakeBought":      0,
+		"logHouseFakeBought": 0,
+		"mansionFakeBought":  0 // these 3 are for Post Apocalypse pollution based housing cost increase — using getEffect instead of special handling
 	},
 	pollutionEffects: {
 		"catnipPollutionRatio":      0,
@@ -1604,16 +1676,33 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 		var pollutionLevel = this.getPollutionLevel();
 		var pollution = this.cathPollution;
 
+		this.pollutionEffects["pollutionDissipationRatio"] = 1e-7;
+
+		//post apocalypse effects
+		if (this.game.challenges.isActive("postApocalypse")) {
+			this.pollutionEffects["pollutionDissipationRatio"] = 0;
+			if (pollutionLevel > 8) {
+				this.effectsBase["hutFakeBought"] = pollutionLevel - 8;
+				this.effectsBase["logHouseFakeBought"] = pollutionLevel - 8;
+				this.effectsBase["mansionFakeBought"] = pollutionLevel - 8;
+
+			} else {
+				this.effectsBase["hutFakeBought"] = 0;
+				this.effectsBase["logHouseFakeBought"] = 0;
+				this.effectsBase["mansionFakeBought"] = 0;
+			}
+		}
+
 		if (pollutionLevel >= 4) {
 			this.pollutionEffects["catnipPollutionRatio"] = this.game.getLimitedDR(-0.5 - 0.1 * Math.log(pollution), 10) / 10;
 			this.pollutionEffects["pollutionHappines"] = -Math.log(pollution) * 1.2;
-			this.pollutionEffects["pollutionArrivalSlowdown"] = Math.log10(this.game.bld.cathPollution) * 1.2;
+			this.pollutionEffects["pollutionArrivalSlowdown"] = Math.log10(pollution) * 1.2;
 			this.pollutionEffects["solarRevolutionPollution"] = -Math.min(1e-10 * (pollution - POL_LBASE * 1000) / 9, 1); //linear HERE AND ONLY HERE
 
 		} else if (pollutionLevel == 3) {
 			this.pollutionEffects["catnipPollutionRatio"] = this.game.getLimitedDR(-0.5 - 0.1 * Math.log(pollution), 10) / 10;
 			this.pollutionEffects["pollutionHappines"] = -Math.log(pollution) * 1.18;
-			this.pollutionEffects["pollutionArrivalSlowdown"] = Math.log10(this.game.bld.cathPollution) * 1.11;
+			this.pollutionEffects["pollutionArrivalSlowdown"] = Math.log10(pollution) * 1.11;
 			this.pollutionEffects["solarRevolutionPollution"] = 0;
 
 		} else if (pollutionLevel == 2) {
@@ -1684,7 +1773,7 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 	},
 
 	getPollutionLevel: function (cathPollution) {
-		if (!cathPollution) {
+		if (cathPollution == undefined) {
 			cathPollution = this.cathPollution;
 		}
 		if (cathPollution <= 0) {
@@ -1702,6 +1791,10 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			return this.getUndissipatedPollutionPerTick() / this.pollutionEffects["pollutionDissipationRatio"];
 		} else if (this.cathPollutionPerTick < 0) {
 			return 0;
+		} else if (this.cathPollutionPerTick == 0) {
+			return this.cathPollution;
+		} else if (this.cathPollutionPerTick > 0) {
+			return Number.POSITIVE_INFINITY;
 		} else {
 			// console.log("No equilibrium found");
 			return -1;
@@ -1760,21 +1853,24 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 
 	calculateEffectsBase: function () {
 		var effects = {
-			"catnipMax":      5000,
-			"woodMax":        200,
-			"mineralsMax":    250,
-			"coalMax":        60,
-			"ironMax":        50,
-			"titaniumMax":    2,
-			"goldMax":        10,
-			"oilMax":         1500,
-			"uraniumMax":     250,
-			"unobtainiumMax": 150,
-			"antimatterMax":  100,
-			"manpowerMax":    100,
-			"scienceMax":     250,
-			"cultureMax":     100,
-			"faithMax":       100
+			"catnipMax":          5000,
+			"woodMax":            200,
+			"mineralsMax":        250,
+			"coalMax":            60,
+			"ironMax":            50,
+			"titaniumMax":        2,
+			"goldMax":            10,
+			"oilMax":             1500,
+			"uraniumMax":         250,
+			"unobtainiumMax":     150,
+			"antimatterMax":      100,
+			"manpowerMax":        100,
+			"scienceMax":         250,
+			"cultureMax":         100,
+			"faithMax":           100,
+			"hutFakeBought":      0,
+			"logHouseFakeBought": 0,
+			"mansionFakeBought":  0 // these 3 are for Post Apocalypse pollution based housing cost increase — using getEffect instead of special handling
 		};
 
 		if (this.game.ironWill) {
@@ -1910,6 +2006,10 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 	showAutomation: false,
 
 	constructor: function () {
+		if (this.name === "ivoryTemple") { // hack
+			return;
+		}
+
 		var setKeys = function (obj, name) {
 			obj.i18nKeys = {
 				label: obj.label || "buildings." + name + ".label",
@@ -2094,6 +2194,17 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 				}
 			}
 		}
+		if (
+			currentName === "field" && this.game.challenges.isActive("postApocalypse") &&
+			this.game.bld.getPollutionLevel() >= 5 && this.val >= 95 - this.game.time.getVSU("usedCryochambers").val - this.game.bld.getPollutionLevel()
+		) {
+			var builtWithUnobtanium = Math.max(this.val + this.game.time.getVSU("usedCryochambers").val - 100, 0);
+			prices.push({
+				name: "unobtainium",
+				val: 15 * Math.pow(ratio, builtWithUnobtanium),
+				isTemporary: true //can't exploit buy manipulating pollution in postApocalypse
+			});
+		}
 		return prices;
 	},
 
@@ -2124,6 +2235,7 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 
 		dojo.toggleClass(this.nameNode, "btnEnabled", this.togglable && on > 0);
 		dojo.toggleClass(this.nameNode, "btnAlmostLimited", this.almostLimited);
+		this.nameNode.title = this.almostLimited ? $I("btn.almostlimited.tooltip") : "";
 
 		dojo.toggleClass(this.onNodeSpan, "hidden", !this.togglable || this.togglableOnOff);
 		dojo.toggleClass(this.toggleNode, "hidden", !this.togglableOnOff);

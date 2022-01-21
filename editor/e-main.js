@@ -163,6 +163,14 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 
 			"maxKittens": {},
 
+			"maxKittensRatio": {
+				type: "ratio"
+			},
+
+			"simScalingRatio": {
+				type: "ratio"
+			},
+
 			"antimatterProduction": {
 				type: "perYear"
 			},
@@ -951,6 +959,10 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				type: "ratio"
 			},
 
+			"temporalPressCap": {
+				type: "fixed"
+			},
+
 			"shatterCostIncreaseChallenge": {
 				type: "ratio"
 			},
@@ -981,6 +993,74 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 
 			"policyFakeBought": {},
 
+			"weaponEfficency": {
+				type: "ratio"
+			},
+
+			"cryochamberSupport": {},
+
+			"arrivalSlowdown": {
+				type: "ratio"
+			},
+
+			"mausoleumBonus": {
+				type: "ratio"
+			},
+
+			//pacts
+
+			"pactsAvailable": {
+				type: "fixed"
+			},
+
+			"kittensKarmaPerMinneliaRatio": {
+				title: "kittensKarmaPerMinneliaRatio.pact",
+				type: "ratio"
+			},
+
+			"necrocornPerDay": {
+				title: "necrocornPerDay.pact",
+				type: "perDay"
+			},
+
+			"pactGlobalResourceRatio": {
+				type: "ratio"
+			},
+
+			"pactGlobalProductionRatio": {
+				type: "ratio"
+			},
+
+			"pactFaithRatio": {
+				type: "ratio"
+			},
+
+			"pyramidGlobalResourceRatio": {
+				type: "ratio"
+			},
+
+			"pyramidGlobalProductionRatio": {
+				type: "ratio"
+			},
+
+			"deficitRecoveryRatio": {
+				type: "ratio"
+			},
+
+			"pyramidFaithRatio": {
+				type: "ratio"
+			},
+
+			"pactBlackLibraryBoost": {
+				type: "ratio"
+			},
+
+			"pactDeficitRecoveryRatio": {
+				type: "ratio"
+			},
+
+			//pollution
+
 			"cathPollutionPerTickProd": {
 				type: "hidden"
 			},
@@ -992,6 +1072,21 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			"cathPollutionRatio": {
 				title: "pollutionRatio",
 				type: "ratio"
+			},
+
+			//zebra workshop upgrades
+
+			"zebraPreparations": {
+				type: "fixed"
+			},
+
+			"academyMeteorBonus": {
+				type: "ratio"
+			},
+
+			"activeHG": {
+				type: "fixed",
+				calculation: "constant"
 			}
 		}
 	}
@@ -1027,6 +1122,23 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	tabs: null,
 	managers: null,
+
+	lastBackup: null,
+
+	featureFlags: {
+		VILLAGE_MAP: {
+			beta: true,
+			main: false
+		},
+		SPACE_EXPL: {
+			beta: true,
+			main: false
+		},
+		MAUSOLEUM_PACTS: {
+			beta: true,
+			main: false
+		}
+	},
 
 	editorOptions: { //options about the editor
 		fixStats: true, //automatically calculate certain stats that may be off due to the game not tracking them before they existed
@@ -1369,10 +1481,15 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return percentage.toFixed(precision);
 	},
 
+	/**
+	 * Converts raw resource value (e.g. 12345.67890) to a formatted representation (i.e. 12.34K)
+	 * If 'prefix' flag is true, positive value will be prefixed with '+', e.g. ("+12.34K")
+	 */
 	getDisplayValueExt: function (value, prefix, usePerTickHack, precision, postfix) {
+
 		if (!value) { return "0"; }
-		if (!isFinite(value)) {
-			return this.getDisplayValue(value, prefix) + (usePerTickHack ? $I("unit.sec") : "");
+		if (value === Infinity) {
+			return "∞";
 		}
 
 		usePerTickHack &= this.opts.usePerSecondValues;
@@ -1430,13 +1547,20 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return _value + postfix + (usePerTickHack ? "/" + $I("unit.sec") : "");
 	},
 
+	/**
+	 * Formats float value to x.xx or x if value is integer
+	 */
 	getDisplayValue: function (floatVal, plusPrefix, precision) {
 		var plusSign = "+";
 		if (floatVal <= 0 || !plusPrefix) {
 			plusSign = "";
 		}
 
-		if (isNaN(precision)) {
+		if (!floatVal.toFixed) {
+			return plusSign + floatVal;
+		}
+
+		if (precision === undefined) {
 			precision = this.opts.forceHighPrecision ? 3 : 2;
 		}
 
@@ -1449,11 +1573,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			}
 		}
 
-		if (!floatVal.toFixed) {
-			return plusSign + floatVal;
-		}
-
-		if (floatVal.toFixed() == floatVal) {
+		if (floatVal % 1 === 0) {
 			var toFixed = floatVal.toFixed();
 			return plusSign + toFixed;
 		} else {
@@ -1483,6 +1603,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				return this.workshop.getCraft(unlockId);
 			case "upgrades":
 				return this.workshop.get(unlockId);
+			case "zebraUpgrades":
+				return this.workshop.getZebraUpgrade(unlockId);
 			/* case "tabs":
 				return this.getTab(unlockId); */
 			case "buildings":
@@ -1499,12 +1621,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				return this.religion.getZU(unlockId);
 			case "religionUpgrades":
 				return this.religion.getRU(unlockId);
+			case "transcendenceUpgrades":
+				return this.religion.getTU(unlockId);
+			case "pacts":
+				return this.religion.getPact(unlockId);
 			case "chronoforge":
 				return this.time.getCFU(unlockId);
 			case "voidSpace":
 				return this.time.getVSU(unlockId);
 			case "challenges":
 				return this.challenges.getChallenge(unlockId);
+			case "biomes":
+				return this.village.getBiome(unlockId);
 			default:
 				console.log("Couldn't get unlock ", unlockId, " of type ", type);
 				return false;
@@ -1552,6 +1680,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		return this.time.isAccelerated ? 0.5 : 0;
 	},
 
+	getFeatureFlag: function (flagId) {
+		var host = window.location.hostname;
+		var isLocalhost = window.location.protocol == "file:" || host == "localhost" || host == "127.0.0.1";
+
+		if (isLocalhost) {
+			return true;
+		}
+
+		var isBeta = (window.location.href.indexOf("beta") >= 0);
+		return this.featureFlags[flagId][isBeta ? "beta" : "main"];
+	},
+
 	calculateAllEffects: function () {
 		// don't need to call this for all since it's called through upgradeItem/s
 		this.workshop.invalidateCachedEffects();
@@ -1593,7 +1733,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	getCraftRatio: function (tag) {
 		return this.getEffect("craftRatio") + this.village.getEffectLeader("engineer", 0) + this.village.getEffectLeader(tag, 0);
 	},
-
 
 	getResCraftRatio: function (craftedResName) {
 		if (craftedResName === "wood") {
@@ -1645,7 +1784,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var resValue = res.getValue();
 		var hasRes = (resValue >= price.val);
 
-
 		var nameSpan = dojo.create("span", {
 			class: "tooltipPriceName",
 			innerHTML: res.title || res.name
@@ -1666,7 +1804,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				priceSpan.textContent += " (" + this.toDisplaySeconds(eta) + ")";
 			}
 		}
-
 
 		//unroll prices to the raw resources
 		if (!hasRes && res.craftable && res.name !== "wood") {
@@ -1756,7 +1893,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				}
 
 				//display resMax values with global ratios like Refrigeration and Paragon
-				if (effectName.substr(-3) === "Max") {
+				if (effectName.substr(-3) === "Max" || effectName.substr(-12) == "MaxChallenge") {
 					res = res || this.resPool.get(effectName.slice(0, -3));
 					if (res) {
 						effectValue = this.resPool.addResMaxRatios(res, effectValue);
@@ -1852,9 +1989,38 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 	},
 
 	getDetailedResMap: function (res) {
+		var resStack = null;
 		var resString = "";
-		var resStack = this.getResourcePerTickStack(res.name);
+		var toZero = null;
 
+		if (res.calculatePerDay) {
+			resStack = this.getResourcePerDayStack(res.name);
+			resString = this.processResourcePerTickStack(resStack, res, 0); //processResourcePerTickStack can work with perDay stack
+			var resPerDay = this.getResourcePerDay(res.name);
+			if (this.opts.usePercentageResourceValues) {
+				resString += "<br> " + $I("res.netGain") + ": " + this.getDisplayValueExt(resPerDay, true, true);
+			}
+			if (resPerDay < 0) {
+				toZero = this.calendar.ticksPerDay * res.value / (-resPerDay * this.getTicksPerSecondUI());
+				resString += "<br>" + $I("res.toZero") + ": " + this.toDisplaySeconds(toZero.toFixed());
+			}
+			if (res.name === "necrocorn") {
+				var toNextNecrocorn = (1 - this.religion.corruption) / (this.religion.getCorruptionPerTick() * 5);
+				resString += "<br>" + $I("res.toNextNecrocorn") + ": " + this.toDisplaySeconds(toNextNecrocorn.toFixed());
+			}
+			return resString;
+
+		} else if (res.calculateOnYear) {
+			resStack = this.getResourceOnYearStack(res.name);
+			resString = this.processResourcePerTickStack(resStack, res, 0); //processResourcePerTickStack can work with perDay stack
+			var resPerYear = this.getResourceOnYearProduction(res.name);
+			if (this.opts.usePercentageResourceValues) {
+				resString += "<br> " + $I("res.netGain") + ": " + this.getDisplayValueExt(resPerYear, true, true);
+			}
+			return resString;
+		}
+
+		resStack = this.getResourcePerTickStack(res.name);
 		resString = this.processResourcePerTickStack(resStack, res, 0);
 
 		var resPertick = this.getResourcePerTick(res.name, true);
@@ -1864,7 +2030,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 
 		if (resPertick < 0) {
-			var toZero = res.value / (-resPertick * this.getTicksPerSecondUI());
+			toZero = res.value / (-resPertick * this.getTicksPerSecondUI());
 			resString += "<br>" + $I("res.toZero") + ": " + this.toDisplaySeconds(toZero.toFixed());
 		} else {
 			if (res.maxValue && res.value < res.maxValue) {
@@ -1895,7 +2061,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				continue;
 			}
 
-			if (!stackElem.value || (stackElem.type != "fixed" && !hasFixed)) {
+			if (
+				!stackElem.value || (stackElem.type != "fixed" && stackElem.type != "perDay" &&
+				stackElem.type != "perYear" && !hasFixed
+			)) {
 				continue;
 			}
 
@@ -1927,6 +2096,16 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			resString += "×" + this.getDisplayValueExt((stackElem.value * 100).toFixed()) + "%";
 		} else if (stackElem.type == "ratioIndent") {
 			resString = "|->" + resString + this.getDisplayValueExt((stackElem.value * 100).toFixed(), true) + "%";
+		} else if (stackElem.type == "perDay") {
+			if (stackElem.value > 0) {
+				resString += "+";
+			}
+			resString += this.getDisplayValueExt((stackElem.value)) + "/" + $I("res.per.day");
+		} else if (stackElem.type == "perYear") {
+			if (stackElem.value > 0) {
+				resString += "+";
+			}
+			resString += this.getDisplayValueExt((stackElem.value)) + "/" + $I("res.per.year");
 		}
 
 		resString += "</div><br>";
@@ -1941,6 +2120,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		} else {
 			return 0;
 		}
+	},
+
+	getResourcePerDay: function (resName) {
+		if (resName === "necrocorn") {
+			return (this.religion.getNecrocornDeficitConsumptionModifier() * this.getEffect(resName + "PerDay") +
+				this.religion.getCorruptionPerTick() * this.calendar.ticksPerDay);
+		}
+		return this.getEffect(resName + "PerDay");
+	},
+
+	getResourceOnYearProduction: function (resName) {
+		return this.getEffect(resName + "Production"); //this might need to be changed!
 	},
 
 	getResourcePerTickConvertion: function (resName) {
@@ -1971,6 +2162,14 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		// +VILLAGE JOB PRODUCTION
 		var resMapProduction = this.village.getResProduction();
 		var resProduction = resMapProduction[resName] ? resMapProduction[resName] : 0;
+
+		// +HOLY GENOCIDE SCALING BONUS
+
+		//TODO: calculate prod scaling effect differently for HG
+		var hgScalingBonus = this.religion.getHGScalingBonus();
+
+		//var hgScalingBonus = Math.pow(1.01, this.religion.getTU("holyGenocide").val * 2);
+		resProduction *= hgScalingBonus;
 
 		perTick += resProduction;
 
@@ -2092,6 +2291,13 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		// +POLICY EFFECTS
 		//necrocracy global effect
 		perTick *= (1 + (this.resPool.get("sorrow").value * this.getEffect("blsProductionBonus")));
+		//pact Global Production Ratio- effect from pacts per pyramid
+		perTick *= (1 + this.getEffect("pyramidGlobalProductionRatio"));
+
+		//pyramid faith ratio
+		if (resName === "faith") {
+			perTick *= (1 + this.getEffect("pyramidFaithRatio"));
+		}
 		//policy ratio effects
 		perTick *= (1 + this.getEffect(resName + "PolicyRatio"));
 
@@ -2108,6 +2314,27 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		var res = this.resPool.get(resName);
 
 		var stack = [];
+
+		var addGlobalModToStack = function (arr, game) {
+			if (game.science.getPolicy("necrocracy").researched) {
+				arr.push({
+					name: $I("res.stack.necrocracy"),
+					type: "ratio",
+					value: game.getEffect("blsProductionBonus") * game.resPool.get("sorrow").value
+				});
+			}
+			arr.push({
+				name: $I("res.stack.policy"),
+				type: "ratio",
+				value: game.getEffect(res.name + "PolicyRatio")
+			});
+			arr.push({
+				name: $I("res.stack.destruction"),
+				type: "ratio",
+				value: game.getEffect("pyramidGlobalProductionRatio")
+			});
+			return arr;
+		};
 
 		// BUILDING PerTickBase
 		stack.push({
@@ -2135,6 +2362,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value: spaceRatio - 1
 			}
 		];
+		addGlobalModToStack(perTickBaseSpaceStack, this);
 		stack.push(perTickBaseSpaceStack);
 
 		// *SEASON MODIFIERS
@@ -2151,6 +2379,10 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				name: $I("res.stack.village"),
 				type: "fixed",
 				value: resMapProduction[resName] || 0
+			}, {
+				name: $I("res.stack.holyGenocide"),
+				type: "ratio",
+				value: this.religion.getHGScalingBonus() - 1
 			}, {
 				name: $I("res.stack.tools"),
 				type: "ratio",
@@ -2310,6 +2542,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value: this.getEffect("blsProductionBonus") * this.resPool.get("sorrow").value
 			});
 		}
+		stack.push({
+			name: $I("res.stack.destruction"),
+			type: "ratio",
+			value: this.getEffect("pyramidGlobalProductionRatio")
+		});
+		if (resName === "faith") {
+			stack.push({
+				name: $I("res.stack.extermination"),
+				type: "ratio",
+				value: this.getEffect("pyramidFaithRatio")
+			});
+		}
 		// +*POLICY
 		stack.push({
 			name: $I("res.stack.policy"),
@@ -2341,6 +2585,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value: spaceRatio - 1
 			}
 		];
+		addGlobalModToStack(perTickAutoprodSpaceStack, this);
 
 		var spaceParagonSubStack = [
 			{
@@ -2368,6 +2613,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				value: spaceRatio - 1
 			}
 		];
+		addGlobalModToStack(perTickSpace, this);
 		stack.push(perTickSpace);
 
 		//CYCLE EFFECT
@@ -2386,17 +2632,19 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		});
 
 		// +BUILDING AND SPACE PerTick
-		stack.push({
-			name: $I("res.stack.baseline"),
-			type: "fixed",
-			value: this.getEffect(resName + "PerTick")
-		});
-
-		stack.push({
-			name: $I("res.stack.baseline"),
-			type: "ratio",
-			value: this.getEffect(resName + "PerTickRatio")
-		});
+		var baselineModifiers = [
+			{
+				name: $I("res.stack.baseline"),
+				type: "fixed",
+				value: this.getEffect(resName + "PerTick")
+			}, {
+				name: $I("res.stack.baselineRatio"),
+				type: "ratio",
+				value: this.getEffect(resName + "PerTickRatio")
+			}
+		];
+		addGlobalModToStack(baselineModifiers, this);
+		stack.push(baselineModifiers);
 
 		// +CRAFTING JOB PRODUCTION
 		stack.push({
@@ -2412,9 +2660,11 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		if (resName === "catnip" && this.village.kittens.length > 0 && this.village.happiness > 1) {
 			var hapinnessConsumption = Math.max(this.village.happiness * (1 + this.getEffect("hapinnessConsumptionRatio")) - 1, 0);
 			if (this.challenges.isActive("anarchy")) {
-				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal"));
+				resConsumption += (resConsumption * hapinnessConsumption *
+					(1 + this.getEffect(resName + "DemandWorkerRatioGlobal")));
 			} else {
-				resConsumption += resConsumption * hapinnessConsumption * (1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length);
+				resConsumption += (resConsumption * hapinnessConsumption *
+					(1 + this.getEffect(resName + "DemandWorkerRatioGlobal")) * (1 - this.village.getFreeKittens() / this.village.kittens.length));
 			}
 		}
 
@@ -2432,6 +2682,124 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		});
 
 		return stack;
+	},
+
+	getResourcePerDayStack: function (resName) {
+		var stack = [];
+		var res = this.resPool.get(resName);
+
+		if (!res) {
+			return;
+		}
+		stack.push({
+			name: $I("res.stack.buildings"),
+			type: "perDay",
+			value: this.getEffect(resName + "PerDay")
+		});
+		if (resName === "necrocorn") {
+			stack.push({
+				name: $I("res.stack.corruptionPerDay"),
+				type: "perDay",
+				value: this.religion.getCorruptionPerTick() * this.calendar.ticksPerDay
+			});
+		}
+		return stack;
+	},
+
+	getResourceOnYearStack: function (resName) {
+		var stack = [];
+		var res = this.resPool.get(resName);
+
+		if (!res) {
+			return;
+		}
+		stack.push({
+			name: $I("res.stack.buildings"),
+			type: "perYear",
+			value: this.getEffect(resName + "Production")
+		});
+		return stack;
+	},
+
+	getKarma: function (karmaKittens) {
+		return this.game.getUnlimitedDR(karmaKittens, 5);
+	},
+
+	getKarmaKittens: function (karma) {
+		return this.game.getInverseUnlimitedDR(karma, 5);
+	},
+
+	_getKarmaKittens: function (kittens) {
+		var karmaKittens = 0;
+
+		if (this.challenges.getChallenge("anarchy").on > 0) {
+			kittens = kittens * 2;
+		}
+
+		if (kittens > 35) {
+			karmaKittens += (kittens - 35);
+		}
+
+		if (kittens > 60) {
+			karmaKittens += (kittens - 60) * 3;
+		}
+
+		if (kittens > 100) {
+			karmaKittens += (kittens - 100) * 4;
+		}
+
+		if (kittens > 150) {
+			karmaKittens += (kittens - 150) * 5;
+		}
+
+		if (kittens > 300) {
+			karmaKittens += (kittens - 300) * 10;
+		}
+
+		if (kittens > 750) {
+			karmaKittens += (kittens - 750) * 15;
+		}
+
+		return karmaKittens;
+	},
+
+	createRandomName: function (lenConst, charPool) {
+		if (!charPool) {
+			charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■◆◆åœ∑ß≈ç∂´®ƒ√∫©†¥˙˜µ∆¨ˆ˚µ≤¬øπ≥…π“æ÷æ«§¡™£¢∞§¶•ªº≠"; //◆
+		}
+		var nameLength = Math.floor(Math.random() * 6 + 5);
+		if (lenConst) {
+			nameLength = lenConst - 1;
+		}
+		var name = "";
+		for (var i = 0; i <= nameLength; i++) {
+			name += charPool[Math.floor(Math.random() * charPool.length)];
+		}
+		return name;
+	},
+
+	createRandomVarietyAndColor: function (ch1, ch2) {
+		if (ch1 == null) {
+			ch1 = 10;
+		}
+		if (ch2 == null) {
+			ch2 = 10;
+		}
+		function rand(ratio) {
+			return (Math.floor(Math.random() * ratio));
+		}
+		var color = 0;
+		var variety = 0;
+		//10% of chance to generate one of 6 primary colors (rare colors TBD)
+		if (rand(100) <= ch1) {
+			color = rand(6) + 1;
+
+			//10% of chance of colored cat to be one of 5 rare varieties (dual, tabby, torbie, calico, spots)
+			if (rand(100) <= ch2) {
+				variety = rand(4) + 1;
+			}
+		}
+		return [color, variety];
 	},
 
 	/**
@@ -2518,6 +2886,36 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}
 	},
 
+	_createPanel: function (parentNode, attrs, header, togglable, toggled) {
+		if (!attrs) {
+			attrs = {};
+		}
+		var c = attrs["class"];
+		attrs["class"] = "panelContainer" + (c ? " " + c : "");
+
+		if (togglable && toggled) {
+			attrs["class"] += " toggled";
+		}
+
+		var panel = dojo.create("div", attrs, parentNode);
+
+		var headerDiv = dojo.create("div", {
+			class: "panelHeader",
+			innerHTML: header
+		}, panel);
+
+		if (togglable) {
+			dojo.addClass(headerDiv, "togglable");
+			on(headerDiv, "click", function () {
+				dojo.toggleClass(panel, "toggled");
+			});
+		}
+
+		var panelContent = dojo.create("div", {class: "panelContent"}, panel);
+
+		return {panel: panel, header: headerDiv, content: panelContent};
+	},
+
 	_createLinkList: function (metaObj, parentNode, listData, handler) {
 		var game = this;
 
@@ -2528,9 +2926,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		}, parentNode);
 		root.children[0].valueProp = data.value;
 
-		var tooltip = dojo.create("div", {
-			class: "linkListTooltip"
-		}, root);
+		var tooltip = dojo.create("div", {class: "linkListTooltip"}, root);
 
 		for (var i = 1; i < listData.length; i++) {
 			data = listData[i];
@@ -2667,6 +3063,37 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				metaObj.set("on", this.parsedValue, true);
 			}
 		};
+		return input;
+	},
+
+	_createTimeInput: function (attrs, parentNode, metaObj, dataProp, pos, noUpdate) {
+		if (!attrs) {
+			attrs = {};
+		}
+		var c = attrs["class"];
+		attrs["class"] = "integerInput timeInput" + (c ? " " + c : "");
+
+		var input = this._createInput(attrs, parentNode, metaObj, dataProp, pos, noUpdate);
+
+		dojo.place(document.createTextNode(" "), parentNode);
+		var btn = dojo.create("a", {
+			href: "#",
+			innerHTML: $I("KGSaveEdit.time.timestamp.set")
+		}, parentNode);
+		on(btn, "click", function () {
+			if (metaObj && dataProp) {
+				metaObj.set(dataProp, Date.now());
+			} else {
+				input.game.setInput(input, Date.now());
+			}
+			input.game.update();
+		});
+
+		dojo.place(document.createTextNode(" "), parentNode);
+		dojo.create("small", {
+			title: $I("KGSaveEdit.time.timestamp.help"),
+			innerHTML: '<a class="help" href="http://www.epochconverter.com/" target="_blank">[?]</a>'
+		}, parentNode);
 		return input;
 	},
 
@@ -2828,7 +3255,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			deadKittens: this.deadKittens,
 			cheatMode: this.cheatMode,
 
-			opts: this.filterMetaObj(this.opts, this.optsKeys)
+			opts: this.filterMetaObj(this.opts, this.optsKeys),
+			lastBackup: this.lastBackup
 		};
 
 		this.telemetry.save(saveData);
@@ -3177,7 +3605,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		this._loadingBlankJSON = true;
 		this._loadJSON(this.blankSaveJSON);
 
-		this.time.set("timestamp", Date.now());
+		var now = Date.now();
+		this.time.set("timestamp", now);
+		this.set("lastBackup", now);
 		this.telemetry.setGuid();
 		this._loadingBlankJSON = false;
 	},
@@ -3204,6 +3634,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			this.ironWill = ("ironWill" in data) ? Boolean(data.ironWill) : true;
 
 			this.loadMetaFields(this.opts, data.opts, this.optsKeys);
+			this.set("lastBackup", data.lastBackup || Date.now());
 		}
 
 		this.resPool.load(saveData);
@@ -3257,15 +3688,17 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				dojo.removeClass(tab.tabBlockNode, "hidden");
 			}
 
+			var prevTab = this.activeTab;
 			this.activeTab = tab;
+			tab.onTabOpen(prevTab !== this.activeTab);
 		}
 	},
-
 
 	updateLanguage: function () {
 		this.render();
 	},
 
+	globalEffectNames: null,
 
 	constructor: function (container) {
 		this.container = container;
@@ -3298,6 +3731,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			disableCMBR: false,
 			disableTelemetry: true,
 			enableRedshift: false,
+			disablePollution: false,
 			enableRedshiftGflops: false,
 			batchSize: 10,
 			// Used only in KG Mobile
@@ -3307,6 +3741,8 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		};
 		this.opts = new classes.KGSaveEdit.GenericItem(this, defaultOpts);
 		this.optsKeys = Object.keys(defaultOpts);
+
+		this.lastBackup = Date.now();
 
 		this.toolbar = new classes.KGSaveEdit.ui.Toolbar(this);
 
@@ -3408,7 +3844,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		this.update();
 	},
 
-
 	updateTimeDelay: 5000, //5 seconds
 	updateTimer: null,
 
@@ -3443,6 +3878,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		this.openTab(this.activeTab);
 
 		this.callMethods(this.managers, "update");
+		this.upgradeItems({religionUpgrades: ["solarRevolution"]}); //sigh
 
 		var energyProdRatio = 1 + this.getEffect("energyProductionRatio");
 		var energyProd = this.getEffect("energyProduction") * energyProdRatio;

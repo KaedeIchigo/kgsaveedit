@@ -263,13 +263,13 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 					},
 					lackResConvert: false,
 					action: function (self, game) {
-						self.effects["uraniumPerTickCon"] = -0.35;
+						self.effects["uraniumPerTickCon"] =      -0.35;
 						self.effects["unobtainiumPerTickSpace"] = 0.007 * (1 + game.getEffect("lunarOutpostRatio"));
 						var amt = game.resPool.getAmtDependsOnStock(
 							[{res: "uranium", amt: -self.effects["uraniumPerTickCon"]}],
 							self.getOn()
 						);
-						self.effects["uraniumPerTickCon"] *= amt;
+						self.effects["uraniumPerTickCon"] *=       amt;
 						self.effects["unobtainiumPerTickSpace"] *= amt;
 
 						return amt;
@@ -467,8 +467,8 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 					},
 					calculateEffects: function (self, game) {
 						self.effects = {
-							"antimatterMax":    100 * (1 + game.space.getBuilding("heatsink").val * 0.02),
-							"energyConsumption": 50 * (1 + game.space.getBuilding("heatsink").val * 0.01)
+							"antimatterMax":     100 * (1 + game.space.getBuilding("heatsink").val * 0.02),
+							"energyConsumption": 50 *  (1 + game.space.getBuilding("heatsink").val * 0.01)
 						};
 					}
 				}, {
@@ -555,8 +555,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 					},
 					action: function (self, game) {
 						var rPerDay = game.getEffect("beaconRelicsPerDay");
-						var rrBoost = (1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").val * 0.1); //10% per BP * BN combo
-						// TODO getEffectiveValue
+						var rrBoost = (1 + game.getEffect("relicRefineRatio") * game.religion.getZU("blackPyramid").getEffectiveValue(game) * 0.1); //10% per BP * BN combo
 
 						//lol
 						var amMax = game.resPool.get("antimatter").maxValue;
@@ -655,6 +654,24 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 							1 * (1 + game.getUnlimitedDR(yearBonus, 0.075) * 0.01) *
 								(1 + game.getEffect("umbraBoostRatio"));
 					}
+				}, {
+					name: "navigationRelay",
+					prices: [
+						{name: "titanium", val: 50000}, // TBD
+						{name: "concrate", val: 5000}
+					],
+					priceRatio: 1.2,
+					requires: {upgrades: ["spiceNavigation"]},
+					effects: {} // TBD
+				}, {
+					name: "spaceShuttle",
+					prices: [
+						{name: "antimatter", val: 50}, // TBD
+						{name: "eludium",    val: 500}
+					],
+					priceRatio: 1.15,
+					requires: {upgrades: ["longRangeSpaceships"]},
+					effects: {} // TBD
 				}
 			],
 			requires: {spaceMission: ["umbraMission"]}
@@ -845,19 +862,23 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 		return num(totalEffect);
 	},
 
-	getEffectCached: function (name) {
-		var cached = this.effectsCached[name];
+	getEffectCached: function (effectName) {
+		if (!this.effectNames[effectName]) {
+			return 0;
+		}
+
+		var cached = this.effectsCached[effectName];
 		if (!isNaN(cached)) {
 			return cached;
 		}
 
 		var effect = 0;
 		for (var i = this.allPrograms.length - 1; i >= 0; i--) {
-			var effectMeta = this.allPrograms[i].getEffect(name);
+			var effectMeta = this.allPrograms[i].getEffect(effectName);
 			effect += effectMeta;
 		}
 
-		this.effectsCached[name] = effect;
+		this.effectsCached[effectName] = effect;
 		return effect;
 	},
 
@@ -865,10 +886,13 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 		var div = dojo.create("div", {class: "bottom-margin"}, this.tabBlockNode);
 		this.game._createCheckbox($I("space.tab.hide.complete.missions"), div, this, "hideResearched");
 
-		this.programsBlock = dojo.create("table", {
-			id: "programsBlock",
+		var panel = this.game._createPanel(this.tabBlockNode, {
+			id: "programsPanel",
 			class: "bottom-margin"
-		}, this.tabBlockNode);
+		}, $I("space.ground.control.label"), false);
+
+		this.programsBlock = panel.content;
+		this.programsBlock.id = "programsBlock";
 
 		this.planetsBlock = dojo.create("table", {id: "planetsBlock"}, this.tabBlockNode);
 	},
@@ -892,7 +916,7 @@ dojo.declare("classes.KGSaveEdit.SpaceManager", [classes.KGSaveEdit.UI.Tab, clas
 
 			var tr = dojo.create("tr", {
 				class: "planet",
-				innerHTML: '<td class="nameNode">' + (planet.label || planet.name) + '</td><td></td>'
+				innerHTML: '<td class="nameNode">' + (planet.label || planet.name) + "</td><td></td>"
 			}, this.planetsBlock);
 
 			planet.nameRow = tr;

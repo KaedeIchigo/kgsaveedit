@@ -918,7 +918,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "alloy",   val: 1750}
 			],
 			effects: {
-				"uplinkDCRatio": 0.01,
+				"uplinkDCRatio":  0.01,
 				"uplinkLabRatio": 0.01
 			},
 			requires: {tech: ["sattelites"]},
@@ -1472,6 +1472,26 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				"routeSpeed": 50
 			}
 		}, {
+			name: "spiceNavigation",
+			prices: [
+				{name: "science",   val: 350000},
+				{name: "starchart", val: 500000}
+			],
+			// unlocks: {spaceBuilding: ["navigationRelay"]},
+			requires: {tech: ["artificialGravity"]},
+			flavor: true
+		}, {
+			name: "longRangeSpaceships",
+			prices: [
+				{name: "science", val: 440000},
+				{name: "gear",    val: 90000},
+				{name: "alloy",   val: 3500},
+				{name: "tanker",  val: 500}
+			],
+			// unlocks: {spaceBuilding: ["spaceShuttle"]},
+			requires: {tech: ["artificialGravity"]},
+			flavor: true
+		}, {
 			name: "oilRefinery",
 			prices: [
 				{name: "titanium", val: 1250},
@@ -1740,9 +1760,54 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "timeCrystal", val: 5000},
 				{name: "relic",       val: 10000}
 			],
-			unlocked: true,
+			requires: {buildings: ["zebraForge"]},
 			progressHandicap: 7500,
 			tier: 5
+		}, {
+			name: "tMythril",
+			prices: [
+				{name: "bloodstone", val: 5},
+				{name: "ivory",      val: 1000},
+				{name: "titanium",   val: 500}
+			],
+			unlocked: false,
+			requires: {buildings: ["zebraForge"]},
+			progressHandicap: 10000,
+			tier: 7
+		}
+	],
+
+	zebraUpgradesData: [
+		{
+			name: "darkRevolution",
+			prices: [
+				{name: "bloodstone", val: 15},
+				{name: "science",    val: 100}
+			],
+			requires: {buildings: ["zebraWorkshop"]},
+			upgrades: {buildings: ["zebraOutpost"]}
+		}, {
+			name: "darkBrew",
+			prices: [
+				{name: "bloodstone", val: 1},
+				{name: "parchment",  val: 3000},
+				{name: "science",    val: 100}
+			],
+			requires: {buildings: ["brewery"]}
+		}, {
+			name: "whispers",
+			prices: [
+				{name: "tMythril", val: 5}
+			],
+			requires: {buildings: ["zebraForge"]},
+			upgrades: {buildings: ["ivoryTemple"]}
+		}, {
+			name: "minerologyDepartment",
+			prices: [
+				{name: "science",   val: 75000},
+				{name: "compedium", val: 75}
+			],
+			requires: {tech: ["archeology"]}
 		}
 	],
 
@@ -1762,6 +1827,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	upgradesByName: null,
 	crafts: null,
 	craftsByName: null,
+	zebraUpgrades: null,
+	zebraUpgradesByName: null,
 
 	hideResearched: false,
 
@@ -1777,6 +1844,13 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			}
 		});
 		this.registerMetaItems(this.craftData, classes.KGSaveEdit.CraftMeta, "crafts");
+		this.registerMetaItems(this.zebraUpgradesData, classes.KGSaveEdit.UpgradeMeta, "zebraUpgrades", function (upgrade) {
+			upgrade.upgradeType = "zebraUpgrades";
+			upgrade.i18nKeys = {
+				label: "workshop.zebraUpgrade." + upgrade.name + ".label",
+				description: "workshop.zebraUpgrade." + upgrade.name + ".desc"
+			};
+		});
 		this.addMeta(this.upgrades);
 	},
 
@@ -1786,21 +1860,33 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		var div = dojo.create("div", {class: "bottom-margin"}, this.tabBlockNode);
 		this.game._createCheckbox($I("workshop.toggleResearched.label"), div, this, "hideResearched");
 
-		this.upgradesBlock = dojo.create("table", {
-			id: "upgradesBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("workshop.upgradePanel.label") + "</th></tr>"
-		}, this.tabBlockNode);
+		var panel = this.game._createPanel(this.tabBlockNode, {
+			id: "upgradesPanel",
+			class: "bottom-margin"
+		}, $I("workshop.upgradePanel.label"), true);
 
-		this.freeEngineersBlock = dojo.create("div", {
+		this.upgradesBlock = dojo.create("table", {id: "upgradesBlock"}, panel.content);
+
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "workshopCraftsPanel",
+			class: "bottom-margin"
+		}, $I("workshop.craftPanel.label"), true);
+
+		this.craftsBlock = dojo.create("table", {id: "workshopCraftsBlock"}, panel.content);
+		this.craftsBlockHeader = panel.header;
+
+		this.freeEngineersBlock = dojo.create("tr", {
 			id: "workshopFreeEngineersBlock",
-			innerHTML: $I("workshop.craftPanel.header.freeEngineers") + ": <span>0 / 0</span>"
-		}, this.tabBlockNode);
-		this.freeEngineersNode = this.freeEngineersBlock.children[0];
+			innerHTML: '<td colspan="4">' + $I("workshop.craftPanel.header.freeEngineers") + ": <span>0 / 0</span></td>"
+		}, this.craftsBlock);
+		this.freeEngineersNode = this.freeEngineersBlock.children[0].children[0];
 
-		this.craftsBlock = dojo.create("table", {
-			id: "workshopCraftsBlock"
-		}, this.tabBlockNode);
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "zebraUpgradesPanel"
+		}, $I("workshop.zebraUpgradesPanel.label"), true);
+
+		this.zebraUpgradesBlock = dojo.create("table", {id: "zebraUpgradesBlock"}, panel.content);
+		this.zebraUpgradesBlockHeader = panel.header;
 	},
 
 	render: function () {
@@ -1814,6 +1900,12 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			var craft = this.crafts[i];
 			craft.render();
 			dojo.place(craft.domNode, this.craftsBlock);
+		}
+
+		for (i = 0, len = this.zebraUpgrades.length; i < len; i++) {
+			var zu = this.zebraUpgrades[i];
+			zu.render();
+			dojo.place(zu.domNode, this.zebraUpgradesBlock);
 		}
 	},
 
@@ -1831,6 +1923,14 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		// 	console.error("Workshop craft not found", name);
 		// }
 		return craft;
+	},
+
+	getZebraUpgrade: function (name) {
+		var zu = this.zebraUpgradesByName[name];
+		if (name && !zu) {
+			console.error("Workshop zebra upgrade not found", name);
+		}
+		return zu;
 	},
 
 	getTabName: function () {
@@ -1877,6 +1977,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	update: function () {
 		this.craftEffectivenessNode.innerHTML = $I("workshop.craft.effectiveness", [this.game.getDisplayValueExt(this.game.getCraftRatio() * 100, false, false, 0)]);
 
+		dojo.toggleClass(this.craftsBlockHeader, "spoiler", !this.game.science.get("construction").owned());
+
 		var count = this.countWorkers();
 
 		var engineers = this.game.village.getJob("engineer").value;
@@ -1890,6 +1992,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		this.freeEngineersNode.innerHTML = this.freeEngineers + " / " + engineers;
 
 		dojo.toggleClass(this.freeEngineersBlock, "spoiler", !this.game.science.get("mechanization").owned());
+
+		dojo.toggleClass(this.zebraUpgradesBlockHeader, "spoiler", !this.game.bld.get("zebraWorkshop").owned());
 
 		var scienceMaxCap = this.game.bld.getEffect("scienceMax", true); // without the default scienceMax, because game adds it in differently
 		if (this.game.ironWill) {
@@ -1920,6 +2024,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 
 		this.game.callMethods(this.upgrades, "update", this.hideResearched);
 		this.game.callMethods(this.crafts, "update");
+		this.game.callMethods(this.zebraUpgrades, "update");
 	},
 
 	getEffectBase: function (name) {
@@ -1934,6 +2039,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 
 		var resMapProduction = this.game.village.getResProduction();
 		var kittenResProduction = resMapProduction["ES" + resName] ? resMapProduction["ES" + resName] : 0;
+		kittenResProduction *= this.game.religion.getHGScalingBonus();
 
 		if (this.game.workshop.get("neuralNetworks").owned()) {
 			kittenResProduction *= 2;
@@ -1952,11 +2058,13 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 	save: function (saveData) {
 		var upgrades = this.game.filterMetadata(this.upgrades, ["name", "unlocked", "researched"]);
 		var crafts = this.game.filterMetadata(this.crafts, ["name", "unlocked", "value", "progress"]);
+		var zebraUpgrades = this.game.filterMetadata(this.zebraUpgrades, ["name", "unlocked", "researched"]);
 
 		saveData.workshop = {
+			hideResearched: Boolean(this.hideResearched),
 			upgrades:       upgrades,
 			crafts:         crafts,
-			hideResearched: Boolean(this.hideResearched)
+			zebraUpgrades:  zebraUpgrades
 		};
 	},
 
@@ -1970,6 +2078,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		this.loadMetadata(saveData, "workshop.upgrades", "get", null, true);
 
 		this.loadMetadata(saveData, "workshop.crafts", "getCraft", null, true);
+
+		this.loadMetadata(saveData, "workshop.zebraUpgrades", "getZebraUpgrade", null, true);
 	},
 
 	// console-only shortcuts
@@ -1977,6 +2087,10 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		for (var i = this.upgrades.length - 1; i >= 0; i--) {
 			var upgrade = this.upgrades[i];
 			upgrade.set("unlocked", true);
+		}
+		for (i = this.zebraUpgrades.length - 1; i >= 0; i--) {
+			var zu = this.zebraUpgrades[i];
+			zu.set("unlocked", true);
 		}
 		this.game.update();
 		return true;
@@ -1987,6 +2101,11 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			var upgrade = this.upgrades[i];
 			upgrade.set("unlocked", true);
 			upgrade.set("researched", true);
+		}
+		for (i = this.zebraUpgrades.length - 1; i >= 0; i--) {
+			var zu = this.zebraUpgrades[i];
+			zu.set("unlocked", true);
+			zu.set("researched", true);
 		}
 		this.game.update();
 		return true;

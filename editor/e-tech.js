@@ -205,7 +205,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				{name: "science",   val: 65000},
 				{name: "compedium", val: 65}
 			],
-			// unlocks: {buildings: ["quarry"], jobs: ["geologist"], tech: ["biology"], upgrades:["geodesy"]},
+			// unlocks: {buildings: ["quarry"], jobs: ["geologist"], tech: ["biology"], upgrades:["geodesy"], zebraUpgrades: ["minerologyDepartment"]},
 			requires: {tech: ["navigation"]},
 			flavor: true
 		}, {
@@ -461,8 +461,19 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "science", val: 235000}
 			],
-			// unlocks: {upgrades: ["energyRifts", "lhc"]},
+			// unlocks: {upgrades: ["energyRifts", "lhc"], /* tech: ["artificialGravity"] */ /* -- see SPACE_EXPL feature flag */ },
 			requires: {tech: ["particlePhysics"]}
+		}, {
+			name: "artificialGravity",
+			prices: [
+				{name: "science", val: 320000}
+			],
+			// unlocks: {upgrades: ["spiceNavigation", "longRangeSpaceships"]},
+			// requires: {tech: ["dimensionalPhysics"]},
+			requires: function (game) {
+				return game.getFeatureFlag("SPACE_EXPL") && game.science.get("dimensionalPhysics").owned();
+			},
+			flavor: true
 		}, {
 			name: "chronophysics",
 			prices: [
@@ -524,7 +535,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// unlocks: {policies: ["authocracy", "republic"]},
 			// blocks: ["tradition"],
 			effects: {
-				"maxKittens": 0
+				"maxKittens":                     0,
+				"happinessKittenProductionRatio": 0.1
 			},
 			calculateEffects: function (self, game) {
 				self.effects["maxKittens"] = game.ironWill ? 0 : 1;
@@ -620,7 +632,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["authocracy", "communism", "fascism"],
 			// blocks: ["communism", "fascism"],
 			effects: {
-				"goldCostReduction": 0.2,
+				"goldCostReduction":    0.2,
 				"globalRelationsBonus": 10
 			}
 		}, {
@@ -636,9 +648,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["liberalism", "fascism"],
 			effects: {
 				"factoryCostReduction": 0.3,
-				"coalPolicyRatio": 0.25,
-				"ironPolicyRatio": 0.25,
-				"titaniumPolicyRatio": 0.25
+				"coalPolicyRatio":      0.25,
+				"ironPolicyRatio":      0.25,
+				"titaniumPolicyRatio":  0.25
 			}
 		}, {
 			name: "fascism",
@@ -702,7 +714,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["necrocracy", "radicalXenophobia"],
 			effects: {
 				"aiCoreProductivness": 1,
-				"aiCoreUpgradeBonus": 0.1
+				"aiCoreUpgradeBonus":  0.1
 			}
 		}, {
 			name: "necrocracy",
@@ -713,7 +725,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["transkittenism", "radicalXenophobia"],
 			// blocks: ["transkittenism", "radicalXenophobia"],
 			effects: {
-				"blsProductionBonus": 0.001,
+				"blsProductionBonus":       0.001,
 				"leviathansEnergyModifier": 0.05
 			}
 		}, {
@@ -724,8 +736,17 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// requires trading with the elders so
 			blockedBy: ["transkittenism", "necrocracy"],
 			// blocks: ["transkittenism", "necrocracy"],
+			upgrades: {transcendenceUpgrades: ["mausoleum"]},
+			// unlocks: {pacts: ["pactOfCleansing", "pactOfDestruction",  "pactOfExtermination", "pactOfPurity"]},
 			effects: {
-				"holyGenocideBonus": 1
+				"mausoleumBonus": 1,
+				"pactsAvailable": 5
+			},
+			calculateEffects: function (self, game) {
+				self.effects["pactsAvailable"] = 5;
+				if (game.religion.isFractured) {
+					self.effects["pactsAvailable"] = 0;
+				}
 			}
 		},
 		//----------------    Foreign Policy --------------------
@@ -762,7 +783,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["zebraRelationsBellicosity"],
 			// blocks: ["zebraRelationsBellicosity"],
 			effects: {
-				"goldPolicyRatio": -0.05,
+				"goldPolicyRatio":      -0.05,
 				"zebraRelationModifier": 15
 			}
 		}, {
@@ -775,7 +796,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			// blocks: ["zebraRelationsAppeasement"],
 			effects: {
 				"nonZebraRelationModifier": 5,
-				"zebraRelationModifier": -10
+				"zebraRelationModifier":   -10
 			}
 		}, {
 			name: "knowledgeSharing",
@@ -1059,6 +1080,23 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				"woodPolicyRatio":     0.125,
 				"mineralsPolicyRatio": 0.125
 			}
+		}, {
+			name: "cryochamberExtraction",
+			blockedBy: ["terraformingInsight"],
+			// blocks: ["terraformingInsight"],
+			prices: [
+				{name: "manpower", val: 10000}
+			]
+		}, {
+			name: "terraformingInsight",
+			prices: [
+				{name: "manpower", val: 10000}
+			],
+			blockedBy: ["cryochamberExtraction"],
+			// blocks: ["cryochamberExtraction"],
+			effects: {
+				"terraformingMaxKittensRatio": 0.001 //might be too weak - could be fixed later on
+			}
 		}/*, {
 			name: "spaceBasedTerraforming",
 			prices: [
@@ -1119,21 +1157,23 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 		var div = dojo.create("div", {class: "bottom-margin"}, this.tabBlockNode);
 		this.game._createCheckbox($I("science.toggleResearched.label"), div, this, "hideResearched");
 
-		this.techsBlock = dojo.create("table", {
+		var panel = this.game._createPanel(this.tabBlockNode, {
 			id: "techsBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("techs.panel.label") + "</th></tr>"
-		}, this.tabBlockNode);
+			class: "bottom-margin"
+		}, $I("techs.panel.label"), true);
 
-		div = dojo.create("div", {class: "bottom-margin", innerHTML: " &nbsp; "}, this.tabBlockNode);
+		this.techsBlock = dojo.create("table", null, panel.content);
+
+		panel = this.game._createPanel(this.tabBlockNode, {
+			id: "policiesBlock",
+			class: "bottom-margin"
+		}, $I("policy.panel.label"), true);
+
+		div = dojo.create("div", {class: "bottom-margin", innerHTML: " &nbsp; "}, panel.content);
 		this.game._createCheckbox($I("science.policyToggleResearched.label"), div, this, "policyToggleResearched", "first");
 		this.game._createCheckbox($I("science.policyToggleBlocked.label"), div, this, "policyToggleBlocked");
 
-		this.policiesBlock = dojo.create("table", {
-			id: "policiesBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("policy.panel.label") + "</th></tr>"
-		}, this.tabBlockNode);
+		this.policiesBlock = dojo.create("table", null, panel.content);
 	},
 
 	render: function () {
@@ -1237,7 +1277,16 @@ dojo.declare("classes.KGSaveEdit.ScienceMeta", classes.KGSaveEdit.UpgradeMeta, {
 
 	getPrices: function () {
 		var prices = this.prices ? dojo.clone(this.prices) : [];
-		return this.game.village.getEffectLeader("scientist", prices);
+		var prices_result = this.game.village.getEffectLeader("scientist", prices);
+
+		// this is to force Gold Ore pathway in BSK+IW and avoid soft locks
+		if (this.game.ironWill && this.game.challenges.isActive("blackSky")) {
+			if (this.name === "construction") {
+				prices_result = prices_result.concat([{name: "gold", val: 5}]);
+			}
+		}
+
+		return prices_result;
 	}
 });
 

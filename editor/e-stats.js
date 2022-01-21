@@ -107,6 +107,11 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			unethical: true,
 			condition: function () {
 				return this.game.deadKittens >= 100;
+			},
+			hasStar: true,
+			starDescription: "", // sigh
+			starCondition: function () {
+				return this.game.deadKittens >= 666666;
 			}
 		}, {
 			name: "superUnethicalClimax",
@@ -140,6 +145,11 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 				return this.game.village.happiness >= 5 && this.game.resPool.get("kittens").value > 35;
 			}
 		}, {
+			name: "deathStranding",
+			condition: function () {
+				return this.game.space.getPlanet("furthestRing").reached;
+			}
+		}, {
 			name: "cathammer",
 			condition: function () {
 				return this.game.stats.getStat("totalYears").val >= 40000;
@@ -151,186 +161,85 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 		}
 	],
 
-	hatsData: [
+	badgesData: [
 		{
-			id: 1,
-			name: "simpleHat",
-			title: "Simple Hat",
-			description: "The hat to rule them all",
-			difficulty: "F"
-		}, {
-			id: 2,
-			name: "lotusHat",
-			title: "Lotus Hat",
-			description: "Hat in the shape of louts",
+			name: "lotus",
+			title: "Lotus Eater",
+			description: "Have more than 50 total resets",
 			difficulty: "A",
 			condition: function () {
 				return this.game.stats.getStat("totalResets").val >= 50;
 			}
 		}, {
-			id: 3,
-			name: "ivoryTowerHat",
-			title: "Ivory Tower Hat",
-			description: "A tall hat in a form of a tower",
+			name: "ivoryTower",
+			title: "Ivory Tower",
+			description: "Have a reset in a IW atheism",
 			difficulty: "S+"
 		}, {
-			id: 4,
-			name: "uselessHat",
-			title: "Useless Hat",
-			description: "This hat is totally useless",
+			name: "useless",
+			title: "Effective Management",
+			description: "Have a useless leader",
 			difficulty: "F",
 			condition: function () {
 				var leader = this.game.village.getLeader();
-				return leader && leader.trait.name == "none";
+				return leader && leader.trait.name === "none";
 			}
 		}, {
-			id: 5,
-			name: "voidHat",
-			title: "Void Hat",
-			description: "Hat is made of void",
-			difficulty: ""
-		}, {
-			id: 6,
-			name: "nullHat",
-			title: "Null Hat",
-			description: "The hat is a lie",
-			difficulty: ""
-		}, {
-			id: 7,
-			name: "betaHat",
-			title: "Beta Hat",
-			description: "The hat is a bit glitchy and rough around the edges",
-			difficulty: "B"
-			// condition: function () {
-			// 	return (this.game.server.donateAmt == 0);
-			// }
-		}, {
-			id: 8,
-			name: "silentHat",
-			title: "Silent Hat",
-			description: "This hat is totally silent",
-			difficulty: "S"
-			// condition: function () {
-			// 	return (this.game.server.motdContent == "");
-			// }
-		}, {
-			id: 9,
-			name: "treetrunkHat",
-			title: "Treetrunk Hat",
-			description: "A hat made of branches and leaves",
-			difficulty: "F",
+			name: "beta",
+			title: "Beta Decay",
+			description: "Participate in a beta test",
+			difficulty: "B",
 			condition: function () {
-				return this.game.workshop.getCraft("wood").value > 0;
+				if (window && window.location && window.location.href) {
+					return window.location.href.indexOf("beta") >= 0;
+				}
+				return false;
 			}
 		}, {
-			id: 10,
-			name: "wizardHat",
-			title: "Wizard Hat",
-			description: "Abracadabra!",
-			difficulty: ""
+			name: "silentHill",
+			title: "Silent Hills",
+			description: "Have not MOTD content",
+			difficulty: "S",
+			condition: function () {
+				return (this.game.server.motdContent == "");
+			}
 		}, {
-			id: 11,
-			name: "nekomimiHat",
-			title: "Nekomimi Hat",
-			description: "*^_^*",
-			difficulty: ""
+			name: "evergreen",
+			title: "Wood badge",
+			description: "Craft a wood I think?",
+			difficulty: "F"
 		}, {
-			id: 12,
-			name: "eldritchHat",
-			title: "Eldritch Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 13,
-			name: "tesseractHat",
-			title: "Tesseract Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 14,
-			name: "crimsonHat",
-			title: "Crimson Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 15,
-			name: "skeletonHat",
-			title: "Skeleton Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 16,
-			name: "gladosHat",
-			title: "Glados Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 17,
-			name: "marioHat",
-			title: "Mario Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 18,
-			name: "fedoraHat",
-			title: "Fedora",
-			description: "Classy fedora",
-			difficulty: ""
-		}, {
-			id: 19,
-			name: "necrocornHat",
-			title: "Necrocorn Hat",
-			description: "",
+			name: "deadSpace",
+			title: "Dead Space",
+			description: "Have kittens wander in the void",
 			difficulty: "S",
 			condition: function () {
 				var kittens = this.game.resPool.get("kittens");
-				return (kittens.value >= 1000 && kittens.maxValue == 0);
+				return (kittens.value >= 1000 && kittens.maxValue === 0);
 			}
 		}, {
-			id: 20,
-			name: "alicornHat",
-			title: "Alicorn Hat",
-			description: "",
+			name: "reginaNoctis",
+			title: "Regina Noctis",
+			description: "Have 500 kittens and no alicorns",
 			difficulty: "S",
 			condition: function () {
-				return (this.game.resPool.get("kittens").value > 500 && this.game.resPool.get("alicorn").value == 0);
+				return (this.game.resPool.get("kittens").value > 500 && this.game.resPool.get("alicorn").value === 0);
 			}
 		}, {
-			id: 21,
-			name: "unicornHat",
-			title: "Unicorn Hat",
-			description: "",
-			difficulty: "A"
-		}, {
-			id: 22,
-			name: "dragonHat",
-			title: "Dragon Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 23,
-			name: "glitchyHat",
-			title: "Glitchy Hat",
+			name: "ghostInTheMachine",
+			title: "Experience a game bug (TBD see newrelic#errorHandle)",
 			description: "♋︎⬧︎⧫︎♏︎❒︎🕯︎⬧︎ ●︎♋︎■︎♑︎◆︎♋︎♑︎♏︎ 🖳︎✆",
 			difficulty: "S"
 		}, {
-			id: 24,
-			name: "topHat",
-			title: "Tophat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 25,
-			name: "jesterHat",
-			title: "Jester Hat",
-			description: "",
-			difficulty: ""
-		}, {
-			id: 26,
-			name: "fezHat",
-			title: "Fez Hat",
-			description: "A prism-shaped red fez hat.",
+			name: "abOwo",
+			title: "Ab Owo",
+			description: "Reset in atheism on day 0",
 			difficulty: "A"
+		}, {
+			name: "cleanPaws",
+			title: "Clean Paws",
+			description: "Peaceful trading without cat-power",
+			difficulty: "C"
 		}
 	],
 
@@ -339,7 +248,7 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 	achievements: null,
 	achievementsByName: null,
 
-	councilUnlocked: false,
+	badgesUnlocked: false,
 
 	constructor: function () {
 		this.i18nKeys = {tabName: "tab.name.achievements"};
@@ -350,12 +259,12 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 				title: "achievements." + ach.name + ".title",
 				description: "achievements." + ach.name + ".desc"
 			};
-			if (ach.hasStar) {
+			if (ach.hasStar && !ach.hasOwnProperty("starDescription")) {
 				ach.i18nKeys.starDescription = "achievements." + ach.name + ".starDesc";
 			}
 		});
 
-		this.registerMetaItems(this.hatsData, classes.KGSaveEdit.AchievementMeta, "hats");
+		this.registerMetaItems(this.badgesData, classes.KGSaveEdit.AchievementMeta, "badges");
 	},
 
 	get: function (name) {
@@ -366,32 +275,46 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 		return achievement;
 	},
 
-	getHat: function (name) {
-		var hat = this.hatsByName[name];
-		if (name && !hat) {
-			console.error("Hat not found", name);
+	getBadge: function (name) {
+		var badge = this.badgesByName[name];
+		if (name && !badge) {
+			console.error("Badge not found", name);
 		}
-		return hat;
+		return badge;
 	},
 
 	renderTabBlock: function () {
-		this.achievementsBlockHeader = dojo.create("div", {class: "bottom-margin"}, this.tabBlockNode);
+		dojo.create("div", {
+			id: "achievementsHeader",
+			class: "bottom-margin",
+			innerHTML: $I("achievements.panel.label")
+		}, this.tabBlockNode);
+		this.achievementsProgress = dojo.create("div", {
+			id: "achievementsProgress",
+			class: "bottom-margin"
+		}, this.tabBlockNode);
 
 		this.achievementsBlock = dojo.create("table", {
 			id: "achievementsBlock",
 			class: "bottom-margin"
 		}, this.tabBlockNode);
 
-		/* this.hatsBlock = dojo.create("table", {
-			id: "hatsBlock",
-			innerHTML: '<tr><th colspan="2">A Secret Council of Hats</th></tr>'
+		dojo.create("div", {
+			id: "badgesHeader",
+			class: "bottom-margin",
+			innerHTML: $I("badges.panel.label")
 		}, this.tabBlockNode);
-		this.hatsBlockHeader = this.hatsBlock.children[0]; */
+		this.badgesProgress = dojo.create("div", {
+			id: "badgesProgress",
+			class: "bottom-margin"
+		}, this.tabBlockNode);
+
+		this.badgesBlock = dojo.create("table", {id: "badgesBlock"}, this.tabBlockNode);
 	},
 
 	render: function () {
 		this.game.callMethods(this.achievements, "render", this.achievementsBlock, "achievement");
-		// this.game.callMethods(this.hats, "render", this.hatsBlock, "hat");
+		this.game.callMethods(this.badges, "render", this.badgesBlock, "badge");
 	},
 
 	hasUnlocked: function () {
@@ -423,9 +346,11 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 				continue;
 			}
 
-			totalAchievements++;
-			if (ach.unlocked) {
-				completedAchievements++;
+			if (!ach.unethical) {
+				totalAchievements++;
+				if (ach.unlocked) {
+					completedAchievements++;
+				}
 			}
 			if (ach.hasStar) {
 				if (ach.starUnlocked) {
@@ -445,18 +370,26 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			stars += "&#9734;";
 		}
 
-		this.achievementsBlockHeader.innerHTML = $I("achievements.header", [completedAchievements, totalAchievements]) + stars;
+		this.achievementsProgress.innerHTML = $I("achievements.header", [completedAchievements, totalAchievements]) + stars;
 
-		var councilUnlocked = this.councilUnlocked;
-		for (i = this.hats.length - 1; i >= 0; i--) {
-			var hat = this.hats[i];
-			hat.update();
-			councilUnlocked = councilUnlocked || hat.unlocked;
-			hasNewMarker = hasNewMarker || hat.isNew;
+		var badgesUnlocked = this.badgesUnlocked;
+		var completedBadges = 0;
+		var totalBadges = 0;
+
+		for (i = this.badges.length - 1; i >= 0; i--) {
+			var badge = this.badges[i];
+			badge.update();
+			totalBadges++;
+			if (badge.unlocked) {
+				badgesUnlocked = true;
+				completedBadges++;
+			}
+			hasNewMarker = hasNewMarker || badge.isNew;
 		}
-		this.councilUnlocked = councilUnlocked;
+		this.badgesUnlocked = badgesUnlocked;
 
-		// dojo.toggleClass(this.hatsBlockHeader, "spoiler", !this.councilUnlocked || !this.game.science.get("metaphysics").owned());
+		this.badgesProgress.innerHTML = $I("badges.header", [completedBadges, totalBadges]);
+		// dojo.toggleClass(this.badgesProgress, "spoiler", !this.badgesUnlocked);
 
 		this.game._toggleNewMarker(this.tabWrapper, hasNewMarker);
 	},
@@ -485,8 +418,8 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 	save: function (saveData) {
 		saveData.achievements = this.game.filterMetadata(this.achievements, ["name", "unlocked", "starUnlocked"]);
 		saveData.ach = {
-			councilUnlocked: this.councilUnlocked,
-			hats: this.game.filterMetadata(this.hats, ["name", "unlocked"])
+			badgesUnlocked: this.badgesUnlocked,
+			badges: this.game.filterMetadata(this.badges, ["name", "unlocked"])
 		};
 	},
 
@@ -502,9 +435,9 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 
 		if (saveData.ach) {
 			this.councilUnlocked = saveData.ach.councilUnlocked || false;
-			this.loadMetadata(saveData, "ach.hats", "getHat", function (hat, saveHat) {
-				hat.isNew = false;
-				hat.set("unlocked", saveHat.unlocked);
+			this.loadMetadata(saveData, "ach.badges", "getBadge", function (badge, saveBadge) {
+				badge.isNew = false;
+				badge.set("unlocked", saveBadge.unlocked);
 			});
 		}
 	}
@@ -519,13 +452,13 @@ dojo.declare("classes.KGSaveEdit.AchievementMeta", [classes.KGSaveEdit.GenericIt
 		this.isNew = false;
 	},
 
-	render: function (parent) {
+	render: function (parent, className) {
 		this.seti18n();
 
 		// TODO turn the title attributes into proper tooltips?
 
 		this.domNode = dojo.create("tr", {
-			class: "achievement",
+			class: className || "achievement",
 			innerHTML: '<td title="' + this.description + '">' + (this.title || this.name) + "</td><td></td><td></td>"
 		}, parent);
 		this.nameNode = this.domNode.children[0];

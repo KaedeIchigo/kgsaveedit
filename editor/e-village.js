@@ -117,6 +117,10 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			this.game.bld.get("hut").owned() || this.game.time.getVSU("usedCryochambers").owned();
 	},
 
+	onTabOpen: function () {
+		this.setAllKittenNames(true);
+	},
+
 	leader: null,
 
 	happiness: 1,
@@ -130,6 +134,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	censusPage: 1, // current census page
 	censusPageMax: 1, // highest census page
 	kittensPerPage: 10,
+
+	hadKittenHunters: false,
 
 	reserveKittens: null,
 	generatedReserveKittens: null,
@@ -154,7 +160,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 		this.selectedKittens = [];
 
-		this.map = new classes.KGSaveEdit.villageMap(game);
+		this.map = new classes.KGSaveEdit.VillageMap(game);
 		this.registerEffectNames(this.map.effects);
 
 		for (var i = 0, len = this.jobsData.length; i < len; i++) {
@@ -178,6 +184,14 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		// 	console.error("Job not found", name);
 		// }
 		return job;
+	},
+
+	getBiome: function (name) {
+		var biome = this.map.biomesByName[name];
+		if (name && !biome) {
+			console.error("Biome not found", name);
+		}
+		return biome;
 	},
 
 	getJobLimit: function (jobName) {
@@ -212,6 +226,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		return leader;
 	},
 
+	showFracturedNames: false,
+
 	renderTabBlock: function () {
 		var self = this;
 		var game = self.game;
@@ -223,15 +239,17 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			trait.title = $I("village.trait." + trait.name);
 		}
 
+		var panel = game._createPanel(self.tabBlockNode, {
+			id: "jobsPanel",
+			class: "bottom-margin"
+		}, $I("village.panel.job"), true);
+
 		var div = dojo.create("div", {
 			innerHTML: $I("village.general.free.kittens.label") + ' <span id="freeKittensSpan">0 / 0</span>'
-		}, self.tabBlockNode);
+		}, panel.content);
 		self.freeKittensSpan = div.children[0];
 
-		self.jobsBlock = dojo.create("table", {
-			id: "jobsBlock",
-			class: "bottom-margin"
-		}, self.tabBlockNode);
+		self.jobsBlock = dojo.create("table", {id: "jobsBlock"}, panel.content);
 
 		for (i = 0, len = self.jobs.length; i < len; i++) {
 			job = self.jobs[i];
@@ -239,9 +257,15 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			dojo.place(job.domNode, self.jobsBlock);
 		}
 
-		self.censusBlock = dojo.create("div", {
-			id: "censusBlock"
-		}, self.tabBlockNode);
+		div = dojo.create("div", null, panel.content);
+		game._createCheckbox($I("KGSaveEdit.village.hadKittenHunters"), div, self, "hadKittenHunters");
+
+		self.map.render();
+
+		panel = game._createPanel(self.tabBlockNode, {id: "censusPanel"}, $I("village.panel.census"), true);
+
+		self.censusBlock = panel.content;
+		self.censusBlock.id = "censusBlock";
 
 		self.governmentBlock = dojo.create("div", {
 			class: "toggleAnarchy noAnarchy",
@@ -277,6 +301,17 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		dojo.place(document.createTextNode(" \u00A0"), censusSourceBlock); //insert &nbsp; equivalent
 		self.reserveKittensCountNode = game._createInput({class: "integerInput"}, censusSourceBlock);
 
+		self.showFracturedNamesBlock = dojo.create("span", {
+			class: "bottom-margin",
+			innerHTML: " &nbsp;"
+		}, censusSourceBlock);
+		var cbox = game._createCheckbox($I("KGSaveEdit.village.census.showFractured"), self.showFracturedNamesBlock).cbox;
+		cbox.handler = function () {
+			self.showFracturedNames = this.checked;
+			self.setAllKittenNames(true);
+		};
+		dojo.toggleClass(self.showFracturedNamesBlock, "hidden", !game.getFeatureFlag("MAUSOLEUM_PACTS"));
+
 		self.reserveKittensCountNode.handler = function () {
 			self.synchReserveKittens(this.parsedValue);
 		};
@@ -307,9 +342,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			}
 		});
 
-		div = dojo.create("div", {
-			class: "censusLine"
-		}, self.censusBlock);
+		div = dojo.create("div", {class: "censusLine"}, self.censusBlock);
 
 		self.censusJobFilterNode = dojo.create("select", {
 			innerHTML: '<option value="all">' + $I("village.census.filter.all") + "</option>"
@@ -594,9 +627,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		self.massEditExpNode = game._createInput({class: "expEdit"}, tr.children[2], null, null, null, true);
 		self.massEditExpSetExpected = game._createCheckbox($I("KGSaveEdit.village.massedit.exp.setExpected"), tr.children[3]).cbox;
 
-		table = dojo.create("table", {
-			class: "noAnarchy"
-		}, this.massEditNode);
+		table = dojo.create("table", {class: "noAnarchy"}, this.massEditNode);
 
 		var handle = function () {
 			var skill = "";
@@ -909,7 +940,8 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			res["manpower"] = num(res["manpower"]) + 0.15; //zebras are a bit stronger than kittens
 		}
 		if (zebras > 1) {
-			res["manpower"] += this.game.getLimitedDR((zebras - 1) * 0.05, 2);
+			var zebraPreparations = Math.floor(this.game.getEffect("zebraPreparations"));
+			res["manpower"] += this.game.getLimitedDR((zebras.value - 1) * 0.05, 2 + zebraPreparations * 0.05);
 		}
 
 		return res;
@@ -919,6 +951,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		var res = {};
 		var leader = this.getLeader();
 		var leaderBonus = leader ? this.getLeaderBonus(leader.rank) : 1;
+		var happiness = this.happiness + ((this.happiness - 1) * this.game.getEffect("happinessKittenProductionRatio"));
 
 		for (var i = 0, len = this.kittens.length; i < len; i++) {
 			var kitten = this.kittens[i];
@@ -942,7 +975,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					} else if (leader) {
 						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
-					diff *= this.happiness; //alter positive resource production from jobs
+					diff *= happiness; //alter positive resource production from jobs
 				}
 
 				if (!res[jobResMod]) {
@@ -971,7 +1004,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 					} else if (leader) {
 						diff *= (1 + (leaderBonus - 1) * this.game.getEffect("boostFromLeader"));
 					}
-					diff *= this.happiness; //alter positive resource production from jobs
+					diff *= happiness;
 				}
 
 				if (!res[jobResMod]) {
@@ -1170,6 +1203,9 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 	},
 
 	getValueModifierPerSkill: function (value) {
+		if (this.game.challenges.isActive("anarchy")) {
+			return 0;
+		}
 		var bonus = 0;
 		switch (true) {
 			case value < 100:
@@ -1441,7 +1477,7 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 				" (" + (leader.job ? this.getJob(leader.job).title : "") + ")";
 			}
 
-			var leaderBlock = dojo.create("div", null, this.governmentBlock);
+			var leaderBlock = dojo.create("div", {class: "currentLeader"}, this.governmentBlock);
 			var leaderInfoBlock = dojo.create("div", {innerHTML: leaderInfo}, leaderBlock);
 
 			if (this.getLeader() !== leader) {
@@ -1527,15 +1563,45 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 		this.updateSelectedKittenControls();
 	},
 
+	setAllKittenNames: function (force) {
+		if (force || (this.showFracturedNames && this === this.game.activeTab)) {
+			this.game.callMethods(this.getKittensForCensus(), "setStyledName");
+			if (this.leader) {
+				this.renderGovernment();
+			}
+		}
+	},
+
+	getMaxKittens: function () {
+		return Math.floor(this.game.getEffect("maxKittens"));
+	},
+
+	calculateSimMaxKittens: function () {
+		var maxKittensRatio = this.game.getEffect("maxKittensRatio");
+		var maxKittens = this.getMaxKittens();
+		if (!maxKittensRatio) {
+			return maxKittens;
+		}
+		var withRatioMaxKittens = Math.round(maxKittens * (1 + this.game.getLimitedDR(maxKittensRatio, 1)));
+		return withRatioMaxKittens;
+	},
+
 	update: function () {
 		dojo.query(".toggleAnarchy").toggleClass("anarchy", this.game.challenges.isActive("anarchy"));
 
-		this.maxKittens = this.game.resPool.get("kittens").maxValue;
+		this.maxKittens = this.calculateSimMaxKittens();
 
 		dojo.toggleClass(this.massEditSelectKittensSpan, "hidden", !this.kittens.length);
 
 		this.freeKittensSpan.textContent = this.getFreeKittens() + " / " + this.getKittens();
 		this.game.callMethods(this.jobs, "update");
+
+		var haveHunter = this.getJob("hunter").value > 0;
+		var hadHunters = this.hadKittenHunters || this.hadKittenHuntersNode.prevChecked || haveHunter;
+		if (this.hadKittenHuntersNode.checked !== hadHunters) {
+			this.game.setCheckbox(this.hadKittenHuntersNode, hadHunters, true, true);
+		}
+		this.game.toggleDisabled(this.hadKittenHuntersNode, haveHunter);
 
 		this.map.update();
 
@@ -1543,18 +1609,23 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 
 		this.updateHappines();
 		this.updateResourceProduction();
+
+		if (this.game.getFeatureFlag("MAUSOLEUM_PACTS")) {
+			dojo.removeClass(this.showFracturedNamesBlock, "hidden");
+		}
+
+		this.setAllKittenNames();
 	},
 
 	save: function (saveData) {
 		saveData.village = {
 			kittens: this.game.mapMethods(this.kittens, "save"),
 			maxKittens: this.maxKittens,
-			jobs: this.game.filterMetadata(this.jobs, ["name", "unlocked", "value"]/* , function (saveJob) {
-				if (this.name === "priest" && this.game.challenges.isActive("atheism")) {
-					saveJob.value = 0;
-				}
-			} */)
-			// map: this.map.villageData
+			jobs: this.game.filterMetadata(this.jobs, ["name", "unlocked", "value"]),
+			currentBiome: this.map.currentBiome,
+			hadKittenHunters: this.hadKittenHuntersNode.checked || this.getJob("hunter").value > 0,
+			biomes: this.game.filterMetadata(this.map.biomes, ["name", "unlocked", "level", "cp"]),
+			map: this.map.save()
 		};
 	},
 
@@ -1563,21 +1634,35 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			return;
 		}
 
-		this.loadMetadata(saveData, "jobs", "getJob", function (job, saveJob) {
+		this.loadMetadata(saveData, "village.jobs", "getJob", function (job, saveJob) {
 			job.set("unlocked", saveJob.unlocked);
 		});
 
 		var saveKittens = saveData.village.kittens;
+		var haveHunter = false;
 		if (saveKittens && saveKittens.length > 0) {
 			this.addKittens(saveKittens.length);
 			for (var i = 0, len = saveKittens.length; i < len; i++) {
 				this.generatedKittens[i].load(saveKittens[i] || {});
+				haveHunter = haveHunter || this.generatedKittens[i].job === "hunter";
 			}
 		}
 
-		/* if (saveData.village.map) {
-			this.map.villageData = saveData.village.map;
-		} */
+		this.set("hadKittenHunters", haveHunter || Boolean(saveData.hadKittenHunters));
+
+		this.loadMetadata(saveData, "village.biomes", "getBiome", function (biome, saveBiome) {
+			biome.set("unlocked", Boolean(saveBiome.unlocked));
+			biome.set("level", num(saveBiome.level));
+			biome.set("cp", num(saveBiome.cp));
+		}, true);
+
+		var biome = this.getBiome(saveData.village.currentBiome);
+		this.map.currentBiome = biome ? biome.name : null;
+		this.game.setSelectByValue(this.map.currentBiomeNode, this.map.currentBiome || "");
+
+		if (saveData.village.map) {
+			this.map.load(saveData.village.map);
+		}
 	},
 
 	saveReserveKittens: function () {
@@ -1620,13 +1705,11 @@ dojo.declare("classes.KGSaveEdit.JobMeta", classes.KGSaveEdit.MetaItem, {
 
 		job.domNode = dojo.create("tr", {
 			class: "job",
-			innerHTML: '<td class="nameNode">' + (this.title || this.name) + '</td><td></td><td></td>'
+			innerHTML: '<td class="nameNode">' + (this.title || this.name) + "</td><td></td><td></td>"
 		});
 		job.nameNode = job.domNode.children[0];
 
-		job.assignedNode = job.game._createInput({
-			class: "integerInput"
-		}, job.domNode.children[1], job);
+		job.assignedNode = job.game._createInput({class: "integerInput"}, job.domNode.children[1], job);
 
 		job.assignedNode.parseFn = function (value) {
 			return Math.min(value, this.game.village.getFreeKittens() + job.value, this.game.village.getJobLimit(job.name));
@@ -1851,6 +1934,13 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		this.fireAll();
 	},
 
+	setStyledName: function () {
+		this.styledName = this.getStyledName();
+		if (this.domNode) {
+			this.nameBlock.innerHTML = this.styledName;
+		}
+	},
+
 	render: function () {
 		var self = this;
 		self.domNode = dojo.create("div", {class: "kittenBlock"});
@@ -1859,12 +1949,14 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		self.editBlock = null;
 
 		var block = dojo.create("div", {class: "blockContainer"}, self.domNode);
-		var div = dojo.create("div", {
-			class: "kittenSubBlock",
-			innerHTML: ", "
-		}, block);
+		var div = dojo.create("div", {class: "kittenSubBlock"}, block);
 
-		var input = self.game._createCheckbox("[:3] ", div, self, "selected", "first");
+		var span = dojo.create("span", {
+			class: "kittenInfo",
+			innerHTML: ", "
+		}, div);
+
+		var input = self.game._createCheckbox(" ", span, self, "selected", "first");
 		dojo.addClass(self.selectedNode, "kittenSelectCheckbox");
 		self.selectedNode.title = "Select kitten";
 
@@ -1872,15 +1964,13 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			self.game.village.updateSelectedKittens();
 		};
 
-		self.nameBlock = dojo.create("span", null, input.text);
-		// self.jobBlock = dojo.create("span", null, div);
-		// dojo.create("br", null, div);
+		self.nameBlock = input.text;
 
-		self.ageBlock = dojo.create("span", null, div);
-		dojo.place(document.createTextNode(" years old, "), div);
+		self.ageBlock = dojo.create("span", {class: "age"}, span);
+		dojo.place(document.createTextNode(" years old, "), span);
 
-		self.traitBlock = dojo.create("span", null, div);
-		self.rankBlock = dojo.create("span", null, div);
+		self.traitBlock = dojo.create("span", {class: "trait"}, span);
+		self.rankBlock = dojo.create("span", {class: "rank"}, span);
 
 		self.kittenSkillsBlock = dojo.create("div", {class: "kittenSkillsBlock noAnarchy"}, div);
 
@@ -1940,9 +2030,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		}
 		var kittenJob = this.village.getJob(this.job);
 
-		this.nameBlock.innerHTML = this.getStyledName();
-		// this.jobBlock.textContent = " - " + this.job;
-		// dojo.toggleClass(this.jobBlock, "hidden", !kittenJob);
+		this.setStyledName();
 
 		dojo.toggleClass(this.quitJobNode, "hidden", !kittenJob);
 
@@ -1973,8 +2061,8 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 
 			var bonus = this.getSkillBonus(skill.name, exp, this.rank);
 			var job = this.village.getJob(skill.name);
-			var className = this.job === skill.name ? '" class="bold' : "";
-			skillsText.push('<span title="' + exp.toFixed(2) + className + '">' + job.title + " " + bonus +
+			var className = 'class="skill' + (this.job === skill.name ? " currentSkill" : "") + '"';
+			skillsText.push("<span " + className + ' title="' + exp.toFixed(2) + '">' + job.title + " " + bonus +
 				this.village.getSkillLevel(exp) + "</span>");
 		}
 
@@ -2035,9 +2123,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			innerHTML: " &nbsp; "
 		}, self.editBlock);
 
-		var span = dojo.create("span", {
-			innerHTML: " &nbsp; "
-		}, div);
+		var span = dojo.create("span", {innerHTML: " &nbsp; "}, div);
 
 		game._createButton(
 			{value: $I("KGSaveEdit.village.edit.save")}, span, function () {
@@ -2162,9 +2248,7 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 			innerHTML: "Job skills"
 		}, self.editBlock);
 
-		table = dojo.create("table", {
-			class: "noAnarchy"
-		}, self.editBlock);
+		table = dojo.create("table", {class: "noAnarchy"}, self.editBlock);
 		self.editJobs = [];
 
 		var handle = function () {
@@ -2218,20 +2302,39 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 		return bonus;
 	},
 
-	getStyledName: function (isLeader) {
-		return '<span class="name color-' +
-			((this.color && this.colors[this.color + 1]) ? this.colors[this.color + 1].color : "none") +
-			" variety-" + ((this.variety && this.varieties[this.variety + 1]) ? this.varieties[this.variety + 1].style : "none") +
-			'">' +
-			(isLeader ? ":3 " : "") + this.name + " " + this.surname +
-		"</span>";
+	getStyledName: function (unfractured) {
+		if (unfractured || !this.village.showFracturedNames) {
+			return ('<span class="name color-' +
+				((this.color && this.colors[this.color + 1]) ? this.colors[this.color + 1].color : "none") +
+				" variety-" + ((this.variety && this.varieties[this.variety + 1]) ? this.varieties[this.variety + 1].style : "none") +
+				'">' + this.name + " " + this.surname +
+			"</span>");
+
+		} else {
+			if (!this.randTimer) {
+				var color_and_variety;
+				color_and_variety = this.game.createRandomVarietyAndColor(this.game.rand(76), this.game.rand(76));
+				this.fakeColor = color_and_variety[0];
+				this.fakeName = this.game.createRandomName() + this.game.createRandomName(1, "    -/_") + this.game.createRandomName();
+				this.fakeVariety = color_and_variety[1];
+				this.randTimer = 10 + this.game.rand(41);
+			} else {
+				this.randTimer += -1;
+			}
+			return ('<span class="name color-' +
+				((this.fakeColor && this.colors[this.fakeColor + 1]) ? this.colors[this.fakeColor + 1].color : "none") +
+				" variety-" + ((this.fakeVariety && this.varieties[this.fakeVariety + 1]) ? this.varieties[this.fakeVariety + 1].style : "none") +
+				'" title="' + this.name + " " + this.surname + '">' +
+				(/*"shade"*/this.fakeName) +
+			"</span>");
+		}
 	},
 
 	getGovernName: function () {
 		var trait = this.trait || this.traitsByName.none;
 		var title = trait.name == "none" ? $I("village.census.trait.none") : trait.title +
 			" (" + $I("village.bonus.desc." + trait.name) + ") [" + $I("village.census.rank") + " " + this.rank + "]";
-		return this.getStyledName(true) + " (" + title + ")";
+		return this.styledName + " (" + title + ")";
 	},
 
 	quitJob: function () {
@@ -2612,133 +2715,238 @@ dojo.declare("classes.KGSaveEdit.Kitten", classes.KGSaveEdit.core, {
 });
 
 
-dojo.declare("classes.KGSaveEdit.villageMap", null, {
-	game: null,
+dojo.declare("classes.KGSaveEdit.VillageMap", classes.KGSaveEdit.MetaManager, {
 	villageData: null,
-
-	villageLevel: 0,
-	/*% explored, affects your priceRatio */
-	exploredLevel: 0,
 
 	effects: null,
 
-	biomes: [
+	biomesData: [
 		{
-			id: "forest",
-			icon: "^",
+			name: "village",
+			title: "Village",
+			desc: "Improves exploration rate of all biomes",
+			unlocked: true,
+			terrainPenalty: 1.0,
+			faunaPenalty: 0
+		}, {
+			name: "plains",
+			title: "Plains",
+			desc: "Improves catnip generation by 1% per level",
+			unlocked: true,
+			terrainPenalty: 1.0,
+			unlocks: {biomes: ["hills"]}
+		}, {
+			name: "hills",
+			title: "Hills",
+			desc: "TBD",
+			// unlocks: {biomes: ["mountain"]},
+			terrainPenalty: 1.2,
+			requires: function (game) {
+				return game.village.getBiome("plains").level >= 5 || game.village.getBiome("forest").level >= 5;
+			},
+			lore: {
+				5: "You can see small lizards enjoying the sun"
+			}
+		}, {
+			name: "forest",
 			title: "Forest",
+			desc: "Improves your wood production by 1% per level",
+			lore: {
+				5: "It smells really nice",
+				10: "The forest is rumored to be endless and covering half of the planet",
+				15: "There is something in the forest and no one knows what it is. Not many are sure if it really exists. If it does, it is somewhere deep below, days of travel, years, centuries maybe."
+			},
+			unlocked: true,
+			// unlocks: {biomes: ["boneForest"]},
 			terrainPenalty: 1.2,
-			biomeChance: 0.2
+			faunaPenalty: 1.5
 		}, {
-			id: "boneForest",
-			icon: "^.",
+			name: "boneForest",
 			title: "Bone Forest",
+			lore: {
+				5: "A place where trees are made of bones"
+			},
 			terrainPenalty: 1.9,
-			biomeChance: 0.02
+			requires: function (game) {
+				return game.village.getBiome("forest").level >= 25 && game.village.getBiome("rainForest").level >= 5;
+			}
 		}, {
-			id: "rainForest",
-			icon: "^`",
+			name: "rainForest",
 			title: "Rain Forest",
+			description: "TBD",
 			terrainPenalty: 1.4,
-			biomeChance: 0.1
+			5: "The trees are so tall you don't see where it ends. When the rains start they can go for hundreds of years.",
+			10: "In the fog you can see the mountains. The mountains have eyes and sometime change places."
 		}, {
-			id: "mountain",
-			icon: "*",
+			name: "mountain",
 			title: "Mountain",
+			description: "Improves mineral generation by 1% per level",
+			lore: {
+				5: "Remember to grab your mandatory 50 meters of rope. The ascend will take quite some time.",
+				10: "A small and larger structures cut from a limestone are towering there. Griffins call this place The White Citadel.",
+				15: "Everything is so pale and white we don’t know what exactly is it made of. There are some red marking and drawings everywhere",
+				20: "Why is this place called a citadel? You can see some system there. This place is a structure on its own, a ziggurat made of ziggurats."
+			},
 			terrainPenalty: 1.2,
-			biomeChance: 0.05
+			// unlocks: {biomes: ["volcano"]},
+			requires: function (game) {
+				return game.village.getBiome("hills").level >= 10;
+			}
 		}, {
-			id: "desert",
-			icon: "~",
+			name: "volcano",
+			title: "Volcano",
+			description: "TBD",
+			lore: {
+				5: "TBD"
+			},
+			terrainPenalty: 3.5,
+			requires: function (game) {
+				return game.village.getBiome("mountain").level >= 25;
+			}
+		}, {
+			name: "desert",
 			title: "Desert",
+			description: "TBD",
+			lore: {
+				5: "An endless white desert with occasional red rock formations"
+			},
 			terrainPenalty: 1.5,
-			biomeChance: 0.08
+			requires: function (game) {
+				return game.village.getBiome("plains").level >= 15;
+			}
+		}, {
+			name: "bloodDesert",
+			title: "Crimson Desert",
+			description: "",
+			lore: {
+				5: "There are tales of horrible monsters and lost cities and endless deserts of red sand",
+				10: "You can travel further. But you don’t really want to see what’s there in the desert.",
+				15: "Once there was an ocean of blood. No one knows why, maybe a frozen shard of Redmoon felt there millenia ago."
+			},
+			terrainPenalty: 1.5
+		}, {
+			name: "swamp",
+			title: "Swamp",
+			description: "Everything that is edible is poisonous and so are the trees and the grass and the air is also poisonous slightly",
+			lore: {
+				5: "Everything here tries to kill you",
+				10: "All plants here are poisonous and so are the trees and the water and the air is also poisonous slightly",
+				15: "All you can see are the endless swamplands with lost ziggurats and rotten watchtowers"
+			},
+			terrainPenalty: 1.95
 		}
 	],
 
-	constructor: function (game) {
-		this.game = game;
-		this.effects = {"mapPriceReduction": 0};
+	biomes: null,
+	biomesByName: null,
+
+	currentBiome: null,
+	exploredLevel: 0,
+	explorersLevel: 0,
+	hqLevel: 0,
+	energy: 70,
+
+	villageLevel: 0, //keep for mints!
+
+	constructor: function () {
+		this.effects = {
+			"mapPriceReduction": 0,
+			"exploreRatio":      0
+		};
+		this.registerMetaItems(this.biomesData, classes.KGSaveEdit.GenericItem, "biomes", function (biome) {
+			biome.unlocked = Boolean(biome.unlocked);
+			biome.defaultUnlocked = biome.unlocked;
+			biome.level = 0;
+			biome.cp = 0;
+		});
 		this.resetMap();
 	},
 
 	resetMap: function () {
 		this.init();
-		this.mapgen();
 	},
 
-	init: function () {
-		this.villageData = {
-			"3_2": {
-				title: "v",
-				type: "village",
-				level: 1,
-				cp: 0
-			}
-		};
-	},
+	init: function () { },
 
-	generateTile: function (i, j) {
-		var key = i + "_" + j;
+	render: function () {
+		var self = this;
+		var game = self.game;
 
-		for (var _biomeKey in this.biomes) {
-			var biome = this.biomes[_biomeKey];
-			if (this.game.rand(100) <= (biome.biomeChance * 100)) {
-				this.villageData[key] = {
-					title: biome.icon,
-					type: biome.id,
-					level: 0,
-					cp: 0,
-					unlocked: false,
-					biomeInfo: biome
-				};
-			}
+		var panel = game._createPanel(game.village.tabBlockNode, {
+			id: "mapPanel",
+			class: "bottom-margin"
+		}, "Map", true, !game.getFeatureFlag("VILLAGE_MAP"));
+
+		var table = dojo.create("table", {
+			id: "mapBlock",
+			class: "bottom-margin"
+		}, panel.content);
+
+		var tr = dojo.create("tr", {innerHTML: "<td>Explorers level</td><td></td>"}, table);
+
+		game._createInput({class: "integerInput"}, tr.children[1], self, "explorersLevel");
+
+		var btn = new classes.KGSaveEdit.MapButton(game, {
+			name: $I("village.btn.upgradeExplorers"),
+			description: $I("village.btn.upgradeExplorers.desc"),
+			prices: [{name: "manpower", val: 100}],
+			dataProp: "explorersLevel"
+		});
+		btn.registerTooltip(tr);
+
+		tr = dojo.create("tr", {innerHTML: "<td>HQ level</td><td></td>"}, table);
+
+		game._createInput({class: "integerInput"}, tr.children[1], self, "hqLevel");
+
+		btn = new classes.KGSaveEdit.MapButton(game, {
+			name: $I("village.btn.upgradeHQ"),
+			description: $I("village.btn.upgradeHQ.desc"),
+			prices: [{name: "catnip", val: 1000}],
+			dataProp: "hqLevel"
+		});
+		btn.registerTooltip(tr);
+
+		tr = dojo.create("tr", {innerHTML: "<td>Supplies</td><td> days</td>"}, table);
+
+		game._createInput(null, tr.children[1], self, "energy", "first");
+
+		tr = dojo.create("tr", {innerHTML: "<td>Current biome</td><td></td>"}, table);
+
+		self.currentBiomeNode = dojo.create("select", {
+			innerHTML: '<option class="currentBiomeChoice" value="">---</option>'
+		}, tr.children[1]);
+
+		on(self.currentBiomeNode, "change", function () {
+			self.currentBiome = this.value || null;
+			game.update();
+		});
+
+		self.biomesBlock = dojo.create("table", {id: "biomesBlock"}, panel.content);
+
+		for (var i = 0; i < self.biomes.length; i++) {
+			var biome = self.biomes[i];
+			var title = biome.title || biome.name;
+			biome.domNode = dojo.create("tr", {
+				class: "biomeRow",
+				innerHTML: '<td class="name">' + title + '</td><td></td><td> &nbsp;Level </td><td> &nbsp;Progress </td>'
+			}, self.biomesBlock);
+			biome.nameNode = biome.domNode.children[0];
+
+			game._createCheckbox($I("KGSaveEdit.label.unlocked"), biome.domNode.children[1], biome, "unlocked");
+
+			game._createInput({class: "integerInput"}, biome.domNode.children[2], biome, "level");
+
+			game._createInput({class: "abbrInput"}, biome.domNode.children[3], biome, "cp");
+			biome.cpDisplayNode = dojo.create("span", null, biome.domNode.children[3]);
+
+			dojo.create("option", {
+				class: "currentBiomeChoice",
+				value: biome.name,
+				innerHTML: title
+			}, self.currentBiomeNode);
 		}
-		if (!this.villageData[key]) {
-			this.villageData[key] = {
-				title: null,
-				type: null,
-				level: 0,
-				cp: 0,
-				unlocked: false,
-				biomeInfo: null
-			};
-		}
-		return this.villageData[key];
-	},
 
-	mapgen: function () {
-		for (var i = 0; i < 7; i++) {
-			for (var j = 0; j < 7; j++) {
-				var key = i + "_" + j;
-				if (!this.villageData[key]) {
-					this.generateTile(i, j);
-				}
-			}
-		}
-
-		this.unlockTile(3, 2); //unlock village and 3x3 area around it
-	},
-
-	unlockTile: function (x, y) {
-		for (var i = x - 1; i <= x + 1; i++) {
-			for (var j = y - 1; j <= y + 1; j++) {
-				var tile = this.getTile(i, j);
-				if (tile) {
-					tile.unlocked = true;
-				}
-			}
-		}
-	},
-
-	getTile: function (x, y) {
-		var key = x + "_" + y,
-			data = this.villageData[key];
-
-		if (!data) {
-			data = this.generateTile(x, y);
-		}
-		return data;
+		game.setSelectByValue(self.currentBiomeNode, self.currentBiome || "");
 	},
 
 	getPriceReduction: function () {
@@ -2749,23 +2957,52 @@ dojo.declare("classes.KGSaveEdit.villageMap", null, {
 		return num(this.effects[effectName]);
 	},
 
+	toLevel: function (biome) {
+		return 100 * (1 + 1.1 * Math.pow(biome.level + 1, 1.18 + 0.1 * biome.terrainPenalty));
+	},
+
 	update: function () {
-		var exploredLevel = 0;
-
-		for (var key in this.villageData) {
-			var cellData = this.villageData[key];
-			exploredLevel += cellData.level;
-
-			if (cellData.type == "village") {
-				this.villageLevel = cellData.level;
-			}
-		}
-
-		this.exploredLevel = exploredLevel;
 		this.effects["mapPriceReduction"] = -this.getPriceReduction();
-	}
+		this.effects["exploreRatio"] = (0.1 * (this.game.village.getBiome("village").level - 1));
 
-	//TODO render if bloodrizer ever turns on the map
+		for (var i = 0; i < this.biomes.length; i++) {
+			var biome = this.biomes[i];
+
+			var req = this.game.checkRequirements(biome, biome.defaultUnlocked);
+			biome.unlocked = req || biome.unlockedNode.prevChecked;
+			biome.unlockedNode.checked = biome.unlocked;
+			this.game.toggleDisabled(biome.unlockedNode, req);
+
+			dojo.toggleClass(biome.nameNode, "spoiler", !biome.unlocked);
+
+			biome.cpDisplayNode.textContent = " [" + (biome.cp / this.toLevel(biome) * 100).toFixed(2) + "%]";
+		}
+	},
+
+	save: function () {
+		return {
+			hqLevel: this.hqLevel,
+			energy: this.energy,
+			explorersLevel: this.explorersLevel
+		};
+	},
+
+	load: function (data) {
+		this.set("hqLevel", data.hqLevel || 0);
+		this.set("energy", data.energy || 100);
+		this.set("explorersLevel", data.explorersLevel || 0);
+	}
+});
+
+//hackity hack
+dojo.declare("classes.KGSaveEdit.MapButton", classes.KGSaveEdit.MetaItem, {
+	getPrices: function () {
+		var prices = dojo.clone(this.prices);
+		for (var i = 0; i < prices.length; i++) {
+			prices[i].val *= Math.pow(1.25, this.game.village.map[this.dataProp]);
+		}
+		return prices;
+	}
 });
 
 });

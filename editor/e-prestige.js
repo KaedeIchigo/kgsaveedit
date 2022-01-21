@@ -405,17 +405,20 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 	},
 
 	render: function () {
-		this.domNode = dojo.create("table", {
-			id: "metaphysicsBlock",
-			class: "bottom-margin",
-			innerHTML: '<tr><th colspan="2">' + $I("prestige.panel.label") + "</th></tr>"
-		}, this.game.science.tabBlockNode);
-		this.domNodeHeader = this.domNode.children[0];
+		var panel = this.game._createPanel(this.game.science.tabBlockNode, {
+			id: "metaphysicsPanel",
+			class: "bottom-margin"
+		}, $I("prestige.panel.label"), true);
+
+		this.domNode = panel.panel;
+
+		var table = dojo.create("table", {id: "metaphysicsBlock"}, panel.content);
+		this.domNodeHeader = panel.header;
 
 		for (var i = 0, len = this.perks.length; i < len; i++) {
 			var perk = this.perks[i];
 			perk.render();
-			dojo.place(perk.domNode, this.domNode);
+			dojo.place(perk.domNode, table);
 		}
 	},
 

@@ -7,10 +7,8 @@ function num(value) {
 	return Number(value) || 0;
 }
 
-
 require(["dojo/on", "dojo/mouse"], function (on, mouse) {
 "use strict";
-
 
 /**
  * Super class. Contains a method to set any property and also update the associated form element, if any.
@@ -109,27 +107,16 @@ dojo.declare("classes.KGSaveEdit.UI.Tab", classes.KGSaveEdit.core, {
 			}
 		}
 		dojo.toggleClass(this.tabNameNode, "traitLeaderBonus", showBonus);
-	}
+	},
+
+	onTabOpen: function () { }
 });
 
-dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
+dojo.declare("classes.KGSaveEdit.MetaManager", classes.KGSaveEdit.core, {
 	game: null,
-	effectNames: null,
-	effectsCached: null,
-	meta: null,
 
 	constructor: function (game) {
 		this.game = game;
-
-		this.effectsCached = {};
-		this.effectNames = {};
-		this.meta = [];
-
-		this.registerEffectNames(this.effectsBase);
-	},
-
-	render: function () {
-		this.seti18n();
 	},
 
 	/**
@@ -153,6 +140,54 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 				fn.call(this, item);
 			}
 		}
+	},
+
+	loadMetadata: function (saveData, path, getFn, loadFn, storeExtra) {
+		var saveArr = this.game.resolveObjPath(saveData, path);
+		if (!saveArr || !saveArr.length) {
+			return;
+		}
+
+		if (!dojo.isFunction(loadFn)) {
+			loadFn = null;
+		}
+
+		for (var i = 0; i < saveArr.length; i++) {
+			var saveMeta = saveArr[i];
+			if (saveMeta && saveMeta.name) {
+				var meta = this[getFn](saveMeta.name);
+				if (meta) {
+					if (loadFn) {
+						loadFn.call(this, meta, saveMeta);
+					} else if ("load" in meta) {
+						meta.load(saveMeta);
+					}
+				} else if (storeExtra) {
+					this.game.extrasTab.storeExtraData(path, saveMeta, i);
+				}
+			}
+		}
+	}
+});
+
+dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.MetaManager, {
+	game: null,
+	effectNames: null,
+	effectsCached: null,
+	meta: null,
+
+	constructor: function (game) {
+		this.game = game;
+
+		this.effectsCached = {};
+		this.effectNames = {};
+		this.meta = [];
+
+		this.registerEffectNames(this.effectsBase);
+	},
+
+	render: function () {
+		this.seti18n();
 	},
 
 	registerEffectNames: function (effects) {
@@ -228,33 +263,6 @@ dojo.declare("classes.KGSaveEdit.Manager", classes.KGSaveEdit.core, {
 		}
 
 		return totalEffect || 0;
-	},
-
-	loadMetadata: function (saveData, path, getFn, loadFn, storeExtra) {
-		var saveArr = this.game.resolveObjPath(saveData, path);
-		if (!saveArr || !saveArr.length) {
-			return;
-		}
-
-		if (!dojo.isFunction(loadFn)) {
-			loadFn = null;
-		}
-
-		for (var i = 0; i < saveArr.length; i++) {
-			var saveMeta = saveArr[i];
-			if (saveMeta && saveMeta.name) {
-				var meta = this[getFn](saveMeta.name);
-				if (meta) {
-					if (loadFn) {
-						loadFn.call(this, meta, saveMeta);
-					} else if ("load" in meta) {
-						meta.load(saveMeta);
-					}
-				} else if (storeExtra) {
-					this.game.extrasTab.storeExtraData(path, saveMeta, i);
-				}
-			}
-		}
 	}
 });
 
@@ -424,6 +432,23 @@ dojo.declare("classes.KGSaveEdit.MetaItem", [classes.KGSaveEdit.GenericItem, cla
 			}, tooltip);
 		}
 
+		if (this.isAutomationEnabled !== undefined) { //TODO: use proper metadata flag
+			dojo.create("div", {
+				innerHTML: this.isAutomationEnabled ? $I("btn.aon.tooltip") : $I("btn.aoff.tooltip"),
+				class: "tooltipDesc small" + (this.isAutomationEnabled ? " auto-on" : " auto-off")
+			}, tooltip);
+		}
+
+		if (
+			this.effects && this.effects["cathPollutionPerTickProd"] > 0 &&
+			this.game.science.get("chemistry").owned() && !this.game.opts.disablePollution
+		) {
+			dojo.create("div", {
+				innerHTML: $I("btn.pollution.tooltip"),
+				class: "tooltipDesc small pollution"
+			}, tooltip);
+		}
+
 		var prices = this.getPrices ? this.getPrices() : this.prices;
 		if (prices) {
 			if (descBlock) {
@@ -462,7 +487,11 @@ dojo.declare("classes.KGSaveEdit.MetaItemStackable", classes.KGSaveEdit.MetaItem
 		} else if (this.togglableOnOff) {
 			return this.on > 0 ? this.val : 0;
 		}
-		return Math.min(this.on, this.val) || 0;
+		var on = Math.min(this.on, this.val) || 0;
+		if (typeof this.limitBuild === "number") {
+			on = Math.min(on, this.limitBuild);
+		}
+		return on;
 	},
 
 	getName: function () {
@@ -495,6 +524,14 @@ dojo.declare("classes.KGSaveEdit.MetaItemStackable", classes.KGSaveEdit.MetaItem
 			prices[i].val *= Math.pow(ratio, this.val) * resPriceModifier * priceModifier;
 		}
 		return prices;
+	},
+
+	updateEnabled: function () {
+		var prices = this.getPrices() || [];
+		var limited = this.game.resPool.isStorageLimited(prices);
+		var buildLimited = typeof this.limitBuild === "number" && this.limitBuild <= this.val;
+		dojo.toggleClass(this.nameNode, "limited", this.game.opts.highlightUnavailable && limited);
+		dojo.toggleClass(this.nameNode, "btnDisabled", limited || buildLimited || !this.game.resPool.hasRes(prices));
 	}
 });
 

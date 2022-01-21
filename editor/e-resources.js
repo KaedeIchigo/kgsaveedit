@@ -56,7 +56,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "antimatter",
 			transient: true,
-			color: "#5a0ede"
+			color: "#5a0ede",
+			calculateOnYear: true
 		}, {
 			name: "manpower",
 			transient: true,
@@ -86,7 +87,7 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				this.game.village.synchKittens();
 			},
 			getMaxValue: function () {
-				return Math.floor(this.game.getEffect("maxKittens"));
+				return Math.floor(this.game.village.calculateSimMaxKittens());
 			},
 			reservable: false
 		}, {
@@ -167,7 +168,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "necrocorn",
 			type: "rare",
 			color: "#e00000",
-			reservable: false
+			reservable: false,
+			calculatePerDay: true
 		}, {
 			name: "tears",
 			type: "rare",
@@ -176,10 +178,10 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			name: "karma",
 			type: "rare",
 			inputParseFn: function (value) {
-				return this.game.getUnlimitedDR(Math.round(this.game.getInverseUnlimitedDR(value, 5)), 5);
+				return this.game.getKarma(this.game.getKarmaKittens(value));
 			},
 			inputHandler: function () {
-				this.game.setInput(this.game.karmaKittensNode, Math.round(this.game.getInverseUnlimitedDR(this.parsedValue, 5)), true);
+				this.game.setInput(this.game.karmaKittensNode, this.game.getKarmaKittens(this.parsedValue), true);
 				this.game.setInput(this.game.karmaKittensKarma, this.parsedValue, true);
 			},
 			reservable: false
@@ -210,7 +212,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}, {
 			name: "relic",
 			type: "exotic",
-			color: "#fa0ede"
+			color: "#fa0ede",
+			calculatePerDay: true
 			/* style: {
 				"-webkit-animation": "neon-purple 1.5s ease-in-out infinite alternate",
 				"-moz-animation":    "neon-purple 1.5s ease-in-out infinite alternate",
@@ -273,6 +276,18 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 				"-o-animation":      "neon-red 1.5s ease-in-out infinite alternate",
 				animation:           "neon-red 1.5s ease-in-out infinite alternate"
 			} */
+		}, {
+			name: "tMythril",
+			type: "exotic",
+			transient: true,
+			craftable: true,
+			color: "#00e6b8"
+			/*style: {
+						 animation : "neon-red 1.5s ease-in-out infinite alternate",
+				"-webkit-animation": "neon-red 1.5s ease-in-out infinite alternate",
+				   "-moz-animation": "neon-red 1.5s ease-in-out infinite alternate",
+					 "-o-animation": "neon-red 1.5s ease-in-out infinite alternate"
+			}*/
 		}, {
 			name: "beam",
 			craftable: true
@@ -518,6 +533,12 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 
 			if (!this.isNormalCraftableResource(res) && !res.transient) {
 				maxValue *= 1 + this.game.getEffect("globalResourceRatio");
+				//pacts effect
+				var pyramidModifier = this.game.getEffect("pyramidGlobalResourceRatio");
+				/*if(pyramidModifier < 0){
+					pyramidModifier = -this.game.getLimitedDR(-pyramidModifier * 1000, 1000)/1000
+				}*/
+				maxValue *= 1 + pyramidModifier;
 			}
 		}
 
@@ -632,8 +653,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 		}
 
 		if (res.name === "karma") {
-			var karmaKittens = Math.round(this.game.getInverseUnlimitedDR(res.value, 5));
-			res.valueVirtual = this.game.getUnlimitedDR(karmaKittens, 5);
+			var karmaKittens = Math.round(this.game.getKarmaKittens(res.value));
+			res.valueVirtual = this.game.getKarma(karmaKittens);
 		}
 
 		return res.valueVirtual - prevValue;
@@ -826,13 +847,15 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 			return;
 		}
 
-		if (!this.perTickCached) {
+		var resString = this.game.getDetailedResMap(this);
+
+		if (!this.perTickNode.textContent || (!this.perTickCached && !resString)) {
 			tooltipBlock.className = "hidden";
 			return;
 		}
 
 		tooltipBlock.className = "pertick_tooltip";
-		tooltipBlock.innerHTML = this.game.getDetailedResMap(this);
+		tooltipBlock.innerHTML = resString;
 	},
 
 	getTooltipOffset: function (node) {
@@ -877,9 +900,22 @@ dojo.declare("classes.KGSaveEdit.ResourceMeta", [classes.KGSaveEdit.GenericItem,
 			postfix = "%" + postfix;
 		}
 
-		var perTickValue = perTick ? this.game.getDisplayValueExt(perTick, true, false) + postfix : "";
+		var perTickValue = "";
+		if (this.game.getResourcePerTick(this.name, false) || this.game.getResourcePerTickConvertion(this.name)) {
+			perTickValue = this.game.getDisplayValueExt(perTick, true, false) + postfix;
+		} else if (this.calculatePerDay) {
+			var perDay = this.game.getResourcePerDay(this.name);
+			if (perDay) {
+				perTickValue = this.game.getDisplayValueExt(perDay, true, false) + "/" + $I("unit.d");
+			}
+		} else if (this.calculateOnYear) {
+			var perYear = this.game.getResourceOnYearProduction(this.name);
+			if (perYear) {
+				perTickValue = this.game.getDisplayValueExt(perYear, true, false) + "/" + $I("unit.y");
+			}
+		}
 		this.perTickNode.textContent = perTickValue;
-		dojo.toggleClass(this.perTickNode, "tooltipped", Boolean(perTick));
+		dojo.toggleClass(this.perTickNode, "tooltipped", Boolean(perTickValue));
 
 		//weather mod
 		if (this.name === "catnip") {

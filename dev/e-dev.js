@@ -9,16 +9,16 @@ if (!window.jsondiffpatch) {
 
 var instance = jsondiffpatch.create({
 	objectHash: function (obj, index) {
-		if (typeof obj._id !== 'undefined') {
+		if (typeof obj._id !== "undefined") {
 			return obj._id;
 		}
-		if (typeof obj.id !== 'undefined') {
+		if (typeof obj.id !== "undefined") {
 			return obj.id;
 		}
-		if (typeof obj.name !== 'undefined') {
+		if (typeof obj.name !== "undefined") {
 			return obj.name;
 		}
-		return '$$index:' + index;
+		return "$$index:" + index;
 	}
 });
 
@@ -91,107 +91,173 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 		var negatedKittens = [];
 		var cappedKittens = [];
 		var extraDataKittens = [];
+		var ignoredBiomes = 0;
 
-		//remove isSenator, trait.title, and negative job experience wipes from the delta for cleaner output
-		//keeps other changes to kittens/village, if any
-		if (delta.village && delta.village.kittens) {
-			var newKittens = {};
-			var key;
+		var index, i, key, newDelta, extraDataKeys;
 
-			var extraDataKeys = ["engineerSpeciality", "isLeader", "isSenator"];
+		if (delta.village) {
+			//remove isSenator, trait.title, and negative job experience wipes from the delta for cleaner output
+			//keeps other changes to kittens/village, if any
+			if (delta.village.kittens) {
+				var newKittens = {};
 
-			for (var index in delta.village.kittens) {
-				var deltaKitten = delta.village.kittens[index];
+				extraDataKeys = ["engineerSpeciality", "isLeader", "isSenator"];
 
-				var extraDataMatches = extraDataKeys.filter(function (key) {
-					return deltaKitten.hasOwnProperty(key);
-				});
+				for (index in delta.village.kittens) {
+					var deltaKitten = delta.village.kittens[index];
 
-				if (index === "_t" || deltaKitten.ssn || (!deltaKitten.skills && !extraDataMatches.length && (!deltaKitten.trait || !deltaKitten.trait.title))) {
-					newKittens[index] = deltaKitten;
-					continue;
-				}
+					var extraDataMatches = extraDataKeys.filter(function (key) {
+						return deltaKitten.hasOwnProperty(key);
+					});
 
-				var keepKitten = false;
-				var deltaKittenKeys = Object.keys(deltaKitten);
-
-				for (var i = deltaKittenKeys.length - 1; i >= 0; i--) {
-					key = deltaKittenKeys[i];
-					if (key !== "skills" && (key !== "trait" || deltaKitten.trait.name) && extraDataMatches.indexOf(key) === -1) {
-						keepKitten = true;
-						break;
+					if (index === "_t" || deltaKitten.ssn || (!deltaKitten.skills && !extraDataMatches.length && (!deltaKitten.trait || !deltaKitten.trait.title))) {
+						newKittens[index] = deltaKitten;
+						continue;
 					}
-				}
 
-				var kittenNegated = false;
-				var kittenCapped = false;
-				var keptSkills = {};
-				for (key in deltaKitten.skills) {
-					var skill = deltaKitten.skills[key];
-					if (skill.length === 3 && skill[0] <= 0 && skill[1] === 0 && skill[2] === 0) {
-						kittenNegated = true;
+					var keepKitten = false;
+					var deltaKittenKeys = Object.keys(deltaKitten);
 
-					} else if (skill.length === 2 && skill[0] > this.game.village.maxJobSkill && skill[1] === this.game.village.maxJobSkill) {
-						kittenCapped = true;
-
-					} else {
-						keptSkills[key] = skill;
-						keepKitten = true;
+					for (i = deltaKittenKeys.length - 1; i >= 0; i--) {
+						key = deltaKittenKeys[i];
+						if (key !== "skills" && (key !== "trait" || deltaKitten.trait.name) && extraDataMatches.indexOf(key) === -1) {
+							keepKitten = true;
+							break;
+						}
 					}
-				}
-				if (kittenNegated) {
-					negatedKittens.push(index);
-				}
-				if (kittenCapped) {
-					cappedKittens.push(index);
-				}
 
-				var kittenTraitTitle = false;
-				var keptTrait = {};
-				if (deltaKitten.trait) {
-					for (key in deltaKitten.trait) {
-						if (key === "title") {
-							kittenTraitTitle = true;
+					var kittenNegated = false;
+					var kittenCapped = false;
+					var keptSkills = {};
+					for (key in deltaKitten.skills) {
+						var skill = deltaKitten.skills[key];
+						if (skill.length === 3 && skill[0] <= 0 && skill[1] === 0 && skill[2] === 0) {
+							kittenNegated = true;
+
+						} else if (skill.length === 2 && skill[0] > this.game.village.maxJobSkill && skill[1] === this.game.village.maxJobSkill) {
+							kittenCapped = true;
+
 						} else {
-							keptTrait[key] = deltaKitten.trait[key];
+							keptSkills[key] = skill;
 							keepKitten = true;
 						}
 					}
-				}
+					if (kittenNegated) {
+						negatedKittens.push(index);
+					}
+					if (kittenCapped) {
+						cappedKittens.push(index);
+					}
 
-				if (kittenTraitTitle || extraDataMatches.length > 0) {
-					extraDataKittens.push(index);
-				}
-
-				if (keepKitten) {
-					var clone = {};
-					for (var keepKey in deltaKitten) {
-						if (keepKey === "skills") {
-							if (!$.isEmptyObject(keptSkills)) {
-								clone[keepKey] = keptSkills;
+					var kittenTraitTitle = false;
+					var keptTrait = {};
+					if (deltaKitten.trait) {
+						for (key in deltaKitten.trait) {
+							if (key === "title") {
+								kittenTraitTitle = true;
+							} else {
+								keptTrait[key] = deltaKitten.trait[key];
+								keepKitten = true;
 							}
-						} else if (keepKey === "trait") {
-							if (!$.isEmptyObject(keptTrait)) {
-								clone[keepKey] = keptTrait;
-							}
-						} else if (extraDataMatches.indexOf(index) === -1) {
-							clone[keepKey] = deltaKitten[keepKey];
 						}
 					}
 
-					newKittens[index] = clone;
+					if (kittenTraitTitle || extraDataMatches.length > 0) {
+						extraDataKittens.push(index);
+					}
+
+					if (keepKitten) {
+						var clone = {};
+						for (var keepKey in deltaKitten) {
+							if (keepKey === "skills") {
+								if (!$.isEmptyObject(keptSkills)) {
+									clone[keepKey] = keptSkills;
+								}
+							} else if (keepKey === "trait") {
+								if (!$.isEmptyObject(keptTrait)) {
+									clone[keepKey] = keptTrait;
+								}
+							} else if (extraDataMatches.indexOf(index) === -1) {
+								clone[keepKey] = deltaKitten[keepKey];
+							}
+						}
+
+						newKittens[index] = clone;
+					}
+				}
+
+				var keys = Object.keys(newKittens);
+				if (!keys.length || keys.toString() === "_t") {
+					delete delta.village.kittens;
+				} else {
+					delta.village.kittens = newKittens;
 				}
 			}
 
-			var keys = Object.keys(newKittens);
-			if (!keys.length || keys.toString() === "_t") {
-				delete delta.village.kittens;
+			//ignore setting default biome cp and level
+			if (delta.village.biomes && !Array.isArray(delta.village.biomes)) {
+				newDelta = {};
+				extraDataKeys = ["level", "cp"];
+				var keepBiomes = false;
 
-				if (Object.keys(delta.village).length === 0) {
-					delete delta.village;
+				for (index in delta.village.biomes) {
+					var deltaBiome = delta.village.biomes[index];
+					if (index === "_t") {
+						newDelta[index] = deltaBiome;
+						continue;
+					}
+
+					var newBiome = {};
+					var ignoredBiome = false;
+					var keepBiome = false;
+					for (key in deltaBiome) {
+						var deltaBiomeProp = deltaBiome[key];
+						if (Array.isArray(deltaBiomeProp) && deltaBiomeProp.length === 1 && deltaBiomeProp[0] === 0 && extraDataKeys.indexOf(key) > -1) {
+							ignoredBiome = true;
+						} else {
+							keepBiome = true;
+							newBiome[key] = deltaBiomeProp;
+						}
+					}
+
+					if (ignoredBiome) {
+						ignoredBiomes++;
+					}
+
+					if (keepBiome) {
+						keepBiomes = true;
+						newDelta[index] = newBiome;
+					}
 				}
+
+				if (keepBiomes) {
+					delta.village.biomes = newDelta;
+				} else {
+					delete delta.village.biomes;
+				}
+			}
+
+			if (Object.keys(delta.village).length === 0) {
+				delete delta.village;
+			}
+		}
+
+		//ignore reordered unlocked schemes
+		if (delta.game && delta.game.unlockedSchemes && !Array.isArray(delta.game.unlockedSchemes)) {
+			newDelta = {};
+			var keptScheme = false;
+			for (index in delta.game.unlockedSchemes) {
+				var deltaScheme = delta.game.unlockedSchemes[index];
+				if (index === "_t" || !Array.isArray(deltaScheme) || deltaScheme[2] != 3) {
+					keptScheme = keptScheme || index !== "_t";
+					newDelta[index] = deltaScheme;
+				}
+			}
+			if (keptScheme) {
+				console.log(delta.game.unlockedSchemes, newDelta);
+				delta.game.unlockedSchemes = newDelta;
 			} else {
-				delta.village.kittens = newKittens;
+				delete delta.game.unlockedSchemes;
 			}
 		}
 
@@ -210,6 +276,10 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 		if (extraDataKittens.length > 0) {
 			summaryHTML.push(extraDataKittens.length + " kittens had extra data wiped.<br><br>");
 			console.log("extraInfoKittens indeces: " + extraDataKittens.join(", "));
+		}
+
+		if (ignoredBiomes > 0) {
+			summaryHTML.push(ignoredBiomes + " map biomes had default level and/or cp set");
 		}
 
 		summaryHTML = summaryHTML.length > 0 ? summaryHTML.join("<br>") + "<br><br>" : "";

@@ -4,7 +4,7 @@ require([], function () {
 
 dojo.declare("classes.KGSaveEdit.KGConfig", null, {
 	statics: {
-		locales: ["br", "cz", "de", "es", "fr", "ja", "pl", "ru", "zh"]
+		locales: ["br", "cz", "de", "es", "fr", "ja", "pl", "ru", "zh", "zht"]
 	}
 });
 
@@ -37,15 +37,16 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 		var localeLabels = {
 			"en": "English",
 
-			"br": "Português",
-			"cz": "Čeština",
-			"de": "Deutsch",
-			"es": "Español",
-			"fr": "Français",
-			"ja": "日本語",
-			"pl": "Polski",
-			"ru": "Русский",
-			"zh": "中文"
+			"br":  "Português",
+			"cz":  "Čeština",
+			"de":  "Deutsch",
+			"es":  "Español",
+			"fr":  "Français",
+			"ja":  "日本語",
+			"pl":  "Polski",
+			"ru":  "Русский",
+			"zh":  "中文",
+			"zht": "漢語"
 		};
 
 		this.availableLocaleLabels = {};
@@ -250,7 +251,7 @@ dojo.declare("classes.KGSaveEdit.i18n.Lang", null, {
 			msg = "$" + key;
 		}
 		return msg;
-	},
+	}
 
 });
 
