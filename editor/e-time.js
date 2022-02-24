@@ -78,6 +78,7 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 			}
 		}, {
 			name: "temporalAccelerator",
+			desc2: true,
 			prices: [
 				{name: "timeCrystal", val: 10},
 				{name: "relic",       val: 1000}
@@ -248,6 +249,9 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 				label: "time.cfu." + cfu.name + ".label",
 				description: "time.cfu." + cfu.name + ".desc"
 			};
+			if (cfu.desc2) {
+				cfu.i18nKeys.desc2 = "time.cfu." + cfu.name + ".desc2";
+			}
 		});
 		this.registerMetaItems(this.vsuData, classes.KGSaveEdit.VSUMeta, "vsu", function (vsu) {
 			vsu.i18nKeys = {

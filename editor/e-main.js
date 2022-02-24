@@ -1859,8 +1859,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			}, tooltip);
 		}
 
-		var isEffectMultiplierEnabled = this.isEffectMultiplierEnabled();
-		var valMultiplier = isEffectMultiplierEnabled ? meta.on : 1;
+		var isEffectMultiplierEnabled = meta.multiplyEffects && this.isEffectMultiplierEnabled();
 
 		//-----------------------------------------
 
@@ -1870,9 +1869,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				continue;
 			}
 
-			var effectValue = effectMeta.calculation === "constant"
-				? effectsList[effectName]
-				: effectsList[effectName] * valMultiplier;
+			var effectValue = isEffectMultiplierEnabled ? meta.getEffect(effectName) : effectsList[effectName];
 
 			if (effectValue) {
 				var effectClass = "tooltipEffect";

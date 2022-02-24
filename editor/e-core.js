@@ -341,6 +341,8 @@ dojo.declare("classes.KGSaveEdit.TooltipItem", classes.KGSaveEdit.core, {
 
 
 dojo.declare("classes.KGSaveEdit.MetaItem", [classes.KGSaveEdit.GenericItem, classes.KGSaveEdit.TooltipItem], {
+	multiplyEffects: false,
+
 	get: function (key) {
 		return this[key];
 	},
@@ -354,7 +356,7 @@ dojo.declare("classes.KGSaveEdit.MetaItem", [classes.KGSaveEdit.GenericItem, cla
 	},
 
 	getDescription: function () {
-		return this.description;
+		return this.description + (this.desc2 ? "\n" + this.desc2 : "");
 	},
 
 	getEffect: function () {
@@ -476,6 +478,8 @@ dojo.declare("classes.KGSaveEdit.MetaItemStackable", classes.KGSaveEdit.MetaItem
 	on: 0,
 	togglable: false,
 	togglableOnOff: false,
+
+	multiplyEffects: true,
 
 	owned: function () {
 		return this.val > 0;

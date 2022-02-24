@@ -1223,10 +1223,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 
 	load: function (saveData) {
 		if (saveData.science) {
-			this.game.setCheckbox(this.hideResearchedNode, saveData.science.hideResearched);
-			this.policyToggleResearched = saveData.science.policyToggleResearched;
-			this.policyToggleBlocked = saveData.science.policyToggleBlocked;
-
+			this.set("hideResearched", saveData.science.hideResearched);
+			this.set("policyToggleResearched", saveData.science.policyToggleResearched);
+			this.set("policyToggleBlocked", saveData.science.policyToggleBlocked);
 			this.loadMetadata(saveData, "science.techs", "get", null, true);
 			this.loadMetadata(saveData, "science.policies", "getPolicy", null, true);
 		}
@@ -1324,6 +1323,13 @@ dojo.declare("classes.KGSaveEdit.PolicyMeta", classes.KGSaveEdit.UpgradeMeta, {
 			prices.val *= Math.pow(1.25, policyFakeBought);
 		}
 		return prices;
+	},
+
+	updateEnabled: function () {
+		var prices = this.getPrices() || [];
+		var limited = this.game.resPool.isStorageLimited(prices);
+		dojo.toggleClass(this.nameNode, "limited", this.game.opts.highlightUnavailable && limited);
+		dojo.toggleClass(this.nameNode, "btnDisabled", limited || this.blocked || !this.game.resPool.hasRes(prices));
 	},
 
 	handler: function () {

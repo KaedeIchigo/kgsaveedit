@@ -687,7 +687,7 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		if (kittens > 35 && this.game.getEffect("pactsAvailable") > 0) {
 			var kittensKarmaPerMinneliaRatio = this.game.getEffect("kittensKarmaPerMinneliaRatio");
 			gain = (millennia * this.game._getKarmaKittens(kittens) * this.game.getUnlimitedDR(kittensKarmaPerMinneliaRatio *
-				Math.max(1 + 0.1 * this.game.religion.transcendenceTier - 25, 1) * (this.game.getEffect("pactsAvailable")), 100));
+				Math.max(1 + 0.1 * (this.game.religion.transcendenceTier - 25), 1) * (this.game.getEffect("pactsAvailable")), 100));
 		}
 		return gain;
 	},
