@@ -1095,7 +1095,7 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			blockedBy: ["cryochamberExtraction"],
 			// blocks: ["cryochamberExtraction"],
 			effects: {
-				"terraformingMaxKittensRatio": 0.001 //might be too weak - could be fixed later on
+				"terraformingMaxKittensRatio": 0.1
 			}
 		}/*, {
 			name: "spaceBasedTerraforming",

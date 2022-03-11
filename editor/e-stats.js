@@ -576,12 +576,7 @@ dojo.declare("classes.KGSaveEdit.StatsManager", [classes.KGSaveEdit.UI.Tab, clas
 			title: "stats.paragon.total",
 			val: 0,
 			compareVal: function (game) {
-				var paragon = game.resPool.get("paragon").value;
-				if (game.editorOptions.includeSpentParagon) {
-					var burnedParagon = game.resPool.get("burnedParagon").value;
-					paragon += burnedParagon + game.prestige.getSpentParagon();
-				}
-				return paragon;
+				return game.resPool.get("paragon").value + game.resPool.get("burnedParagon").value;
 			}
 		}, {
 			name: "eventsObserved",

@@ -1142,7 +1142,6 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	editorOptions: { //options about the editor
 		fixStats: true, //automatically calculate certain stats that may be off due to the game not tracking them before they existed
-		includeSpentParagon: true, //include price of researched metaphysics perks when calculating the totalParagon stat
 		showAllKittenSkills: true //show all of a kitten's job skills in the census (game caps at displaying three jobs)
 	},
 
