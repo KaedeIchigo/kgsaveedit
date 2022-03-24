@@ -1329,7 +1329,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "titanium", val: 5000},
 				{name: "uranium",  val: 50},
 				{name: "science",  val: 150000}
-			]
+			],
+			requires: {tech: ["electronics"]}
 		}, {
 			name: "neuralNetworks",
 			prices: [
