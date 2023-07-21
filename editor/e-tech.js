@@ -157,8 +157,8 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 				{name: "science",   val: 42000},
 				{name: "compedium", val: 10}
 			],
-			// unlocks: {tech: ["acoustics"]},
-			requires: {buildings: ["mansion", "mint"], tech: ["navigation"]},
+			// unlocks: {buildings: ["mansion", "mint"], tech: ["acoustics"]},
+			requires: {tech: ["navigation"]},
 			flavor: true
 		}, {
 			name: "physics",
