@@ -1,0 +1,19 @@
+# The repository is already uniformly LF in the index. Pin that so contributors
+# on Windows (core.autocrlf=true) cannot accidentally commit CRLF and produce
+# whole-file diffs.
+* text=auto eol=lf
+
+# Vendored and minified bundles: store verbatim, and keep them out of diffs so
+# they do not drown out real changes in review.
+lib/dojo.js            -text -diff
+lib/jquery-*.min.js    -text -diff
+lib/lz-string.js       -text -diff
+dev/*.min.js           -text -diff
+
+# Translation payloads are machine-managed; keep them out of diff noise too.
+res/i18n/**.json       -diff
+
+# Let GitHub's language stats reflect the editor, not vendored libraries.
+lib/**       linguist-vendored
+dev/*.min.js linguist-vendored
+res/i18n/**  linguist-generated
