@@ -16,10 +16,14 @@
   "scripts": {
     "start": "http-server . -p 8080 -c-1 -o /editor.html?dev",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@playwright/test": "^1.49.0",
     "eslint": "^9.15.0",
     "globals": "^15.12.0",
     "http-server": "^14.1.1"

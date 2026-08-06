@@ -49,5 +49,24 @@ export default [
 			"no-trailing-spaces": "warn",
 			"eol-last": ["warn", "always"]
 		}
+	},
+
+	{
+		// Tooling and tests are modern Node ESM, unlike the editor source.
+		files: ["**/*.mjs"],
+		languageOptions: {
+			ecmaVersion: 2023,
+			sourceType: "module",
+			globals: {
+				...globals.node,
+				// Callbacks handed to page.evaluate() are serialised and run inside
+				// the browser, so these files legitimately reference both realms.
+				...globals.browser
+			}
+		},
+		rules: {
+			"no-var": "error",
+			eqeqeq: ["error", "smart"]
+		}
 	}
 ];

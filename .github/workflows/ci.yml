@@ -31,3 +31,31 @@ jobs:
       # backlog and are intentionally not gating, so the build stays honest
       # instead of being silenced with a blanket disable.
       - run: npm run lint
+
+  test:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      # Boots the real editor in Chromium. This is the regression net for the
+      # game-version work: the editor loads its modules via $.getScript and
+      # resolves strings via $I, and both fail silently - a broken module or a
+      # missing i18n key produces a console error, never a failed build.
+      - run: npm test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

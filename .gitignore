@@ -22,6 +22,12 @@ desktop.ini
 # Tooling caches
 .eslintcache
 
+# Playwright output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # Local save files used for testing (never commit real saves)
 *.save.txt
 saves/

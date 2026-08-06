@@ -83,6 +83,31 @@ config, so one has been added in [`eslint.config.mjs`](eslint.config.mjs) to mat
 the code is actually written. Indentation rules are deliberately left to
 [`.editorconfig`](.editorconfig).
 
+### Tests
+
+```bash
+npm test
+```
+
+This boots the real editor in headless Chromium (Playwright) and checks that it loads,
+that every module and locale resolves, and that a save survives an export/import
+round-trip.
+
+The reason it works this way: **this codebase fails quietly.** Modules are fetched with
+`$.getScript` and strings are resolved through `$I`, so a broken module or a missing
+translation key shows up as a console error and nothing else — the page still renders,
+lint still passes, and the diff still looks clean. The tests therefore treat any
+`console.error`, page error, or failed request during boot as a failure.
+
+That matters most for the game-version work: changing hundreds of data entries is
+exactly the situation where a silent break is easy to ship.
+
+First run needs the browser binary:
+
+```bash
+npx playwright install chromium
+```
+
 ## Credits
 
 - **[patsy](https://coderpatsy.bitbucket.io/)** — created the save editor. All of it.
