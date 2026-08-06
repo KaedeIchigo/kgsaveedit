@@ -122,13 +122,16 @@
 				"editor/e-buildings.js", "editor/e-religion.js", "editor/e-space.js",
 				"editor/e-time.js", "editor/e-village.js", "editor/e-stats.js", "editor/e-main.js", "editor/e-extras.js"];
 
-			// The dev save-diff tab is opt-in: it loads on localhost or with "?dev" in the
-			// query string, so a deployed copy stays clean. These are appended (not
-			// prepended) because e-dev.js extends classes declared by e-main.js, and the
-			// loader below fetches strictly in order.
-			var devMode = /[?&]dev(&|=|$)/.test(location.search) ||
-				location.hostname === "localhost" ||
-				location.hostname === "127.0.0.1";
+			// The dev save-diff tab is opt-in. An explicit "dev" query parameter always
+			// wins, so "?dev=0" can force the deployed code path even on localhost -
+			// which is what the smoke tests rely on. Otherwise it defaults on for local
+			// development and off everywhere else, keeping deployed copies clean.
+			// The dev scripts are appended (not prepended) because e-dev.js extends
+			// classes declared by e-main.js, and the loader below fetches in order.
+			var devParam = new URLSearchParams(location.search).get("dev");
+			var devMode = devParam !== null ?
+				(devParam !== "0" && devParam !== "false") :
+				(location.hostname === "localhost" || location.hostname === "127.0.0.1");
 
 			if (devMode) {
 				dojo.create("link", {
