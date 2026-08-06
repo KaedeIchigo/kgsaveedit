@@ -37,8 +37,12 @@ takes precedence and this fork will defer to it.
 
 ## Status
 
-Currently targets Kittens Game version **1.4.9.0.r674**, which is what the editor was
-left at upstream. Updating this to current Kittens Game is the active work.
+Currently targets Kittens Game version **1.5.0.3** (July 2026). Upstream left the
+editor at 1.4.9.0.r674 (July 2023); the content added across 1.4.9.4, 1.5.0.0,
+1.5.0.1, 1.5.0.2 and 1.5.0.3 has since been ported in.
+
+The save format itself is unchanged across that range — the game and the editor both
+use `saveVersion: 15` — so saves from any of those versions load and round-trip.
 
 The target version is declared in one place — the `#gameVersionSpan` element in
 [`editor.html`](editor.html) — and is read at runtime into `window.editorVersion`,

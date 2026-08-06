@@ -92,6 +92,21 @@ dojo.declare("classes.KGSaveEdit.VillageManager", [classes.KGSaveEdit.UI.Tab, cl
 			name: "engineer",
 			requires: {tech: ["mechanization"]},
 			modifiers: {}
+		}, {
+			//Added in Kittens Game 1.5.x, unlocked by the "ambassadors" perk.
+			//The game scales this job's culture/spice upkeep with headcount and
+			//caps its slots from embassy count; those are runtime calculations the
+			//editor does not reproduce, so only the flat modifiers are listed.
+			name: "ambassador",
+			modifiers: {
+				"tradeVolume":                   0.0007,
+				"embassyEffectCap":              0.00133,
+				"tradeBlueprintChance":          0.00008,
+				"tradeSpiceChance":              0.00009,
+				"tradeNormalResChance":          0.00003,
+				"cultureConsumptionAmbassadors": 20,
+				"spiceConsumptionAmbassadors":   0.8
+			}
 		}
 	],
 

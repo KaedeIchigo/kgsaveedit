@@ -1572,6 +1572,60 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "blackcoin",    val: 64}
 			],
 			requires: {tech: ["blackchain"]}
+		},
+
+		//Added in Kittens Game 1.4.9.x - 1.5.0.x. Grouped here rather than slotted
+		//next to their thematic neighbours so the addition stays easy to review;
+		//position in this array only affects display order in the Workshop tab.
+		{
+			name: "prospecting",
+			prices: [
+				{name: "minerals", val: 1000},
+				{name: "science",  val: 1000}
+			],
+			requires: {tech: ["metal"]}
+		}, {
+			name: "petri",
+			prices: [
+				{name: "plastic", val: 250},
+				{name: "science", val: 65000}
+			],
+			requires: {tech: ["biology"]}
+		}, {
+			name: "freightfulExchange",
+			prices: [
+				{name: "science",  val: 450000},
+				{name: "eludium",  val: 100},
+				{name: "titanium", val: 1000},
+				{name: "tanker",   val: 5000}
+			],
+			requires: {tech: ["advExogeology"]}
+		}, {
+			//Gated behind the freightfulExchange upgrade plus dimensionalPhysics,
+			//so there is no single tech to key off - left for manual toggling.
+			name: "transportSuperposition",
+			prices: [
+				{name: "science", val: 500000},
+				{name: "eludium", val: 1500},
+				{name: "thorium", val: 25000},
+				{name: "tanker",  val: 500000}
+			]
+		}, {
+			//Unlocked from the Chronoforge, not from a tech.
+			name: "tachyonModerator",
+			prices: [
+				{name: "science",  val: 16000},
+				{name: "gear",     val: 500},
+				{name: "titanium", val: 250}
+			]
+		}, {
+			//Only unlockable while the Unicorn Tears challenge is active.
+			name: "alicornStable",
+			prices: [
+				{name: "wood",    val: 3000},
+				{name: "gold",    val: 100},
+				{name: "alicorn", val: 20}
+			]
 		}
 	],
 
@@ -1699,6 +1753,26 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			progressHandicap: 5,
 			tier: 2
 		}, {
+			name: "plastic",
+			prices: [
+				{name: "oil", val: 1000}
+			],
+			unlocked: false,
+			requires: {tech: ["biology"]},
+			progressHandicap: 5,
+			tier: 2
+		}, {
+			name: "microchip",
+			prices: [
+				{name: "plastic", val: 50},
+				{name: "gold",    val: 1000},
+				{name: "spice",   val: 1000}
+			],
+			unlocked: false,
+			requires: {tech: ["electronics"]},
+			progressHandicap: 20,
+			tier: 3
+		}, {
 			name: "parchment",
 			prices: [
 				{name: "furs", val: 175}
@@ -1809,6 +1883,16 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "compedium", val: 75}
 			],
 			requires: {tech: ["archeology"]}
+		}, {
+			//Added in Kittens Game 1.5.x. Unlocked by the minerologyDepartment
+			//zebra upgrade rather than by a tech.
+			name: "bloodstoneInstitute",
+			prices: [
+				{name: "science",    val: 85000},
+				{name: "blueprint",  val: 50},
+				{name: "bloodstone", val: 25},
+				{name: "tMythril",   val: 10}
+			]
 		}
 	],
 

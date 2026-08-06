@@ -112,7 +112,6 @@
     "buildings.group.culture": "Cultura",
     "buildings.group.other": "Otro",
     "buildings.group.megastructures": "Mega Estructuras",
-
     "village.job.woodcutter": "Leñador",
     "village.job.woodcutter.desc": "+0.1 madera por segundo",
     "village.job.farmer": "Agricultor",
@@ -218,7 +217,6 @@
     "village.trait.none": "Ninguno",
     "village.trait.scientist": "Científico",
     "village.trait.wise": "Filósofo",
-
     "stats.kittens.total": "Total Gatitos",
     "stats.kittens.dead": "Gatitos muertos",
     "stats.years.total": "Total de años jugados",
@@ -237,7 +235,6 @@
     "stats.time.current": "Tiempo jugado (horas)",
     "stats.group.all": "Estadísticas de todos los tiempos",
     "stats.group.current": "Estadísticas del juego actual",
-
     "challendge.1000Years.desc": "Objetivo: llegar al año 1000.",
     "challendge.1000Years.effect.desc": "TBD",
     "challendge.1000Years.label": "1000 años",
@@ -265,7 +262,6 @@
     "challendge.winterIsComing.effect.desc": "El clima es mejor en general",
     "challendge.winterIsComing.label": "El invierno ha llegado",
     "challendge.panel.label": "Desafíos",
-
     "space.centaurusSystemMission.desc": "Sistema Centaurus es un sistema de estrella lejano cálido",
     "space.centaurusSystemMission.label": "Misión del sistema Centaurus",
     "space.duneMission.desc": "Dune es un planeta grande y sin vida cubierto por arena y roca volcánica",
@@ -339,10 +335,8 @@
     "space.terminusMission.label": "Misión T-minus",
     "space.yarnMission.desc": "Yarn es un planeta clase M con un clima moderado, mares y atmósfera de oxígeno",
     "space.yarnMission.label": "Misión Yarn",
-
     "void.spaceCathedral.desc": "TBD.",
     "void.spaceCathedral.label": "Catedral del espacio",
-
     "prestige.engeneering.desc": "Reduce todas las relaciones de precios en un 1%. Desbloquea más actualizaciones de precios.",
     "prestige.engeneering.label": "Ingeniería",
     "prestige.codexVox.desc": "Mejora la proporción de manuscritos en un 25%.",
@@ -412,7 +406,6 @@
     "prestige.btn.burnParagon.label": "Graba tu dechado",
     "prestige.btn.burnParagon.desc": "Descartar todos los puntos de Paragón",
     "prestige.panel.label": "Metafísica",
-
     "science.toggleResearched.label": "Ocultar técnicos investigados",
     "science.calendar.desc": "Desarrolla la capacidad de predecir cuándo cambiarán las estaciones. Esta capacidad es esencial para la agricultura avanzada",
     "science.calendar.effectDesc": "El Calendario proporciona una forma de seguimiento del tiempo más preciso",
@@ -601,7 +594,6 @@
     "science.paradoxalKnowledge.desc": "TBD",
     "science.paradoxalKnowledge.effectDesc": "Desbloquea Chronocontrol Recuperación de Recursos",
     "science.paradoxalKnowledge.label": "conocimiento paradoxal",
-
     "workshop.toggleResearched.label": "Ocultar actualizaciones investigadas",
     "workshop.mineralHoes.desc": "Tus agricultores son un 50% más efectivos",
     "workshop.mineralHoes.label": "Azadas de mineral",
@@ -918,12 +910,8 @@
     "workshop.crafted.msg": "+ {0} {1} Creado",
     "workshop.all.upgrades.unlocked": "¡Todas las actualizaciones están desbloqueadas!",
     "workshop.craft.effectiveness": "Efectividad del arte: + {0}%",
-
     "general.copy.to.clipboard.prompt": "Copiar al portapapeles: Ctrl + C, Enter",
     "general.food.advisor.text": "Asesor de alimentos: '¡Su suministro de catnip es demasiado bajo!'",
-
-
-
     "resources.catnip.title": "Catnip",
     "resources.wood.title": "Madera",
     "resources.minerals.title": "Minerales",
@@ -979,7 +967,6 @@
     "resources.thorium.title": "Torio",
     "resources.megalith.title": "Megalito",
     "resources.craftTable.all": "Todos",
-
     "effectsMgr.type.resMax": "Max {0}",
     "effectsMgr.type.resRatio": "{0} bonificación",
     "effectsMgr.type.resDemandRatio": "{0} reducción de demanda",
@@ -1090,7 +1077,6 @@
     "effectsMgr.statics.sunlifter-energyProduction.title": "Sunlifter - Producción de energía",
     "effectsMgr.statics.spaceBeacon-starchartPerTickBaseSpace.title": "Producción de Baliza Espacial - Mapa Estelar",
     "effectsMgr.statics.spiceRefinery-spicePerTickAutoprodSpace.title": "Refinería de especias - Producción de especias",
-
     "religion.zu.unicornTomb.desc": "Mejora tu generación de unicornios en un 5%",
     "religion.zu.unicornTomb.label": "Tumba del unicornio",
     "religion.zu.ivoryTower.desc": "Mejora tu generación de unicornios en un 10%, desbloquea las Grietas del unicornio",
@@ -1179,7 +1165,6 @@
     "religion.transcend.confirmation.title": "Trascender?",
     "religion.transcend.msg.success": "Has trascendido los límites mortales. T-Nivel: {0}",
     "religion.transcend.msg.failure": "Un paso más cerca: {0}%",
-
     "achievements.theElderLegacy.title": "El legado de los Ancestros",
     "achievements.theElderLegacy.desc": "Sé el primer jugador en probar Kittens Game Móvil",
     "achievements.unicornConspiracy.title": "Conspiración de unicornios",
@@ -1237,7 +1222,6 @@
     "achievements.msg.unlock": "Logro desbloqueado: {0}!",
     "achievements.msg.starUnlock": "Estrella de logro desbloqueada: {0}!",
     "achievements.header": "Logros: {0} de {1}",
-
     "time.cfu.temporalBattery.desc": "Mejora la capacidad de energía de su flujo en un 25%",
     "time.cfu.temporalBattery.label": "Batería temporal",
     "time.cfu.blastFurnace.desc": "Funciona con cronocalor. Aumenta el límite de calor máximo en 100.",
@@ -1370,7 +1354,8 @@
     "opts.theme": "Esquema de colores",
     "opts.theme.default": "Clasico",
     "opts.theme.dark": "Invertido",
-    "opts.theme.oledblack": "OLED Black", "opts.theme.oledblack_comment": "Used for mobile",
+    "opts.theme.oledblack": "OLED Black",
+    "opts.theme.oledblack_comment": "Used for mobile",
     "opts.lang": "Idioma",
     "opts.percentage": "Usar valores porcentuales",
     "opts.percentage.desc": "El juego usará el% de los valores totales de los recursos, de lo contrario, los valores por segundo.",
@@ -1430,7 +1415,6 @@
     "time.fixCryochambers.label": "Reparar Criocámara",
     "time.fixCryochambers.desc": "Rasga el espacio-tiempo para recuperar una cámara criogénica antes de usarla",
     "time.void": "Vacío",
-
     "time.tc.shatterOne": "Energía temporal liberada, omitida un año",
     "time.tc.shatter": "Energía temporal liberada, omitida {0} años",
     "res.notify.unavailable": "Este edificio no estará disponible para la construcción porque no tiene suficiente espacio de almacenamiento para los recursos necesarios. Inténtelo más tarde",
@@ -1439,7 +1423,6 @@
     "res.notify.ready": "El {0} está listo",
     "res.notify.ready.title": "Suficiente recurso para comprar",
     "console.intro": "Eres un gatito en un bosque de gavilán",
-
     "trade.buys": "compran",
     "trade.sells": "Venden",
     "trade.cost": "Costes",
@@ -1482,19 +1465,15 @@
     "menu.import.text": "Importar texto",
     "menu.import.btn": "Importar desde texto",
     "navbar.observe.short": "Observar",
-
     "unit.watt": "Wt",
     "unit.sec": "est",
     "unit.s": "s",
-    
     "unit.m": "m",
-    
     "unit.h": "h",
     "unit.day": "día",
     "unit.d": "d",
     "unit.year": "año",
     "unit.y": "a",
-
     "menu.language": "Idioma",
     "about.title": "Kittens Game por Nuclear Unicorn",
     "about.title.studio": "Estudio",
@@ -1508,7 +1487,6 @@
     "effectsMgr.timeImpedance.title": "Impedancia de tiempo",
     "btn.praise": "Alabanza",
     "village.label.na": "N / A",
-
     "village.name.Angel": "Ángel",
     "village.name.Charlie": "Charlie",
     "village.name.Mittens": "Mitones",
@@ -1526,7 +1504,6 @@
     "village.name.Micha": "Micha",
     "village.name.Tami": "Tami",
     "village.name.Plato": "Platón",
-
     "village.surname.Smoke": "Humo",
     "village.surname.Dust": "Dust",
     "village.surname.Chalk": "Chalk",
@@ -1538,14 +1515,11 @@
     "village.surname.Scratch": "Scratch",
     "village.surname.Berry": "Berry",
     "village.surname.Shadow": "Shadow",
-
     "eta.year": "a",
     "eta.day": "d",
     "eta.hour": "h",
     "eta.min": "m",
     "eta.sec": "s",
-
-
     "buildings.aicore.label": "Núcleo de IA",
     "buildings.aicore.desc": "FelineOS, una inteligencia artificial de última generación. Absolutamente inofensivo. Cada nivel de actualización aumentará el consumo de energía central en un 75%",
     "buildings.aicore.flavor": "Es hora de poner nuestras diferencias a un lado para la ciencia",
@@ -1560,11 +1534,9 @@
     "science.quantumCryptography.effectDesc": "TBD",
     "space.planet.helios.heatsink.label": "Disipador de calor",
     "space.planet.helios.heatsink.desc": "Un sistema de disipación de calor. Cada disipador de calor aumentará el consumo de energía de la cámara de contención en un 1% y la capacidad de almacenamiento de antimateria en un 2%",
-
     "achievements.systemShock.title": "Sistema de choque",
     "achievements.systemShock.desc": "Lo siento Dave, me temo que no puedo hacer eso",
     "buildings.aicore.attemptsell": "Acceso denegado.",
-
     "space.planet.charon.label": "Charon",
     "space.charonMission.label": "Misión Charon",
     "space.charonMission.desc": "Charon es un planeta enano pequeño, increíblemente denso y distante en el extremo del sistema Helios. Es tan hostil y estéril que algunas veces se lo conoce como 'Las puertas de la muerte'",
@@ -1580,7 +1552,6 @@
     "effectsMgr.statics.hashrate.title": "Tasa de Pico",
     "prestige.ascoh.label": "ASCOH",
     "prestige.ascoh.desc": "Un Consejo Secreto de Sombreros",
-
     "time.vsu.voidResonator.label": "Resonador de vacío",
     "time.vsu.voidResonator.desc": "Todos los resonadores de Vacío mejorarán el efecto de Orden del Vacío en un 10%. Dispararan Orden del Vacío en un tiempo saltean.",
     "science.blackchain.label": "Cadena Oscura",

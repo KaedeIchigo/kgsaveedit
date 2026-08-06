@@ -343,6 +343,16 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			color: "darkYellow",
 			tag: "chemist"
 		}, {
+			name: "plastic",
+			craftable: true,
+			color: "#9b9a5a",
+			tag: "chemist"
+		}, {
+			name: "microchip",
+			craftable: true,
+			color: "#9b9a5a",
+			tag: "chemist"
+		}, {
 			name: "parchment",
 			craftable: true,
 			color: "#df01d7"
