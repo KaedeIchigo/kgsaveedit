@@ -35,6 +35,14 @@ export default [
 
 			eqeqeq: ["warn", "smart"],
 			"no-unused-vars": ["warn", { args: "none" }],
+
+			// Promoted into eslint:recommended in ESLint 10, where it errors on 9
+			// dead stores in the upstream source - all of them the defensive
+			// "initialise, then assign in a branch" idiom (e.g. `var success = false`
+			// at the top of importSave). Rewriting working logic to satisfy a style
+			// rule is the wrong trade, so this is downgraded rather than fixed.
+			// Set explicitly so the result is identical on ESLint 9 and 10.
+			"no-useless-assignment": "warn",
 			"no-console": "off",
 			curly: ["warn", "all"],
 			semi: ["error", "always"],
