@@ -1189,7 +1189,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			return ele.value;
 		}
 
-		var str = ele.value.replace(/[^\d\-\+\.A-Z]/gi, "");
+		var str = ele.value.replace(/[^\d\-+.A-Z]/gi, "");
 		var value = parseFloat(str);
 
 		if (dojo.hasClass(ele, "abbrInput") && !isNaN(value) && /\d[A-Z]$/i.test(str)) {

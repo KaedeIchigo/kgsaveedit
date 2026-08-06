@@ -2118,7 +2118,7 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 		var input = self.game._createCheckbox($I("KGSaveEdit.label.unlocked"), self.domNode.children[3], self, "unlocked");
 		dojo.toggleClass(input.label, "hidden", !self.get("unlockRatio"));
 
-		if (self.hasOwnProperty("isAutomationEnabled")) {
+		if (Object.prototype.hasOwnProperty.call(self, "isAutomationEnabled")) {
 			input = self.game._createCheckbox($I("btn.aon.tooltip"), self.domNode.children[3], self, "isAutomationEnabled");
 			self.isAutomationEnabledLabel = input.label;
 			input.cbox.handler = function () {

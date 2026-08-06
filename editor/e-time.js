@@ -514,7 +514,7 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 			title: $I("KGSaveEdit.buildings.val.title")
 		}, tr.children[1], this);
 
-		if (this.hasOwnProperty("heat")) {
+		if (Object.prototype.hasOwnProperty.call(this, "heat")) {
 			dojo.place(document.createTextNode(" " + $I("time.heat") + " "), tr.children[1]);
 			var input = this.game._createInput(null, tr.children[1], this, "heat");
 			input.minValue = -Number.MAX_VALUE;
@@ -523,7 +523,7 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 			};
 		}
 
-		if (this.hasOwnProperty("isAutomationEnabled")) {
+		if (Object.prototype.hasOwnProperty.call(this, "isAutomationEnabled")) {
 			this.game._createCheckbox($I("btn.aon.tooltip"), tr.children[2], this, "isAutomationEnabled");
 		}
 

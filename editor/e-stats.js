@@ -259,7 +259,7 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 				title: "achievements." + ach.name + ".title",
 				description: "achievements." + ach.name + ".desc"
 			};
-			if (ach.hasStar && !ach.hasOwnProperty("starDescription")) {
+			if (ach.hasStar && !Object.prototype.hasOwnProperty.call(ach, "starDescription")) {
 				ach.i18nKeys.starDescription = "achievements." + ach.name + ".starDesc";
 			}
 		});
