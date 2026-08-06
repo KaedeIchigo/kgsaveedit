@@ -10,7 +10,11 @@ export default defineConfig({
 	forbidOnly: Boolean(process.env.CI),
 	retries: process.env.CI ? 1 : 0,
 	workers: process.env.CI ? 2 : undefined,
-	reporter: process.env.CI ? [["github"], ["list"]] : [["list"]],
+	// The html reporter is what CI uploads as an artifact; without it the upload
+	// step finds nothing and a failed run leaves nothing to debug with.
+	reporter: process.env.CI ?
+		[["github"], ["list"], ["html", { open: "never" }]] :
+		[["list"]],
 
 	use: {
 		baseURL: BASE_URL,
