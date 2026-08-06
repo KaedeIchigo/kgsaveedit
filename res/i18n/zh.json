@@ -1,7 +1,6 @@
 {
     "console.intro": "你是猫薄荷森林中的一只小猫",
     "console.intro.zebra": "你是充满钛矿的稀树草原中的一只斑马",
-
     "achievements.header": "成就已达成: {0} / {1}",
     "achievements.msg.unlock": "成就已解锁: {0}!",
     "achievements.msg.starUnlock": "加星成就已解锁: {0}!",
@@ -61,15 +60,12 @@
     "achievements.winterIsComing.desc": "死了 10 只喵星人",
     "achievements.youMonster.title": "你这个禽兽",
     "achievements.youMonster.desc": "可怜的小猫们",
-
     "ai.apocalypse.msg": "AI 已经摧毁了你资源的 {0}%",
-
     "bld.msg.automation": "启动工坊自动化",
     "bld.msg.automation.beams": "消耗 {0} 木材, +{1} 木梁!",
     "bld.msg.automation.plates": "消耗 {0} 铁, +{1} 金属板!",
     "bld.msg.automation.skip": "跳过工坊自动化...",
     "bld.msg.automation.slabs": "消耗 {0} 矿物, +{1} 石板!",
-
     "btn.all": "全部",
     "btn.all.minor": "全部",
     "btn.all.assign": "[+全部]",
@@ -99,13 +95,11 @@
     "btn.sell.minor": "出售",
     "btn.trade": "贸易",
     "btn.blocked.capital": "(冲突)",
-
     "sell.all.confirmation.title": "",
     "sell.all.confirmation.msg": "确定全部出售吗?",
     "construct.all.confirmation.title": "",
     "construct.all.confirmation.msg": "确定建造全部吗?",
     "construct.all.msg": "批量建造了 {1} 个 {0}",
-
     "buildings.academy.label": "研究院",
     "buildings.academy.desc": "增加研究效率和小猫工作技能的成长速率。每一级使科学产出增加 20%",
     "buildings.academy.flavor": "好奇心乃是科学之基石。吾等猫类死得高贵",
@@ -236,7 +230,6 @@
     "buildings.group.zebraBuildings": "斑马",
     "buildings.upgrade.confirmation.msg": "确定升级这个建筑吗?\n\n你将失去当前已经建成的建筑。",
     "buildings.downgrade.confirmation.msg": "确定降级这个建筑吗?\n\n你将失去当前已经建成的建筑。",
-
     "calendar.msg.alicorn": "一只天角兽从天而降!",
     "calendar.msg.event": "天空中出现了一种罕见的天文现象",
     "calendar.msg.ivoryMeteor": "一颗象牙流星落在村庄附近， +{0}象牙!",
@@ -264,7 +257,6 @@
     "calendar.year.ext": "第{0}年 - {1}季",
     "calendar.year.full": "第{0}年 - {1}季, 第{2}天",
     "calendar.year.tooltip": "日历年:",
-
     "challendge.panel.label": "挑战",
     "challendge.1000Years.label": "千禧年",
     "challendge.1000Years.desc": "重启游戏，进入半衰期时间<br><br>目标: 抵达第 1000 年",
@@ -296,18 +288,14 @@
     "challendge.btn.log.message.on.complete": "恭喜你!你完成了挑战: {0}.",
     "challendge.btn.name.complete": "{0} (已完成)",
     "challendge.btn.name.current": "{0} (进行中)",
-
     "common.collapse.all": "全部收起",
     "common.expand.all": "全部展开",
     "common.warning": " <span class='genericWarning'>(!)</span>",
-
     "cycle.effects.title": "周期效果",
     "cycle.effects.festival.title": "周期节日效果:",
-
     "discardParagon.confirmation.msg1": "确定要舍弃所有的领导力吗?此操作无法撤消。",
     "discardParagon.confirmation.msg2": "你有很多领导力，你真的确定吗?",
     "discardParagon.confirmation.msgIW": "警告! 燃烧领导力将破坏你的钢铁意志模式。你要继续吗?",
-
     "effectsMgr.statics.acceleratorRatio.title": "加速器扩容",
     "effectsMgr.statics.aiCoreProductivity.title": "AI 核心生产加成",
     "effectsMgr.statics.aiCoreUpgradeBonus.title": "AI 核心协同加成",
@@ -360,13 +348,11 @@
     "effectsMgr.statics.energyProductionRatio.title": "能源产出加成",
     "effectsMgr.statics.entangler-gflopsConsumption.title": "纠缠站 - GFlops 转化",
     "effectsMgr.statics.entangler-hrProgress.title": "哈希碰撞",
-
     "effectsMgr.statics.environmentFactoryCraftBonus.title": "工厂工艺效率",
     "effectsMgr.statics.environmentHappinessBonus.title": "幸福度加成",
     "effectsMgr.statics.environmentMineralBonus.title": "矿物生产加成",
     "effectsMgr.statics.environmentUnhappiness.title": "不幸福度",
     "effectsMgr.statics.environmentWoodBonus.title": "木材生产加成",
-
     "effectsMgr.statics.expansionismUnobtainiumProductionBonus.title": "难得素生产加成",
     "effectsMgr.statics.factoryCostReduction.title": "工厂成本降低",
     "effectsMgr.statics.factoryRefineRatio.title": "工厂炼油加成",
@@ -505,19 +491,13 @@
     "effectsMgr.statics.mineralsPolicyRatio.title": "矿物生产加成",
     "effectsMgr.statics.woodPolicyRatio.title": "木材生产加成",
     "effectsMgr.statics.goldPolicyRatio.title": "黄金生产加成",
-
     "general.copy.to.clipboard.prompt": "复制到剪贴板: Ctrl+C, Enter",
     "general.food.advisor.text": "食品顾问:你的猫薄荷储量过低!",
-
     "iron.will.break.confirmation.msg": "这会结束钢铁意志，你确定吗?",
-
     "kittens.craft.confirmation.title": "确定要这样做吗?",
     "kittens.craft.confirmation.msg": "你的小猫会死",
-
     "craft.msg.notEnoughCatnip": "猫薄荷不足!",
-
     "log.clear": "清除日志",
-
     "menu.about": "关于",
     "menu.close": "关闭",
     "menu.export": "导出存档",
@@ -535,7 +515,6 @@
     "menu.reset": "重置",
     "menu.wipe": "删档",
     "menu.getTheApp": "APP",
-
     "navbar.title": "猫国建设者",
     "navbar.menu.title": "菜单",
     "navbar.btn.hunters": "派出全部猎人",
@@ -546,10 +525,8 @@
     "navbar.observe": "观测天空",
     "navbar.observe.short": "观察",
     "navbar.res.amount": "数量",
-
     "notification.save.title": "正在保存...",
     "notification.save.desc": "游戏已保存",
-
     "opts.group.interface": "界面",
     "opts.hideSell": "隐藏出售按钮",
     "opts.hideSell.desc": "隐藏所有建筑的出售按钮",
@@ -589,15 +566,12 @@
     "opts.notation.si": "SI",
     "opts.notation.e": "E",
     "opts.notation.sie": "SI+E",
-
     "msg.policy.aiNotMerges": "AI 拒绝与猫猫融合",
     "msg.policy.exclusivity": "相同价格的政策是互斥的",
-    "msg.policy.kittenNotMadeLeader" : "{0} 要求领袖必须担任 {1} 的工作",
-    "msg.policy.wrongLeaderJobDemoted" : "{0} 要求领袖必须担任 {1} 的工作",
-    "msg.policy.wrongLeaderJobForResearch" : "必须由 {1} 担任领袖才能研究 {0}",
-
+    "msg.policy.kittenNotMadeLeader": "{0} 要求领袖必须担任 {1} 的工作",
+    "msg.policy.wrongLeaderJobDemoted": "{0} 要求领袖必须担任 {1} 的工作",
+    "msg.policy.wrongLeaderJobForResearch": "必须由 {1} 担任领袖才能研究 {0}",
     "policy.confirmation.title": "你确定吗? 猫史不能重来。\n政策效果是永久的，只有在重置后才能切换政策",
-
     "policy.panel.label": "政策",
     "policy.autocracy.label": "专制",
     "policy.autocracy.desc": "最适合有高等级猫猫的社会。领袖的工作能力翻倍",
@@ -675,7 +649,6 @@
     "policy.zebraRelationsAppeasement.desc": "即使斑马讨厌你，也尝试对他们友好。贸易条件将不那么苛刻，但黄金产出轻微降低。",
     "policy.zebraRelationsBellicosity.label": "斑马关系: 剑拔弩张",
     "policy.zebraRelationsBellicosity.desc": "勇敢面对斑马，这使得对斑马的贸易关系更加糟糕，但赢得了其他种族的尊重",
-
     "prestige.panel.label": "玄学",
     "prestige.adjustmentBureau.label": "仲裁局",
     "prestige.adjustmentBureau.desc": "解开额外的游戏挑战",
@@ -751,7 +724,6 @@
     "prestige.zebraCovenant.desc": "更多的斑马将会留下",
     "prestige.zebraDiplomacy.label": "斑马外交",
     "prestige.zebraDiplomacy.desc": "一些斑马猎人将留在村子里 (解锁斑马猎人后才能产生效果)",
-
     "religion.adoreBtn.label": "赞美群星",
     "religion.adoreBtn.desc": "将你所有的虔诚转化为顿悟。\n旧版 [重置信仰]",
     "religion.faithCount.bonus": "加成",
@@ -853,7 +825,6 @@
     "religion.zu.unicornTomb.desc": "独角兽产量增加 5%",
     "religion.zu.unicornUtopia.label": "独角兽理想国",
     "religion.zu.unicornUtopia.desc": "独角兽产量增加 250%，增加召唤天角兽的概率，水晶精炼产率增加 5%",
-
     "unit.watt": "Wt",
     "unit.sec": "秒",
     "unit.s": "秒",
@@ -865,7 +836,6 @@
     "unit.d": "天",
     "unit.year": "年",
     "unit.y": "年",
-
     "res.effect": "效果",
     "res.effects": "效果",
     "res.netGain": "净收益",
@@ -915,13 +885,11 @@
     "res.toCap": "封顶",
     "res.toZero": "耗尽",
     "res.show.hidden": "显示隐藏资源",
-
     "reset.confirmation.title": "确定要重置游戏吗?",
     "reset.confirmation.msgbase": "你将得到幸福度奖励，并且保留成就和奖励。",
     "reset.confirmation.msg35": "你不会得到新的奖励，但能保留原有的成就和奖励。",
     "reset.confirmation.msg60": "你将获得额外的幸福度奖励。",
     "reset.confirmation.msg70": "你将获得额外的幸福度和生产奖励。",
-
     "resources.alicorn.title": "天角兽",
     "resources.alloy.title": "合金",
     "resources.antimatter.title": "反物质",
@@ -981,21 +949,17 @@
     "resources.epiphany.title": "顿悟",
     "resources.wrappingPaper.title": "包装纸",
     "resources.zebras.title": "斑马",
-
     "resources.sorrow.full": "黑色悲伤液体",
     "resources.sorrow.short": "BLS",
-
     "gift.get": "XOXOXO! 上古神送给你一个礼物盒!",
     "gift.repaired": "上古神修好了你的礼物盒",
     "gift.resources": "获得 {1} 个 {0}!",
     "gift.apocrypha": "新月外传加成增加 {0}%!",
     "gift.transcendence": "超越等级增加 4!",
     "gift.metaphysics": "获得 {0}!",
-
     "save.export.msg": "存档导出成功!",
     "save.import.confirmation.msg": "确定吗?这样做会覆盖你当前游戏数据!",
     "save.import.msg": "存档导入成功!",
-
     "science.policyToggleBlocked.label": "隐藏冲突的政策",
     "science.policyToggleResearched.label": "隐藏已完成的政策",
     "science.toggleResearched.label": "隐藏已完成的科技",
@@ -1199,7 +1163,6 @@
     "science.writing.desc": "写作是在素材上记录信息的艺术，写作可以广泛影响文明的幸福和文化发展",
     "science.writing.effectDesc": "解锁露天剧场",
     "science.writing.flavor": "写作使用的墨水比爪印少",
-
     "space.ground.control.label": "地面控制",
     "space.newplanet.log.msg": "你到达了一颗新的星球!",
     "space.mission.name.inprogress": "{0} (进行中)",
@@ -1289,7 +1252,6 @@
     "space.umbraMission.desc": "暗影是位于喵太阳系中心的超大质量黑洞",
     "space.yarnMission.label": "探索纱星",
     "space.yarnMission.desc": "纱星是一颗拥有适宜气候、海洋和含氧大气的类地行星",
-
     "stats.buildings": "建造建筑",
     "stats.clicks.total": "累计点击总数",
     "stats.crafts.current": "工艺制作次数",
@@ -1308,7 +1270,6 @@
     "stats.trades.total": "累计贸易完成次数",
     "stats.unicorns": "献祭独角兽",
     "stats.years.total": "游戏总年数",
-
     "tab.name.achievements": "成就",
     "tab.name.religion": "宗教",
     "tab.name.science": "科学",
@@ -1317,9 +1278,7 @@
     "tab.name.time": "时间",
     "tab.name.trade": "贸易",
     "tab.name.workshop": "工坊",
-
     "techs.panel.label": "科技",
-
     "time.AccelerateTimeBtn.label": "光阴似箭",
     "time.AccelerateTimeBtn.desc": "随心所欲地加速和放慢时间 (加速 +50%)",
     "time.AccelerateTimeBtn.tooltip.normal": "光阴似箭",
@@ -1369,7 +1328,6 @@
     "time.vsu.voidResonator.desc": "每级虚空共振将使虚空圣典的效果提高 10％，每次进行时间跳跃时将触发虚空圣典",
     "time.vsu.voidRift.label": "虚空裂隙",
     "time.vsu.voidRift.desc": "资源存储上限提升 2%",
-
     "trade.attitude.friendly": "友好",
     "trade.attitude.hostile": "敌对",
     "trade.attitude.neutral": "中立",
@@ -1425,13 +1383,11 @@
     "trade.embassy.desc": "设立大使馆，改善外交关系",
     "trade.embassy.pinned": "固定",
     "trade.embassy.unpinned": "取消固定",
-
     "ui.filter.all": "全部",
     "ui.filter.available": "可建造",
     "ui.filter.enabled": "可使用",
     "ui.filter.togglable": "可切换",
     "ui.toggle.researched": "切换已研究",
-
     "ui.loading.msg.0": "正在饲喂斑马",
     "ui.loading.msg.1": "正在校准庙塔",
     "ui.loading.msg.2": "正在播种猫薄荷",
@@ -1448,12 +1404,10 @@
     "ui.loading.msg.13": "正在抚摸鲨鱼",
     "ui.loading.msg.14": "正在铸造黑币",
     "ui.loading.msg.15": "正在修复时间悖论",
-    
     "ui.autosave.tooltip": "自动保存...",
     "ui.save.tooltip": "已保存!",
     "ui.energy.tooltip": "能量",
     "ui.log.link": "日志",
-    "ui.chat.link": "聊天",
     "ui.clear.log": "清空日志",
     "ui.log.filters.block": "[<span id=\"filterIcon\">+</span>] 日志过滤",
     "ui.pause": "暂停",
@@ -1461,7 +1415,6 @@
     "ui.pause.title": "暂停/恢复游戏",
     "ui.undo": "撤销 ({0}秒)",
     "ui.undo.title": "撤销操作",
-
     "ui.close": "关闭",
     "ui.option.language": "语言:",
     "ui.option.language.add": "添加翻译",
@@ -1469,7 +1422,8 @@
     "ui.option.scheme": "主题:",
     "ui.option.scheme.relock": "重新锁定主题",
     "ui.option.scheme.tip": "主题可以通过特定操作解锁",
-    "ui.option.workers": "启用 web worker\n<i>(游戏可以在后台运行，可这能会影响性能)<br>您需要刷新页面使该设置生效</i>",
+    "ui.option.workers": "启用 web worker",
+    "ui.option.workers.tip": "<i>(游戏可以在后台运行，可这能会影响性能)<br>您需要刷新页面使该设置生效</i>",
     "ui.option.force.high.precision": "高精度资源值",
     "ui.option.use.per.second.values": "按秒显示资源变化 <i>(否则按tick显示资源变化)</i>",
     "ui.option.use.percentage.resource.values": "已百分比显示资源变化",
@@ -1506,7 +1460,6 @@
     "ui.option.app.android": "Android",
     "ui.option.app.ios": "iOS",
     "ui.option.notation": "计数制:",
-
     "left.resources": "资源",
     "left.resources.tip": "Ctrl+单击 可以隐藏资源, 点击齿轮图标显示详细设置",
     "left.font.inc": "font+",
@@ -1518,7 +1471,6 @@
     "left.hunt.time": "次",
     "left.hunt.times": "次",
     "left.praise": "赞美太阳!",
-
     "console.filter.astronomicalEvent": "天文事件",
     "console.filter.hunt": "狩猎",
     "console.filter.trade": "贸易",
@@ -1530,7 +1482,6 @@
     "console.filter.alicornRift": "天角兽裂隙",
     "console.filter.tc": "时间水晶",
     "console.filter.faith": "信仰",
-
     "village.bonus.desc.chemist": "化学工艺制作加成",
     "village.bonus.desc.engineer": "工艺制作加成",
     "village.bonus.desc.manager": "狩猎加成",
@@ -1657,14 +1608,11 @@
     "village.trait.none": "无特质",
     "village.trait.scientist": "科学家",
     "village.trait.wise": "哲学家",
-
     "void.spaceCathedral.label": "太空大教堂",
     "void.spaceCathedral.desc": "TBD.",
-
     "wipe.confirmation.title": "删档确认",
     "wipe.confirmation.msg1": "确定擦除所有保存的数据吗?",
     "wipe.confirmation.msg2": "你真的确定吗?",
-
     "workshop.upgradePanel.label": "升级",
     "workshop.all.upgrades.unlocked": "所有升级均已解锁!",
     "workshop.toggleResearched.label": "隐藏已完成的升级",
@@ -2004,5 +1952,6 @@
     "workshop.voidEnergy.label": "虚空能量",
     "workshop.voidEnergy.desc": "能量裂隙的存储量进一步增加",
     "workshop.voidReactors.label": "虚空反应堆",
-    "workshop.voidReactors.desc": "科研船和太空灯塔的效能进一步增加 ~116%"
+    "workshop.voidReactors.desc": "科研船和太空灯塔的效能进一步增加 ~116%",
+    "ui.chat.link": "聊天"
 }
