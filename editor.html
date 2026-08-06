@@ -9,18 +9,19 @@
 	<title>Kittens Game Save Editor</title>
 	<link rel="stylesheet" type="text/css" href="editor/editor.css">
 
-	<!--for dev testing, if you see this live poke me (patsy)-->
-	<link rel="stylesheet" type="text/css" href="dev/html.css">
-	<script src="dev/jsondiffpatch.min.js"></script>
-	<script src="dev/jsondiffpatch-formatters.min.js"></script>
+	<!--
+		Dev tooling (the save-diff "Dev" tab) is no longer hard-coded here.
+		It is loaded on demand further down - see the `devMode` check.
+	-->
 </head>
 <body>
 	<form>
 		<div id="topBar" class="header">
 			<span class="smallText">
-				<a href="https://bitbucket.org/coderpatsy/kgsaveedit">Kittens Game Save Editor</a> by <a href="https://coderpatsy.bitbucket.io/">patsy</a>
-				for <a href="http://kittensgame.com/web/">Kittens Game</a> version <span id="gameVersionSpan">1.4.9.0.r674</span> (ML)
-				by <a href="http://bloodrizer.ru/">bloodrizer</a>
+				<a href="https://github.com/KaedeIchigo/kgsaveedit">Kittens Game Save Editor</a> originally by <a href="https://coderpatsy.bitbucket.io/">patsy</a>
+				<!-- #gameVersionSpan is the single source of truth for window.editorVersion - see the loader script below -->
+				for <a href="https://kittensgame.com/web/">Kittens Game</a> version <span id="gameVersionSpan">1.4.9.0.r674</span> (ML)
+				by <a href="https://bloodrizer.ru/">bloodrizer</a>
 			</span>
 
 			<span id="topSettings">
@@ -119,7 +120,30 @@
 			var scripts = ["editor/e-core.js", "editor/e-misc.js", "editor/e-resources.js",
 				"editor/e-upgrades.js", "editor/e-tech.js", "editor/e-prestige.js",
 				"editor/e-buildings.js", "editor/e-religion.js", "editor/e-space.js",
-				"editor/e-time.js", "editor/e-village.js", "editor/e-stats.js", "editor/e-main.js", "editor/e-extras.js", "dev/e-dev.js"];
+				"editor/e-time.js", "editor/e-village.js", "editor/e-stats.js", "editor/e-main.js", "editor/e-extras.js"];
+
+			// The dev save-diff tab is opt-in. An explicit "dev" query parameter always
+			// wins, so "?dev=0" can force the deployed code path even on localhost -
+			// which is what the smoke tests rely on. Otherwise it defaults on for local
+			// development and off everywhere else, keeping deployed copies clean.
+			// The dev scripts are appended (not prepended) because e-dev.js extends
+			// classes declared by e-main.js, and the loader below fetches in order.
+			var devParam = new URLSearchParams(location.search).get("dev");
+			var devMode = devParam !== null ?
+				(devParam !== "0" && devParam !== "false") :
+				(location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+			if (devMode) {
+				dojo.create("link", {
+					rel: "stylesheet",
+					type: "text/css",
+					href: "dev/html.css"
+				}, document.head);
+
+				scripts = scripts.concat(["dev/jsondiffpatch.min.js",
+					"dev/jsondiffpatch-formatters.min.js", "dev/e-dev.js"]);
+			}
+
 			var index = 0;
 			window.editorVersion = dojo.byId("gameVersionSpan").textContent;
 
@@ -133,8 +157,29 @@
 			});
 
 			function fetchScript() {
-				$.getScript(scripts[index] + "?" + editorVersion)
+				var src = scripts[index];
+
+				// The jsondiffpatch bundles are UMD and prefer AMD when `define.amd`
+				// exists - which dojo provides - so they would register as anonymous
+				// modules and never attach to `window`. Originally they were <script>
+				// tags placed ahead of dojo.js to dodge this; now that they load lazily,
+				// hide `define` for the duration so they take the global branch instead.
+				var hideAmd = src.indexOf("dev/jsondiffpatch") === 0;
+				var savedDefine;
+				if (hideAmd) {
+					savedDefine = window.define;
+					window.define = undefined;
+				}
+
+				var restoreAmd = function () {
+					if (hideAmd) {
+						window.define = savedDefine;
+					}
+				};
+
+				$.getScript(src + "?" + editorVersion)
 				.done(function () {
+					restoreAmd();
 					index++;
 					if (scripts[index]) {
 						fetchScript();
@@ -142,6 +187,7 @@
 						initEditor();
 					}
 				}).fail(function () {
+					restoreAmd();
 					console.error("Unable to load modules");
 				});
 			}

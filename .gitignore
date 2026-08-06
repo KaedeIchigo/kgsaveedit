@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Editor / IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tooling caches
+.eslintcache
+
+# Playwright output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Local save files used for testing (never commit real saves)
+*.save.txt
+saves/

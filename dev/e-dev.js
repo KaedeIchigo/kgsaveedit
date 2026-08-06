@@ -107,7 +107,7 @@ dojo.declare("classes.KGSaveEdit.DevMode", classes.KGSaveEdit.UI.Tab, {
 					var deltaKitten = delta.village.kittens[index];
 
 					var extraDataMatches = extraDataKeys.filter(function (key) {
-						return deltaKitten.hasOwnProperty(key);
+						return Object.prototype.hasOwnProperty.call(deltaKitten, key);
 					});
 
 					if (index === "_t" || deltaKitten.ssn || (!deltaKitten.skills && !extraDataMatches.length && (!deltaKitten.trait || !deltaKitten.trait.title))) {
