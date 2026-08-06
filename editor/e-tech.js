@@ -1097,6 +1097,160 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			effects: {
 				"terraformingMaxKittensRatio": 0.1
 			}
+		}, {
+			//---------------- added in Kittens Game 1.4.9.x - 1.5.0.x ----------------
+			//The 18 "Relations" policies are mutually exclusive within each race and
+			//unlock at a standing threshold with that race, which the editor does not
+			//model - so they carry blockedBy but no requires, and are toggled by hand.
+			//Relations policy: unlocked at 10 standing with dragons.
+			name: "dragonRelationsAstrologers",
+			prices: [
+				{name: "culture", val: 30000}
+			],
+			blockedBy: ["dragonRelationsPhysicists", "dragonRelationsDynamicists"]
+		}, {
+			//Relations policy: unlocked at 10 standing with dragons.
+			name: "dragonRelationsDynamicists",
+			prices: [
+				{name: "culture", val: 30000}
+			],
+			blockedBy: ["dragonRelationsPhysicists", "dragonRelationsAstrologers"]
+		}, {
+			//Relations policy: unlocked at 10 standing with dragons.
+			name: "dragonRelationsPhysicists",
+			prices: [
+				{name: "culture", val: 30000}
+			],
+			blockedBy: ["dragonRelationsAstrologers", "dragonRelationsDynamicists"]
+		}, {
+			//Relations policy: unlocked at 20 standing with griffins.
+			name: "griffinRelationsMachinists",
+			prices: [
+				{name: "culture", val: 16000}
+			],
+			blockedBy: ["griffinRelationsMetallurgists", "griffinRelationsScouts"]
+		}, {
+			//Relations policy: unlocked at 20 standing with griffins.
+			name: "griffinRelationsMetallurgists",
+			prices: [
+				{name: "culture", val: 16000}
+			],
+			blockedBy: ["griffinRelationsMachinists", "griffinRelationsScouts"]
+		}, {
+			//Relations policy: unlocked at 20 standing with griffins.
+			name: "griffinRelationsScouts",
+			prices: [
+				{name: "culture", val: 16000}
+			],
+			blockedBy: ["griffinRelationsMachinists", "griffinRelationsMetallurgists"]
+		}, {
+			//Relations policy: unlocked at 20 standing with lizards.
+			name: "lizardRelationsDiplomats",
+			prices: [
+				{name: "culture", val: 2100}
+			],
+			blockedBy: ["lizardRelationsEcologists", "lizardRelationsPriests"]
+		}, {
+			//Relations policy: unlocked at 20 standing with lizards.
+			name: "lizardRelationsEcologists",
+			prices: [
+				{name: "culture", val: 2100}
+			],
+			blockedBy: ["lizardRelationsPriests", "lizardRelationsDiplomats"]
+		}, {
+			//Relations policy: unlocked at 20 standing with lizards.
+			name: "lizardRelationsPriests",
+			prices: [
+				{name: "culture", val: 2100}
+			],
+			blockedBy: ["lizardRelationsEcologists", "lizardRelationsDiplomats"]
+		}, {
+			//Relations policy: unlocked at 20 standing with nagas.
+			name: "nagaRelationsArchitects",
+			prices: [
+				{name: "culture", val: 8000}
+			],
+			blockedBy: ["nagaRelationsMasons", "nagaRelationsCultists"]
+		}, {
+			//Relations policy: unlocked at 20 standing with nagas.
+			name: "nagaRelationsCultists",
+			prices: [
+				{name: "culture", val: 8000}
+			],
+			blockedBy: ["nagaRelationsMasons", "nagaRelationsArchitects"]
+		}, {
+			//Relations policy: unlocked at 20 standing with nagas.
+			name: "nagaRelationsMasons",
+			prices: [
+				{name: "culture", val: 8000}
+			],
+			blockedBy: ["nagaRelationsCultists", "nagaRelationsArchitects"]
+		}, {
+			//Relations policy: unlocked at 20 standing with sharks.
+			name: "sharkRelationsBotanists",
+			prices: [
+				{name: "culture", val: 2200}
+			],
+			blockedBy: ["sharkRelationsScribes", "sharkRelationsMerchants"]
+		}, {
+			//Relations policy: unlocked at 20 standing with sharks.
+			name: "sharkRelationsMerchants",
+			prices: [
+				{name: "culture", val: 2200}
+			],
+			blockedBy: ["sharkRelationsScribes", "sharkRelationsBotanists"]
+		}, {
+			//Relations policy: unlocked at 20 standing with sharks.
+			name: "sharkRelationsScribes",
+			prices: [
+				{name: "culture", val: 2200}
+			],
+			blockedBy: ["sharkRelationsMerchants", "sharkRelationsBotanists"]
+		}, {
+			//Relations policy: unlocked at 10 standing with spiders.
+			name: "spiderRelationsChemists",
+			prices: [
+				{name: "culture", val: 20000}
+			],
+			blockedBy: ["spiderRelationsGeologists", "spiderRelationsPaleontologists"]
+		}, {
+			//Relations policy: unlocked at 10 standing with spiders.
+			name: "spiderRelationsGeologists",
+			prices: [
+				{name: "culture", val: 20000}
+			],
+			blockedBy: ["spiderRelationsChemists", "spiderRelationsPaleontologists"]
+		}, {
+			//Relations policy: unlocked at 10 standing with spiders.
+			name: "spiderRelationsPaleontologists",
+			prices: [
+				{name: "culture", val: 20000}
+			],
+			blockedBy: ["spiderRelationsChemists", "spiderRelationsGeologists"]
+		}, {
+			name: "scientificCommunism",
+			prices: [
+				{name: "culture", val: 8500}
+			],
+			requires: {policies: ["socialism"]}
+		}, {
+			name: "siphoning",
+			prices: [
+				{name: "necrocorn", val: 1}
+			],
+			blockedBy: ["feedingFrenzy", "upfrontPayment"]
+		}, {
+			name: "upfrontPayment",
+			prices: [
+				{name: "necrocorn", val: 1}
+			],
+			blockedBy: ["siphoning", "feedingFrenzy"]
+		}, {
+			name: "feedingFrenzy",
+			prices: [
+				{name: "necrocorn", val: 1}
+			],
+			blockedBy: ["siphoning", "upfrontPayment"]
 		}/*, {
 			name: "spaceBasedTerraforming",
 			prices: [
