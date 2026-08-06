@@ -1430,6 +1430,19 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				"tMythrilCraftRatio":   0.01
 			}
 		}, {
+			name: "stasisPod",
+			prices: [
+				{name: "tMythril", val: 1},
+				{name: "timeCrystal", val: 2},
+				{name: "void", val: 100}
+			],
+			priceRatio: 1.25,
+			unlockRatio: 0.01,
+			zebraRequired: 1,
+			effects: {
+				"zebrasMax": 1
+			}
+		}, {
 			name: "ivoryTemple",
 			label: "Ivory Temple",
 			description: "Mystical temple where ivory is converted into minerals",
