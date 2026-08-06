@@ -1433,6 +1433,20 @@ dojo.declare("classes.KGSaveEdit.ChallengesManager", [classes.KGSaveEdit.UI.Tab,
 			},
 			upgrades: {upgrades: ["compositeBow", "crossbow", "railgun"]}
 		}, {
+			//Added in Kittens Game 1.5.x, behind the UNICORN_TEARS_CHALLENGE flag.
+			//Only the flat ziggurat effect is modelled here. While active, the game
+			//also scales bonfire/science/workshop prices and several caps through
+			//getLimitedDR() against per-effect LDR limits; reproducing that here
+			//would mean porting the game's diminishing-returns maths, and getting it
+			//subtly wrong would show players numbers that do not match their game.
+			//The editor's job is editing the saved on/active/unlocked values, which
+			//this supports fully - the game recalculates the rest on load.
+			name: "unicornTears",
+			effects: {
+				"zigguratIvoryPriceRatio": -0.003
+			},
+			upgrades: {upgrades: ["alicornStable"]}
+		}, {
 			name: "postApocalypse",
 			requires: {transcendenceUpgrades: ["holyGenocide"]},
 			effects: {

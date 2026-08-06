@@ -158,6 +158,37 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			starCondition: function () {
 				return this.game.calendar.trueYear() >= 40000;
 			}
+		}, {
+			//---------------- added in Kittens Game 1.4.9.x - 1.5.0.x ----------------
+			name: "sadnessAbyss",
+			condition: function () {
+				return this.game.resPool.get("sorrow").value >= 100;
+			}
+		}, {
+			name: "veryLargeArray",
+			condition: function () {
+				return this.game.bld.get("observatory").on >= 100 &&
+					!this.game.workshop.get("seti").researched;
+			}
+		}, {
+			name: "eternalBacchanalia",
+			condition: function () {
+				return this.game.calendar.festivalDays >=
+					100 * this.game.calendar.daysPerSeason * this.game.calendar.seasonsPerYear;
+			}
+		}, {
+			//The game tests this with challenges.getCountUniqueCompletions(), which
+			//the editor does not implement, so there is no auto-detection here - the
+			//achievement is still fully editable by hand.
+			name: "challenger"
+		}, {
+			//Was previously a badge; the game now grants the achievement to saves
+			//that still carry the old badge, which is what this mirrors.
+			name: "betterSafeThanSorry",
+			condition: function () {
+				var badge = this.game.achievements.getBadge("betterSafeThanSorry");
+				return Boolean(badge && badge.unlocked);
+			}
 		}
 	],
 
@@ -240,6 +271,80 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			title: "Clean Paws",
 			description: "Peaceful trading without cat-power",
 			difficulty: "C"
+		}, {
+			//---------------- added in Kittens Game 1.4.9.x - 1.5.0.x ----------------
+			//Badges whose auto-detection needs game APIs the editor does not
+			//implement are listed without a condition; they remain fully editable.
+			name: "sequenceBreak",
+			title: "Sequence Break",
+			description: "Skip Moon in the space tab",
+			difficulty: "D",
+			condition: function () {
+				return !this.game.space.getPlanet("moon").reached &&
+					this.game.space.getPlanet("dune").reached;
+			}
+		}, {
+			name: "fantasticFurColor",
+			title: "Fantastic Fur Color",
+			description: "Have a leader with a rare fur colour",
+			difficulty: "F",
+			condition: function () {
+				var leader = this.game.village.leader;
+				return Boolean(leader && leader.color);
+			}
+		}, {
+			name: "whatYearIsIt",
+			title: "What Year is it Again?",
+			description: "Forcefully resolve a Temporal Paradox. May have unknown side effects.",
+			difficulty: "C"
+		}, {
+			name: "tardis",
+			title: "Time Advancing Relative Dimensions In Space",
+			description: "Prioritize time travel over space travel.",
+			difficulty: "C"
+		}, {
+			name: "wheredThisComeFrom",
+			title: "Where'd This Come From?",
+			description: "Chronoreset to gain resources.",
+			difficulty: "S"
+		}, {
+			name: "lostDates",
+			title: "Lost Dates",
+			description: "Accumulate 5 years of timeslip.",
+			difficulty: "B",
+			condition: function () {
+				return this.game.time.flux <= -5;
+			}
+		}, {
+			name: "buffet",
+			title: "A Whale of a Buffet",
+			description: "Reach 1000 Leviathan energy.",
+			difficulty: "A",
+			condition: function () {
+				var race = this.game.diplomacy.get("leviathans");
+				return Boolean(race) && race.energy >= 1000;
+			}
+		}, {
+			//Needs village.getOverpopulation() and cached space effects, neither of
+			//which the editor models, so there is no auto-detection.
+			name: "newHome",
+			title: "A New Home",
+			description: "Have more housing on Yarn than on Cath.",
+			difficulty: "D"
+		}, {
+			name: "betterSafeThanSorry",
+			title: "Better Safe Than Sorry (old)",
+			description: "Get Carbon Sequestration with no pollution.",
+			difficulty: "E"
+		}, {
+			name: "soLongAndThanksForAllTheHay",
+			title: "So Long, and Thanks for All the Hay",
+			description: "Have exactly 42 alicorns.",
+			difficulty: "S",
+			condition: function () {
+				var epsilon = 1e-12;
+				return Math.abs(this.game.resPool.get("alicorn").value - 42) < epsilon;
+			}
 		}
 	],
 

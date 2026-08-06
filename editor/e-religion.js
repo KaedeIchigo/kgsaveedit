@@ -309,6 +309,17 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			// unlocks: {challenges: ["atheism"]},
 			faith: 125000
+		}, {
+			//Added in Kittens Game 1.5.x. Stackable only once Transcendence is on.
+			name: "frescoes",
+			prices: [
+				{name: "gold",  val: 5000},
+				{name: "faith", val: 4000},
+				{name: "spice", val: 8000}
+			],
+			faith: 200000,
+			priceRatio: 2.5,
+			upgrades: {buildings: ["chapel"]}
 		}
 	],
 
@@ -458,6 +469,22 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 				self.effects["activeHG"] = game.religion.activeHolyGenocide;
 			},
 			flavor: true
+		}, {
+			//Added in Kittens Game 1.5.x. Gated behind the DARK_PARACOSM feature
+			//flag in the game; the editor has no flag system, so it is always
+			//listed and left for manual toggling.
+			name: "darkParacosm",
+			prices: [
+				{name: "relic",   val: 230000},
+				{name: "void",    val: 29000},
+				{name: "paragon", val: 8}
+			],
+			tier: 27,
+			priceRatio: 2,
+			effects: {
+				"milleninumParagon": 1
+			},
+			flavor: true
 		}
 		//Holy Memecide
 	],
@@ -534,6 +561,41 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			calculateEffects: function (self, game) {
 				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
 			}
+		}, {
+			//Added in Kittens Game 1.5.x, alongside the MAUSOLEUM_PACTS feature.
+			name: "pactOfArcane",
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1,
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable":        -1,
+				"necrocornPerDay":        0,
+				"pactcraftRatio":         0.001,
+				"pactUniversalKnowHow":   0.1
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			}
+		}, {
+			name: "pactOfChronicler",
+			prices: [
+				{name: "relic", val: 100}
+			],
+			priceRatio: 1,
+			requires: {transcendenceUpgrades: ["mausoleum"]},
+			effects: {
+				"pactsAvailable":   -1,
+				"necrocornPerDay":   0,
+				"pactPerYearRatio":  0.003,
+				"umbraBoostRatio":   0.1,
+				"pacttimeRatio":     0.1
+			},
+			calculateEffects: function (self, game) {
+				self.effects["necrocornPerDay"] = game.getEffect("pactNecrocornConsumption");
+			},
+			upgrades: {spaceBuilding: ["hrHarvester"]}
 		}, {
 			name: "payDebt",
 			prices: [

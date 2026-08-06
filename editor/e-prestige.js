@@ -322,6 +322,31 @@ dojo.declare("classes.KGSaveEdit.PrestigeManager", classes.KGSaveEdit.Manager, {
 				{name: "paragon", val: 5}
 			],
 			requires: {perks: ["adjustmentBureau"]}
+		}, {
+			//---------------- added in Kittens Game 1.5.x ----------------
+			name: "ambassadors",
+			prices: [
+				{name: "paragon", val: 100}
+			]
+			// unlocks: {jobs: ["ambassador"], perks: ["treaties"]}
+		}, {
+			name: "treaties",
+			prices: [
+				{name: "paragon", val: 500}
+			],
+			requires: {perks: ["ambassadors"]},
+			effects: {
+				"embassiesPerAmbassadorSlot": 30,
+				"ambassadorBoostPerRank":      0.1
+			},
+			upgrades: {jobs: ["ambassador"]}
+		}, {
+			//Exists to reduce reliance on RNG during the Unicorn Tears challenge.
+			name: "alicornmancy",
+			prices: [
+				{name: "paragon", val: 200}
+			],
+			upgrades: {zigguratUpgrades: ["skyPalace", "unicornUtopia", "sunspire"]}
 		}
 	],
 
