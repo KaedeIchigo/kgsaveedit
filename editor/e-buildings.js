@@ -407,39 +407,100 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			flavor: true
 		}, {
 			name: "warehouse",
-			prices: [
-				{name: "beam", val: 1.5},
-				{name: "slab", val: 2}
+			stage: 0,
+			stages: [
+				{
+					stageName: "warehouse",
+					prices: [
+						{name: "beam", val: 1.5},
+						{name: "slab", val: 2}
+					],
+					priceRatio: 1.15,
+					stageUnlocked: true,
+					effects: {
+						"catnipMax":   0,
+						"woodMax":     0,
+						"mineralsMax": 0,
+						"coalMax":     0,
+						"ironMax":     0,
+						"titaniumMax": 0,
+						"goldMax":     0
+					},
+					flavor: true
+				}, {
+					//Spaceport, added in Kittens Game 1.5.x as a second warehouse
+					//stage. Without this the editor showed staged Spaceports under
+					//the "Warehouse" label and, worse, dropped the stage on load -
+					//see the stage guard in BuildingMeta.load().
+					stageName: "spaceport",
+					prices: [
+						{name: "titanium",  val: 10000},
+						{name: "eludium",   val: 500},
+						{name: "kerosene",  val: 1000},
+						{name: "blueprint", val: 500},
+						{name: "starchart", val: 100000}
+					],
+					priceRatio: 1.15,
+					stageUnlocked: false,
+					stageRequires: {tech: ["advExogeology"]},
+					togglable: true,
+					effects: {
+						"moonBaseStorageBonus":      0.0085,
+						"planetCrackerStorageBonus": 0.0085,
+						"cryostationStorageBonus":   0.0085,
+						"energyConsumption":         5,
+						"tradeVolume":               0
+					}
+				}
 			],
 			priceRatio: 1.15,
 			requires: {tech: ["construction"]},
-			effects: {
-				"catnipMax":   0,
-				"woodMax":     0,
-				"mineralsMax": 0,
-				"coalMax":     0,
-				"ironMax":     0,
-				"titaniumMax": 0,
-				"goldMax":     0
-			},
 			calculateEffects: function (self, game) {
-				var effects = {
-					"catnipMax":   0, //for tooltip order
-					"woodMax":     150,
-					"mineralsMax": 200,
-					"coalMax":     30,
-					"ironMax":     25,
-					"titaniumMax": 10,
-					"goldMax":     5
-				};
+				var stageMeta = self.stages[self.stage];
 
-				if (game.workshop.get("silos").owned()) {
-					effects["catnipMax"] = 750;
+				if (self.stage === 0) {
+					var effects = {
+						"catnipMax":   0, //for tooltip order
+						"woodMax":     150,
+						"mineralsMax": 200,
+						"coalMax":     30,
+						"ironMax":     25,
+						"titaniumMax": 10,
+						"goldMax":     5
+					};
+
+					if (game.workshop.get("silos").owned()) {
+						effects["catnipMax"] = 750;
+					}
+
+					stageMeta.effects = game.resPool.addBarnWarehouseRatio(effects);
+
+				} else if (self.stage === 1) {
+					var spaceportEffects = {
+						"moonBaseStorageBonus":      0.0085,
+						"planetCrackerStorageBonus": 0.0085,
+						"cryostationStorageBonus":   0.0085,
+						"energyConsumption":         5,
+						"tradeVolume":               0
+					};
+
+					//The first 10 Spaceports cost 5Wt each; every one past that adds
+					//0.5Wt to the per-building cost.
+					if (self.on >= 10) {
+						spaceportEffects["energyConsumption"] = 0.5 * (self.on - 9) + 45 / self.on;
+					}
+
+					//Automation only exists once freightfulExchange is researched, and
+					//transportSuperposition doubles the trade bonus it grants.
+					if (game.workshop.get("freightfulExchange").owned() && self.isAutomationEnabled) {
+						spaceportEffects["tradeVolume"] = 0.5 +
+							(game.workshop.get("transportSuperposition").owned() ? 0.5 : 0);
+					}
+
+					stageMeta.effects = spaceportEffects;
 				}
-
-				self.effects = game.resPool.addBarnWarehouseRatio(effects);
 			},
-			flavor: true
+			upgrades: {spaceBuilding: ["moonBase", "planetCracker", "cryostation"]}
 			// unlockScheme: {name: "minimalist", threshold: 10}
 		}, {
 			name: "harbor",

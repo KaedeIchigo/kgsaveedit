@@ -1125,16 +1125,36 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	lastBackup: null,
 
+	//Mirrors game.js featureFlags as of Kittens Game 1.5.0.3. These gate whole
+	//subsystems, so a stale value here silently zeroes their effects: pacts were
+	//still main:false long after the game shipped them, which made every pact
+	//contribute nothing to production per tick.
 	featureFlags: {
 		VILLAGE_MAP: {
 			beta: true,
 			main: false
 		},
 		SPACE_EXPL: {
-			beta: true,
+			beta: false,
 			main: false
 		},
 		MAUSOLEUM_PACTS: {
+			beta: true,
+			main: true
+		},
+		QUEUE: {
+			beta: true,
+			main: true
+		},
+		QUEUE_REDSHIFT: {
+			beta: true,
+			main: true
+		},
+		UNICORN_TEARS_CHALLENGE: {
+			beta: true,
+			main: true
+		},
+		DARK_PARACOSM: {
 			beta: true,
 			main: false
 		}
