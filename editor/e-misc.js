@@ -972,7 +972,14 @@ dojo.declare("classes.KGSaveEdit.Console", classes.KGSaveEdit.core, {
 		"tcShatter":          {},
 		"tcRefine":           {},
 		"faith":              {},
-		"elders":             {}
+		"elders":             {},
+		//Added in Kittens Game 1.5.x. Without these the Extras tab listed
+		//console.filters.<name> as unhandled save data.
+		"blackcoin":          {},
+		"festival":           {},
+		"undo":               {},
+		"explore":            {},
+		"combat":             {}
 	},
 
 	filters: null,

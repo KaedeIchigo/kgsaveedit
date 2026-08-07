@@ -125,18 +125,48 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 				{name: "void", val: 10}
 			],
 			priceRatio: 1.1,
-			limitBuild: 0,
+			//No limitBuild: the game commented out both its cap and the
+			//temporalPressCap assignment. Keeping limitBuild at 0 here clamped
+			//getOn() to zero, which is why the "on" field had no usable input.
 			requires: {challenges: ["1000Years"]},
 			effects: {
 				"shatterYearBoost":  0,
 				"energyConsumption": 5
 			},
-			isAutomationEnabled: false,
+			//null until automation is actually unlocked, matching the game.
+			isAutomationEnabled: null,
 			calculateEffects: function (self, game) {
+				//Two or more completions of 1000Years - or a blazar above 2 - unlock
+				//the automation toggle.
+				if (game.challenges.getChallenge("1000Years").on > 1 || game.religion.getTU("blazar").val > 2) {
+					if (self.isAutomationEnabled === null || self.isAutomationEnabled === undefined) {
+						self.isAutomationEnabled = false;
+					}
+				} else {
+					self.isAutomationEnabled = null;
+				}
+
 				self.effects["shatterYearBoost"] = (self.isAutomationEnabled) ? 5 * game.calendar.yearsPerCycle : game.calendar.yearsPerCycle; //25 or 5 currently
-				self.limitBuild = game.getEffect("temporalPressCap");
-				self.priceRatio = Math.max(1.05, 1.1 - game.challenges.getChallenge("1000Years").on * 0.001); //first 50 completions of 1000Years make priceRatio cheaper
+				//The game floors this at 1.01, so the discount keeps improving for
+				//90 completions; flooring at 1.05 stopped it at 50.
+				self.priceRatio = Math.max(1.01, 1.1 - game.challenges.getChallenge("1000Years").on * 0.001);
 			},
+			unlocked: false
+		}, {
+			//Added in Kittens Game 1.5.x, unlocked by the tachyonModerator upgrade.
+			//Hard-capped at 25 (5 seconds of delay).
+			name: "controlledDelay",
+			prices: [
+				{name: "timeCrystal", val: 1},
+				{name: "gear",        val: 10}
+			],
+			priceRatio: 1, //affordable scaling
+			limitBuild: 25,
+			effects: {
+				"energyConsumption": 0.75
+			},
+			delayTicks: 0,
+			isAutomationEnabled: false,
 			unlocked: false
 		}
 	],
@@ -546,6 +576,15 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 
 		this.updateEnabled();
 
+		//Chronoforge and void-space upgrades only got their effects recalculated
+		//if their own action happened to do it. blastFurnace does; temporalPress
+		//and temporalImpedance do not, so those never picked up changes such as
+		//the temporal press price ratio falling as 1000Years completions mount.
+		//The space tab already recalculates this way on update.
+		if (this.calculateEffects) {
+			this.calculateEffects(this, this.game);
+		}
+
 		if (this.action) {
 			this.action(this, this.game);
 		}
@@ -556,11 +595,12 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 	},
 
 	save: function () {
-		var saveData = this.game.filterMetaObj(this, ["name", "val", "on", "heat", "unlocked"]);
+		//Same field list the game writes for cfu. isAutomationEnabled used to be
+		//hardcoded to false for blastFurnace and omitted everywhere else, so any
+		//automation the player had enabled was discarded on export.
+		var saveData = this.game.filterMetaObj(this,
+			["name", "val", "on", "heat", "delayTicks", "unlocked", "isAutomationEnabled"]);
 		saveData.on = this.getOn();
-		if (this.name === "blastFurnace") {
-			saveData.isAutomationEnabled = false;
-		}
 		return saveData;
 	},
 
@@ -572,9 +612,16 @@ dojo.declare("classes.KGSaveEdit.CFUMeta", classes.KGSaveEdit.MetaItemStackable,
 		if (this.heatNode) {
 			this.set("heat", num(saveData.heat));
 		}
-		// if (this.isAutomationEnabledNode) {
-		// 	this.set("isAutomationEnabled", false);
-		// }
+		if (Object.prototype.hasOwnProperty.call(this, "delayTicks")) {
+			this.delayTicks = num(saveData.delayTicks);
+		}
+		if (Object.prototype.hasOwnProperty.call(this, "isAutomationEnabled")) {
+			//Preserve null (feature not yet unlocked) rather than coercing to false,
+			//which is the distinction the game itself keeps.
+			this.set("isAutomationEnabled",
+				saveData.isAutomationEnabled === null || saveData.isAutomationEnabled === undefined ?
+					null : Boolean(saveData.isAutomationEnabled));
+		}
 	}
 });
 

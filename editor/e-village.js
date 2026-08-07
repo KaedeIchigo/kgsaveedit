@@ -2849,6 +2849,24 @@ dojo.declare("classes.KGSaveEdit.VillageMap", classes.KGSaveEdit.MetaManager, {
 				15: "All you can see are the endless swamplands with lost ziggurats and rotten watchtowers"
 			},
 			terrainPenalty: 1.95
+		}, {
+			//Biomes of the "space" map, added in Kittens Game 1.5.x. Note the game
+			//also has a *map* called cath; this is the separate biome entry that
+			//village.biomes actually persists.
+			name: "cath",
+			title: "Cath",
+			description: "Little pale green dot",
+			unlocked: true,
+			terrainPenalty: 10
+		}, {
+			name: "redmoon",
+			title: "Redmoon",
+			description: "Red moon description",
+			lore: {
+				5: "You know why this moon is red",
+				10: "Under the basins, mountains and craters and the endless oceans of red dust you can sense the shape of something giant and snake-like coiled into an impossible knot"
+			},
+			terrainPenalty: 20
 		}
 	],
 

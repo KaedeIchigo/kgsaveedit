@@ -1087,6 +1087,217 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			"activeHG": {
 				type: "fixed",
 				calculation: "constant"
+			},
+
+			//---- ported from game.js effectMeta (Kittens Game 1.5.0.3) ----
+			//Effects the editor knew nothing about rendered as raw identifiers in
+			//tooltips. Titles resolve via "effectsMgr.statics.<name>.title".
+			"catpowerReductionRatio": {
+				type: "ratio"
+			},
+
+			"tradeVolume": {
+				type: "ratio"
+			},
+
+			"embassyEffectCap": {
+				type: "ratio"
+			},
+
+			"tradeBlueprintChance": {
+				type: "ratio"
+			},
+
+			"tradeSpiceChance": {
+				type: "ratio"
+			},
+
+			"tradeNormalResChance": {
+				type: "ratio"
+			},
+
+			"shatterYearBoost": {
+				type: "ratio"
+			},
+
+			"moonBaseStorageBonus": {
+				type: "ratio"
+			},
+
+			"planetCrackerStorageBonus": {
+				type: "ratio"
+			},
+
+			"cryostationStorageBonus": {
+				type: "ratio"
+			},
+
+			"bskSattelitePenalty": {
+				type: "ratio"
+			},
+
+			"happinessKittenProductionRatio": {
+				type: "ratio"
+			},
+
+			"cultureFromManuscripts": {
+				type: "ratio"
+			},
+
+			"harborLimitRatioPolicy": {
+				type: "ratio"
+			},
+
+			"neutralRaceEmbassyStanding": {
+				type: "ratio"
+			},
+
+			"raceSpecificStanding": {
+				type: "ratio"
+			},
+
+			"calcinerSteelRatioBonus": {
+				type: "ratio"
+			},
+
+			"magnetoBoostBonusPolicy": {
+				type: "ratio"
+			},
+
+			"faithFromManuscripts": {
+				type: "ratio"
+			},
+
+			"quarrySlabCraftBonus": {
+				type: "ratio"
+			},
+
+			"zigguratTempleEffectPolicy": {
+				type: "ratio"
+			},
+
+			"refinePolicyRatio": {
+				type: "ratio"
+			},
+
+			"biolabEnergyRatio": {
+				type: "ratio"
+			},
+
+			"breweryPolicyManpowerRatio": {
+				type: "ratio"
+			},
+
+			"biolabBiofuelScienceMaxRatio": {
+				type: "ratio"
+			},
+
+			"religionUpgradesDiscount": {
+				type: "ratio"
+			},
+
+			"nagaBlueprintTradeChance": {
+				type: "ratio"
+			},
+
+			"starchartPolicyRatio": {
+				type: "ratio"
+			},
+
+			"mintIvoryRatio": {
+				type: "ratio"
+			},
+
+			"huntCatpowerDiscount": {
+				type: "fixed"
+			},
+
+			"antimatterPolicyRatio": {
+				type: "ratio"
+			},
+
+			"oilPolicyRatio": {
+				type: "ratio"
+			},
+
+			"smallDebtPunishmentExemption": {
+				type: "fixed"
+			},
+
+			"repayDebtOnNecrocornGeneration": {
+				type: "fixed"
+			},
+
+			"feedEldersEfficiencyRatio": {
+				type: "ratio"
+			},
+
+			"necrocornCorruptionInterference": {
+				type: "ratio"
+			},
+
+			"heatEfficiency": {
+				type: "ratio"
+			},
+
+			"heatCompression": {
+				type: "ratio"
+			},
+
+			"tradeKnowledgeRatio": {
+				type: "ratio"
+			},
+
+			"bonfireTearsPriceRatioChallenge": {
+				type: "ratio"
+			},
+
+			"scienceTearsPricesChallenge": {
+				type: "ratio"
+			},
+
+			"workshopTearsPricesChallenge": {
+				type: "ratio"
+			},
+
+			"zigguratIvoryPriceRatio": {
+				type: "ratio"
+			},
+
+			"pyramidSpaceCompendiumRatio": {
+				type: "ratio"
+			},
+
+			"pyramidPerYearRatio": {
+				type: "ratio"
+			},
+
+			"UniversalKnowHow": {
+				type: "fixed"
+			},
+
+			"pactSpaceCompendiumRatio": {
+				type: "ratio"
+			},
+
+			"pactcraftRatio": {
+				type: "ratio"
+			},
+
+			"pactPerYearRatio": {
+				type: "ratio"
+			},
+
+			"pactUniversalKnowHow": {
+				type: "fixed"
+			},
+
+			"pacttimeRatio": {
+				type: "ratio"
+			},
+
+			"milleninumParagon": {
+				type: "fixed"
 			}
 		}
 	}
@@ -1115,8 +1326,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	isCMBREnabled: false,
 
+	//Legacy: neither is written back any more. forceShowLimits no longer exists
+	//in the game at all, and useWorkers now lives in game.opts - they are still
+	//read so older saves load cleanly.
 	forceShowLimits: false,
 	useWorkers: false,
+
+	startedWithoutChronospheres: false,
+
+	//game.opts entries the editor has no UI for, carried through verbatim so
+	//exporting never strips a player's settings.
+	unknownOpts: null,
+
 	colorScheme: "",
 	unlockedSchemes: null,
 
@@ -1938,6 +2159,15 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				} else if (effectMeta.type === "integerRatio") {
 					displayEffectValue = this.getDisplayValueExt(effectValue) + "%";
 				} else if (effectMeta.type === "energy") {
+					//The game scales these for display, so a building's tooltip shows
+					//what it actually produces or draws: production picks up
+					//energyProductionRatio (darkNova and friends), consumption picks up
+					//the reduction earned from energy challenge completions.
+					if (effectName === "energyProduction") {
+						effectValue *= this.resPool.getEnergyProductionRatio();
+					} else if (effectName === "energyConsumption") {
+						effectValue *= this.resPool.getEnergyConsumptionRatio();
+					}
 					displayEffectValue = this.getDisplayValueExt(effectValue) + "Wt";
 				} else {
 					displayEffectValue = this.getDisplayValueExt(effectValue);
@@ -3259,10 +3489,20 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		this.callMethods(this.managers, "save", saveData);
 
+		//Mirrors the game's saveData.game block. Two keys are deliberately absent:
+		//forceShowLimits, which no longer exists anywhere in the game, and the
+		//top-level useWorkers - settings.js migrates game.useWorkers into
+		//game.opts.useWorkers on load, so writing the legacy key would clobber the
+		//player's real setting with whatever the editor happened to hold.
+		var opts = this.filterMetaObj(this.opts, this.optsKeys);
+		for (var optKey in this.unknownOpts) {
+			if (!(optKey in opts)) {
+				opts[optKey] = this.unknownOpts[optKey];
+			}
+		}
+
 		saveData.game = {
-			forceShowLimits: this.forceShowLimits,
 			isCMBREnabled: this.isCMBREnabled,
-			useWorkers: this.useWorkers,
 			colorScheme: this.colorScheme,
 			unlockedSchemes: this.unlockedSchemes,
 			karmaKittens: this.karmaKittens,
@@ -3270,8 +3510,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			ironWill: this.ironWill,
 			deadKittens: this.deadKittens,
 			cheatMode: this.cheatMode,
+			startedWithoutChronospheres: this.startedWithoutChronospheres,
 
-			opts: this.filterMetaObj(this.opts, this.optsKeys),
+			opts: opts,
 			lastBackup: this.lastBackup
 		};
 
@@ -3649,6 +3890,26 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 			this.ironWill = ("ironWill" in data) ? Boolean(data.ironWill) : true;
 
+			//Flag the game keeps purely for achievements. Not modelled by the editor
+			//beyond carrying it across, but dropping it silently downgraded a
+			//player's jupiterAscending star.
+			this.startedWithoutChronospheres = ("startedWithoutChronospheres" in data) ?
+				Boolean(data.startedWithoutChronospheres) : false;
+
+			//game.opts is an open-ended bag: the game declares only notation and
+			//batchSize up front and lets settings.js add the rest, so the editor's
+			//whitelist quietly discarded anything it had not heard of (fontSize,
+			//hodl, ksEnabled, useSwipeNavigation, ...). Keep the raw object so those
+			//keys can be written back untouched.
+			this.unknownOpts = {};
+			if (data.opts) {
+				for (var optKey in data.opts) {
+					if (this.optsKeys.indexOf(optKey) === -1) {
+						this.unknownOpts[optKey] = data.opts[optKey];
+					}
+				}
+			}
+
 			this.loadMetaFields(this.opts, data.opts, this.optsKeys);
 			this.set("lastBackup", data.lastBackup || Date.now());
 		}
@@ -3896,11 +4157,12 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		this.callMethods(this.managers, "update");
 		this.upgradeItems({religionUpgrades: ["solarRevolution"]}); //sigh
 
-		var energyProdRatio = 1 + this.getEffect("energyProductionRatio");
+		//Shared with the tooltip display so the top bar and per-building figures
+		//can never drift apart.
+		var energyProdRatio = this.resPool.getEnergyProductionRatio();
 		var energyProd = this.getEffect("energyProduction") * energyProdRatio;
 		var energyWinterProd = energyProd;
-		var energyConsRatio = 1 + this.getLimitedDR(this.getEffect("energyConsumptionRatio"), 1) + this.getEffect("energyConsumptionIncrease");
-		var energyCons = this.getEffect("energyConsumption") * energyConsRatio * (this.game.challenges.isActive("energy") ? 2 : 1);
+		var energyCons = this.getEffect("energyConsumption") * this.resPool.getEnergyConsumptionRatio();
 
 		var currentSeason = this.calendar.season;
 		var solarFarm = this.bld.get("pasture");

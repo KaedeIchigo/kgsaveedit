@@ -205,7 +205,8 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 			visible: false,
 			color: "black",
 			getMaxValue: function () {
-				return 16 + this.game.getEffect("blsLimit");
+				//The game caps sorrow at 17 + blsLimit; this trailed at 16.
+				return 17 + this.game.getEffect("blsLimit");
 			},
 			hardMaxLimit: true,
 			reservable: false
@@ -467,9 +468,32 @@ dojo.declare("classes.KGSaveEdit.Resources", classes.KGSaveEdit.Manager, {
 	update: function () {
 		this.game.callMethods(this.resources, "update");
 
-		// handled in main.js
-		// this.energyProd = this.game.getEffect("energyProduction") * (1 + game.getEffect("energyProductionRatio"));
-		// this.energyCons = this.game.getEffect("energyConsumption");
+		// energyProd / energyCons themselves are computed in main.js, using the
+		// ratio helpers below.
+	},
+
+	/**
+	 * All energy production amounts are multiplied by this - notably the
+	 * darkNova transcendence upgrade contributes here.
+	 */
+	getEnergyProductionRatio: function () {
+		return 1 + this.game.getEffect("energyProductionRatio");
+	},
+
+	/**
+	 * All energy consumption amounts are multiplied by this. Completing the
+	 * energy challenge lowers it; having it active doubles consumption.
+	 *
+	 * The game applies limited diminishing returns to energyConsumptionRatio
+	 * while stacking the effect (stackOptions in challenges.js). The editor has
+	 * no stackOptions mechanism, so the same limit is applied to the summed
+	 * value here instead, which works out equivalently.
+	 */
+	getEnergyConsumptionRatio: function () {
+		var game = this.game;
+		return (1 + game.getLimitedDR(game.getEffect("energyConsumptionRatio"), 1) +
+			game.getEffect("energyConsumptionIncrease")) *
+			(game.challenges.isActive("energy") ? 2 : 1);
 	},
 
 	updateMax: function () {

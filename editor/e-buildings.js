@@ -2279,6 +2279,16 @@ dojo.declare("classes.KGSaveEdit.BuildingMeta", classes.KGSaveEdit.MetaItemStack
 				isTemporary: true //can't exploit buy manipulating pollution in postApocalypse
 			});
 		}
+		//The Spaceport is a deliberate starchart sink: its starchart cost climbs on
+		//a much steeper ratio than everything else it charges, applied on top of the
+		//normal price ratio above.
+		if (currentName === "warehouse" && this.get("stage") === 1) {
+			for (i = 0; i < prices.length; i++) {
+				if (prices[i].name === "starchart") {
+					prices[i].val *= Math.pow(1.35, this.val);
+				}
+			}
+		}
 		return prices;
 	},
 
