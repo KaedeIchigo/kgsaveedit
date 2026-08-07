@@ -171,32 +171,66 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 			requires: {perks: ["megalomania"]},
 			effects: {
 				"pyramidGlobalResourceRatio":   0,
+				"pyramidRecoveryRatio":         0,
 				"pyramidGlobalProductionRatio": 0,
 				"pyramidFaithRatio":            0,
+				"pyramidSpaceCompendiumRatio":  0,
+				"pyramidPerYearRatio":          0,
+				"craftRatio":                   0,
+				"UniversalKnowHow":             0,
+				"timeRatio":                    0,
 				"deficitRecoveryRatio":         0,
 				"blackLibraryBonus":            0
 			},
+			//Effects the pyramid re-exports as "pyramid<Name>" from "pact<Name>".
 			simpleEffectNames: [
 				"GlobalResourceRatio",
+				"RecoveryRatio",
 				"GlobalProductionRatio",
-				"FaithRatio"
+				"FaithRatio",
+				"SpaceCompendiumRatio",
+				"PerYearRatio"
+			],
+			//Effects re-exported under their own name, read from "pact<Name>".
+			//These carry pactOfArcane and pactOfChronicler; without them those two
+			//pacts contributed nothing at all.
+			prefixEffectNames: [
+				"craftRatio",
+				"UniversalKnowHow",
+				"timeRatio"
 			],
 			action: function (self, game) { //sigh
 				self.effects = {
 					"pyramidGlobalResourceRatio":   0,
+					"pyramidRecoveryRatio":         0,
 					"pyramidGlobalProductionRatio": 0,
 					"pyramidFaithRatio":            0,
+					"pyramidSpaceCompendiumRatio":  0,
+					"pyramidPerYearRatio":          0,
+					"craftRatio":                   0,
+					"UniversalKnowHow":             0,
+					"timeRatio":                    0,
 					"deficitRecoveryRatio":         0,
 					"blackLibraryBonus":            0
 				};
 				if (!game.getFeatureFlag("MAUSOLEUM_PACTS")) {
 					return;
 				}
-				var transcendenceTierModifier = Math.max(game.religion.transcendenceTier - 25, 1);
-				var deficitModifier = (1 - game.religion.necrocornDeficit / 50);
+
+				//The game uses (transcendenceTier - 24); this was -25, which cost one
+				//multiple of every pact effect at any tier above 25.
+				var transcendenceTierModifier = Math.max(game.religion.transcendenceTier - 24, 1);
+				var deficitModifier = game.religion.getDebtPenaltyRatio();
+
 				for (var i = 0; i < self.simpleEffectNames.length; i++) {
-					self.effects["pyramid" + self.simpleEffectNames[i]] = game.getEffect("pact" + self.simpleEffectNames[i]) * transcendenceTierModifier * deficitModifier;
+					self.effects["pyramid" + self.simpleEffectNames[i]] =
+						game.getEffect("pact" + self.simpleEffectNames[i]) * transcendenceTierModifier * deficitModifier;
 				}
+				for (var j = 0; j < self.prefixEffectNames.length; j++) {
+					self.effects[self.prefixEffectNames[j]] =
+						game.getEffect("pact" + self.prefixEffectNames[j]) * transcendenceTierModifier * deficitModifier;
+				}
+
 				self.effects["deficitRecoveryRatio"] = game.getEffect("pactDeficitRecoveryRatio");
 				var pactBlackLibraryBoost = game.getEffect("pactBlackLibraryBoost") * transcendenceTierModifier;
 				if (pactBlackLibraryBoost) {
@@ -766,6 +800,29 @@ dojo.declare("classes.KGSaveEdit.ReligionManager", [classes.KGSaveEdit.UI.Tab, c
 		return 0;
 	},
 
+	/**
+	 * Mirrors pactsManager.getDebtPenaltyRatio() in the game. Pact effects are
+	 * scaled by this before they reach the Black Pyramid. It used to be
+	 * approximated here as (1 - deficit / 50), which ignored both the fractured
+	 * pact and the punishment exemption the siphoning policy grants.
+	 */
+	getDebtPenaltyRatio: function () {
+		//The game tests getPact("fractured").on; the editor models that state on
+		//the manager instead (PactMeta.getOn for "fractured" just reflects this
+		//flag), so read it from there.
+		if (this.isFractured || this.necrocornDeficit >= this.fractureNecrocornDeficit) {
+			return 0; //maximum debt
+		}
+
+		var lowerBound = this.game.getEffect("smallDebtPunishmentExemption");
+		if (this.necrocornDeficit <= lowerBound) {
+			return 1; //no debt worth punishing
+		}
+
+		return 1 - (this.necrocornDeficit - lowerBound) /
+			(this.fractureNecrocornDeficit - lowerBound);
+	},
+
 	getNecrocornDeficitConsumptionModifier: function () {
 		if (this.necrocornDeficit <= 0) {
 			return 1;
@@ -1160,6 +1217,12 @@ dojo.declare("classes.KGSaveEdit.TranscendenceMeta", classes.KGSaveEdit.MetaItem
 	getEffect: function (effectName) {
 		var effectValue = this.effects[effectName] || 0;
 		if (this.name === "holyGenocide") {
+			//activeHG *is* the active count - calculateEffects assigns
+			//activeHolyGenocide straight into it - so scaling it again squared the
+			//value. The game returns this one directly and stacks only the rest.
+			if (effectName === "activeHG") {
+				return this.game.religion.activeHolyGenocide;
+			}
 			return effectValue * this.game.religion.activeHolyGenocide;
 		}
 		return effectValue * this.getOn();
