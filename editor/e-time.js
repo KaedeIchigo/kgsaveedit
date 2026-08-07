@@ -138,6 +138,21 @@ dojo.declare("classes.KGSaveEdit.TimeManager", [classes.KGSaveEdit.UI.Tab, class
 				self.priceRatio = Math.max(1.05, 1.1 - game.challenges.getChallenge("1000Years").on * 0.001); //first 50 completions of 1000Years make priceRatio cheaper
 			},
 			unlocked: false
+		}, {
+			//Added in Kittens Game 1.5.x, unlocked by the tachyonModerator upgrade.
+			//Hard-capped at 25 (5 seconds of delay).
+			name: "controlledDelay",
+			prices: [
+				{name: "timeCrystal", val: 1},
+				{name: "gear",        val: 10}
+			],
+			priceRatio: 1, //affordable scaling
+			limitBuild: 25,
+			effects: {
+				"energyConsumption": 0.75
+			},
+			isAutomationEnabled: false,
+			unlocked: false
 		}
 	],
 

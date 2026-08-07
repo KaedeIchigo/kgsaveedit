@@ -1087,6 +1087,217 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 			"activeHG": {
 				type: "fixed",
 				calculation: "constant"
+			},
+
+			//---- ported from game.js effectMeta (Kittens Game 1.5.0.3) ----
+			//Effects the editor knew nothing about rendered as raw identifiers in
+			//tooltips. Titles resolve via "effectsMgr.statics.<name>.title".
+			"catpowerReductionRatio": {
+				type: "ratio"
+			},
+
+			"tradeVolume": {
+				type: "ratio"
+			},
+
+			"embassyEffectCap": {
+				type: "ratio"
+			},
+
+			"tradeBlueprintChance": {
+				type: "ratio"
+			},
+
+			"tradeSpiceChance": {
+				type: "ratio"
+			},
+
+			"tradeNormalResChance": {
+				type: "ratio"
+			},
+
+			"shatterYearBoost": {
+				type: "ratio"
+			},
+
+			"moonBaseStorageBonus": {
+				type: "ratio"
+			},
+
+			"planetCrackerStorageBonus": {
+				type: "ratio"
+			},
+
+			"cryostationStorageBonus": {
+				type: "ratio"
+			},
+
+			"bskSattelitePenalty": {
+				type: "ratio"
+			},
+
+			"happinessKittenProductionRatio": {
+				type: "ratio"
+			},
+
+			"cultureFromManuscripts": {
+				type: "ratio"
+			},
+
+			"harborLimitRatioPolicy": {
+				type: "ratio"
+			},
+
+			"neutralRaceEmbassyStanding": {
+				type: "ratio"
+			},
+
+			"raceSpecificStanding": {
+				type: "ratio"
+			},
+
+			"calcinerSteelRatioBonus": {
+				type: "ratio"
+			},
+
+			"magnetoBoostBonusPolicy": {
+				type: "ratio"
+			},
+
+			"faithFromManuscripts": {
+				type: "ratio"
+			},
+
+			"quarrySlabCraftBonus": {
+				type: "ratio"
+			},
+
+			"zigguratTempleEffectPolicy": {
+				type: "ratio"
+			},
+
+			"refinePolicyRatio": {
+				type: "ratio"
+			},
+
+			"biolabEnergyRatio": {
+				type: "ratio"
+			},
+
+			"breweryPolicyManpowerRatio": {
+				type: "ratio"
+			},
+
+			"biolabBiofuelScienceMaxRatio": {
+				type: "ratio"
+			},
+
+			"religionUpgradesDiscount": {
+				type: "ratio"
+			},
+
+			"nagaBlueprintTradeChance": {
+				type: "ratio"
+			},
+
+			"starchartPolicyRatio": {
+				type: "ratio"
+			},
+
+			"mintIvoryRatio": {
+				type: "ratio"
+			},
+
+			"huntCatpowerDiscount": {
+				type: "fixed"
+			},
+
+			"antimatterPolicyRatio": {
+				type: "ratio"
+			},
+
+			"oilPolicyRatio": {
+				type: "ratio"
+			},
+
+			"smallDebtPunishmentExemption": {
+				type: "fixed"
+			},
+
+			"repayDebtOnNecrocornGeneration": {
+				type: "fixed"
+			},
+
+			"feedEldersEfficiencyRatio": {
+				type: "ratio"
+			},
+
+			"necrocornCorruptionInterference": {
+				type: "ratio"
+			},
+
+			"heatEfficiency": {
+				type: "ratio"
+			},
+
+			"heatCompression": {
+				type: "ratio"
+			},
+
+			"tradeKnowledgeRatio": {
+				type: "ratio"
+			},
+
+			"bonfireTearsPriceRatioChallenge": {
+				type: "ratio"
+			},
+
+			"scienceTearsPricesChallenge": {
+				type: "ratio"
+			},
+
+			"workshopTearsPricesChallenge": {
+				type: "ratio"
+			},
+
+			"zigguratIvoryPriceRatio": {
+				type: "ratio"
+			},
+
+			"pyramidSpaceCompendiumRatio": {
+				type: "ratio"
+			},
+
+			"pyramidPerYearRatio": {
+				type: "ratio"
+			},
+
+			"UniversalKnowHow": {
+				type: "fixed"
+			},
+
+			"pactSpaceCompendiumRatio": {
+				type: "ratio"
+			},
+
+			"pactcraftRatio": {
+				type: "ratio"
+			},
+
+			"pactPerYearRatio": {
+				type: "ratio"
+			},
+
+			"pactUniversalKnowHow": {
+				type: "fixed"
+			},
+
+			"pacttimeRatio": {
+				type: "ratio"
+			},
+
+			"milleninumParagon": {
+				type: "fixed"
 			}
 		}
 	}

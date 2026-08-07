@@ -717,6 +717,28 @@ dojo.declare("classes.KGSaveEdit.StatsManager", [classes.KGSaveEdit.UI.Tab, clas
 				var kittens = game.stats.getStat("totalKittens").val;
 				return years != 0 ? kittens / Math.ceil(years / 100) : 0;
 			}
+		}, {
+			//Added in Kittens Game 1.5.x. Both were listed as unhandled save data
+			//by the Extras tab until now.
+			name: "transcendenceTier",
+			title: "stats.transcendenceTier",
+			val: 0,
+			calculate: function (game) {
+				return game.religion.transcendenceTier;
+			}
+		}, {
+			name: "totalChallengesCompleted",
+			title: "stats.challenges.total",
+			val: 0,
+			calculate: function (game) {
+				//Mirrors challenges.getCountCompletions(): every completion counts,
+				//not merely every distinct challenge completed.
+				var total = 0;
+				for (var i = 0; i < game.challenges.challenges.length; i++) {
+					total += num(game.challenges.challenges[i].on);
+				}
+				return total;
+			}
 		}
 	],
 
