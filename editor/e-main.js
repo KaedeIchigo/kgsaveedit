@@ -2149,6 +2149,15 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				} else if (effectMeta.type === "integerRatio") {
 					displayEffectValue = this.getDisplayValueExt(effectValue) + "%";
 				} else if (effectMeta.type === "energy") {
+					//The game scales these for display, so a building's tooltip shows
+					//what it actually produces or draws: production picks up
+					//energyProductionRatio (darkNova and friends), consumption picks up
+					//the reduction earned from energy challenge completions.
+					if (effectName === "energyProduction") {
+						effectValue *= this.resPool.getEnergyProductionRatio();
+					} else if (effectName === "energyConsumption") {
+						effectValue *= this.resPool.getEnergyConsumptionRatio();
+					}
 					displayEffectValue = this.getDisplayValueExt(effectValue) + "Wt";
 				} else {
 					displayEffectValue = this.getDisplayValueExt(effectValue);
@@ -4107,11 +4116,12 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		this.callMethods(this.managers, "update");
 		this.upgradeItems({religionUpgrades: ["solarRevolution"]}); //sigh
 
-		var energyProdRatio = 1 + this.getEffect("energyProductionRatio");
+		//Shared with the tooltip display so the top bar and per-building figures
+		//can never drift apart.
+		var energyProdRatio = this.resPool.getEnergyProductionRatio();
 		var energyProd = this.getEffect("energyProduction") * energyProdRatio;
 		var energyWinterProd = energyProd;
-		var energyConsRatio = 1 + this.getLimitedDR(this.getEffect("energyConsumptionRatio"), 1) + this.getEffect("energyConsumptionIncrease");
-		var energyCons = this.getEffect("energyConsumption") * energyConsRatio * (this.game.challenges.isActive("energy") ? 2 : 1);
+		var energyCons = this.getEffect("energyConsumption") * this.resPool.getEnergyConsumptionRatio();
 
 		var currentSeason = this.calendar.season;
 		var solarFarm = this.bld.get("pasture");

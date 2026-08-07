@@ -80,6 +80,13 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			name: "jupiterAscending",
 			condition: function () {
 				return this.game.space.getProgram("orbitalLaunch").owned() && this.game.calendar.year <= 1;
+			},
+			hasStar: true,
+			starCondition: function () {
+				//The game also requires startedWithoutChronospheres, which the editor
+				//does not track. Reporting false leaves the star editable by hand
+				//instead of claiming it was not earned.
+				return false;
 			}
 		}, {
 			name: "shadowOfTheColossus",
@@ -134,6 +141,10 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			name: "serenity",
 			condition: function () {
 				return this.game.resPool.get("kittens").value >= 50 && this.game.deadKittens === 0;
+			},
+			hasStar: true,
+			starCondition: function () {
+				return this.game.resPool.get("kittens").value >= 1000 && this.game.deadKittens === 0;
 			}
 		}, {
 			name: "utopiaProject",
@@ -175,12 +186,28 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			condition: function () {
 				return this.game.calendar.festivalDays >=
 					100 * this.game.calendar.daysPerSeason * this.game.calendar.seasonsPerYear;
+			},
+			hasStar: true,
+			starCondition: function () {
+				//The game declares a starDescription but leaves its starCondition
+				//commented out as a TODO, so there is nothing to detect yet.
+				return false;
 			}
 		}, {
 			//The game tests this with challenges.getCountUniqueCompletions(), which
-			//the editor does not implement, so there is no auto-detection here - the
-			//achievement is still fully editable by hand.
-			name: "challenger"
+			//the editor does not implement, so the base achievement has no
+			//auto-detection and is edited by hand.
+			name: "challenger",
+			hasStar: true,
+			starCondition: function () {
+				//Star is getCountCompletions() >= 100 - total completions across all
+				//challenges, not distinct ones.
+				var total = 0;
+				for (var i = 0; i < this.game.challenges.challenges.length; i++) {
+					total += num(this.game.challenges.challenges[i].on);
+				}
+				return total >= 100;
+			}
 		}, {
 			//Was previously a badge; the game now grants the achievement to saves
 			//that still carry the old badge, which is what this mirrors.
@@ -188,6 +215,12 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			condition: function () {
 				var badge = this.game.achievements.getBadge("betterSafeThanSorry");
 				return Boolean(badge && badge.unlocked);
+			},
+			hasStar: true,
+			starCondition: function () {
+				//Awarded manually in the game too; it only defines starCondition so
+				//the star renders.
+				return false;
 			}
 		}
 	],
