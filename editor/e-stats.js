@@ -83,10 +83,9 @@ dojo.declare("classes.KGSaveEdit.AchievementsManager", [classes.KGSaveEdit.UI.Ta
 			},
 			hasStar: true,
 			starCondition: function () {
-				//The game also requires startedWithoutChronospheres, which the editor
-				//does not track. Reporting false leaves the star editable by hand
-				//instead of claiming it was not earned.
-				return false;
+				return Boolean(this.game.startedWithoutChronospheres) &&
+					this.game.space.getProgram("orbitalLaunch").owned() &&
+					this.game.calendar.year <= 1;
 			}
 		}, {
 			name: "shadowOfTheColossus",

@@ -1326,8 +1326,18 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 	isCMBREnabled: false,
 
+	//Legacy: neither is written back any more. forceShowLimits no longer exists
+	//in the game at all, and useWorkers now lives in game.opts - they are still
+	//read so older saves load cleanly.
 	forceShowLimits: false,
 	useWorkers: false,
+
+	startedWithoutChronospheres: false,
+
+	//game.opts entries the editor has no UI for, carried through verbatim so
+	//exporting never strips a player's settings.
+	unknownOpts: null,
+
 	colorScheme: "",
 	unlockedSchemes: null,
 
@@ -3479,10 +3489,20 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 
 		this.callMethods(this.managers, "save", saveData);
 
+		//Mirrors the game's saveData.game block. Two keys are deliberately absent:
+		//forceShowLimits, which no longer exists anywhere in the game, and the
+		//top-level useWorkers - settings.js migrates game.useWorkers into
+		//game.opts.useWorkers on load, so writing the legacy key would clobber the
+		//player's real setting with whatever the editor happened to hold.
+		var opts = this.filterMetaObj(this.opts, this.optsKeys);
+		for (var optKey in this.unknownOpts) {
+			if (!(optKey in opts)) {
+				opts[optKey] = this.unknownOpts[optKey];
+			}
+		}
+
 		saveData.game = {
-			forceShowLimits: this.forceShowLimits,
 			isCMBREnabled: this.isCMBREnabled,
-			useWorkers: this.useWorkers,
 			colorScheme: this.colorScheme,
 			unlockedSchemes: this.unlockedSchemes,
 			karmaKittens: this.karmaKittens,
@@ -3490,8 +3510,9 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 			ironWill: this.ironWill,
 			deadKittens: this.deadKittens,
 			cheatMode: this.cheatMode,
+			startedWithoutChronospheres: this.startedWithoutChronospheres,
 
-			opts: this.filterMetaObj(this.opts, this.optsKeys),
+			opts: opts,
 			lastBackup: this.lastBackup
 		};
 
@@ -3868,6 +3889,26 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 				"deadKittens", "useWorkers", "cheatMode", "isCMBREnabled"]);
 
 			this.ironWill = ("ironWill" in data) ? Boolean(data.ironWill) : true;
+
+			//Flag the game keeps purely for achievements. Not modelled by the editor
+			//beyond carrying it across, but dropping it silently downgraded a
+			//player's jupiterAscending star.
+			this.startedWithoutChronospheres = ("startedWithoutChronospheres" in data) ?
+				Boolean(data.startedWithoutChronospheres) : false;
+
+			//game.opts is an open-ended bag: the game declares only notation and
+			//batchSize up front and lets settings.js add the rest, so the editor's
+			//whitelist quietly discarded anything it had not heard of (fontSize,
+			//hodl, ksEnabled, useSwipeNavigation, ...). Keep the raw object so those
+			//keys can be written back untouched.
+			this.unknownOpts = {};
+			if (data.opts) {
+				for (var optKey in data.opts) {
+					if (this.optsKeys.indexOf(optKey) === -1) {
+						this.unknownOpts[optKey] = data.opts[optKey];
+					}
+				}
+			}
 
 			this.loadMetaFields(this.opts, data.opts, this.optsKeys);
 			this.set("lastBackup", data.lastBackup || Date.now());
