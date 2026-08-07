@@ -1107,6 +1107,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 30000}
 			],
+			effects: {
+				"starEventChance":      0.004,
+				"starchartPolicyRatio": 0.03
+			},
 			blockedBy: ["dragonRelationsPhysicists", "dragonRelationsDynamicists"]
 		}, {
 			//Relations policy: unlocked at 10 standing with dragons.
@@ -1114,6 +1118,11 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 30000}
 			],
+			effects: {
+				"tradeCatpowerDiscount":  5,
+				"huntCatpowerDiscount":   10,
+				"catpowerReductionRatio": 0.5
+			},
 			blockedBy: ["dragonRelationsPhysicists", "dragonRelationsAstrologers"]
 		}, {
 			//Relations policy: unlocked at 10 standing with dragons.
@@ -1121,6 +1130,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 30000}
 			],
+			effects: {
+				"reactorEnergyRatio":     0.25,
+				"harborLimitRatioPolicy": 0.05
+			},
 			blockedBy: ["dragonRelationsAstrologers", "dragonRelationsDynamicists"]
 		}, {
 			//Relations policy: unlocked at 20 standing with griffins.
@@ -1128,6 +1141,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 16000}
 			],
+			effects: {
+				"magnetoBoostBonusPolicy": 0.005
+			},
 			blockedBy: ["griffinRelationsMetallurgists", "griffinRelationsScouts"]
 		}, {
 			//Relations policy: unlocked at 20 standing with griffins.
@@ -1135,6 +1151,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 16000}
 			],
+			effects: {
+				"calcinerSteelRatioBonus": 0.15
+			},
 			blockedBy: ["griffinRelationsMachinists", "griffinRelationsScouts"]
 		}, {
 			//Relations policy: unlocked at 20 standing with griffins.
@@ -1142,6 +1161,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 16000}
 			],
+			effects: {
+				"hunterRatio": 0.5
+			},
 			blockedBy: ["griffinRelationsMachinists", "griffinRelationsMetallurgists"]
 		}, {
 			//Relations policy: unlocked at 20 standing with lizards.
@@ -1149,6 +1171,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 2100}
 			],
+			effects: {
+				"neutralRaceEmbassyStanding": 0.001
+			},
 			blockedBy: ["lizardRelationsEcologists", "lizardRelationsPriests"]
 		}, {
 			//Relations policy: unlocked at 20 standing with lizards.
@@ -1156,6 +1181,11 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 2100}
 			],
+			effects: {
+				"cathPollutionRatio": -0.05,
+				"solarFarmRatio":     0,
+				"hydroPlantRatio":    0
+			},
 			blockedBy: ["lizardRelationsPriests", "lizardRelationsDiplomats"]
 		}, {
 			//Relations policy: unlocked at 20 standing with lizards.
@@ -1163,6 +1193,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 2100}
 			],
+			effects: {
+				"cultureFromManuscripts": -0.25,
+				"faithFromManuscripts":   1
+			},
 			blockedBy: ["lizardRelationsEcologists", "lizardRelationsDiplomats"]
 		}, {
 			//Relations policy: unlocked at 20 standing with nagas.
@@ -1170,6 +1204,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 8000}
 			],
+			effects: {
+				"nagaBlueprintTradeChance": 0,
+				"blueprintCraftRatio":      0
+			},
 			blockedBy: ["nagaRelationsMasons", "nagaRelationsCultists"]
 		}, {
 			//Relations policy: unlocked at 20 standing with nagas.
@@ -1177,6 +1215,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 8000}
 			],
+			effects: {
+				"zigguratTempleEffectPolicy": 0.1
+			},
 			blockedBy: ["nagaRelationsMasons", "nagaRelationsArchitects"]
 		}, {
 			//Relations policy: unlocked at 20 standing with nagas.
@@ -1184,6 +1225,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 8000}
 			],
+			effects: {
+				"quarrySlabCraftBonus": 0.025
+			},
 			blockedBy: ["nagaRelationsCultists", "nagaRelationsArchitects"]
 		}, {
 			//Relations policy: unlocked at 20 standing with sharks.
@@ -1191,6 +1235,13 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 2200}
 			],
+			effects: {
+				"refinePolicyRatio":            0.25,
+				"biolabEnergyRatio":            -0.75,
+				"breweryPolicyManpowerRatio":   0.01,
+				"woodRatio":                    0,
+				"biolabBiofuelScienceMaxRatio": 0.02
+			},
 			blockedBy: ["sharkRelationsScribes", "sharkRelationsMerchants"]
 		}, {
 			//Relations policy: unlocked at 20 standing with sharks.
@@ -1219,6 +1270,11 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 20000}
 			],
+			effects: {
+				"mineralsPolicyRatio": 0,
+				"coalPolicyRatio":     0,
+				"goldPolicyRatio":     0
+			},
 			blockedBy: ["spiderRelationsChemists", "spiderRelationsPaleontologists"]
 		}, {
 			//Relations policy: unlocked at 10 standing with spiders.
@@ -1226,6 +1282,10 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "culture", val: 20000}
 			],
+			effects: {
+				"mintIvoryRatio": 0.15,
+				"oilPolicyRatio": 0.1
+			},
 			blockedBy: ["spiderRelationsChemists", "spiderRelationsGeologists"]
 		}, {
 			name: "scientificCommunism",
@@ -1238,18 +1298,30 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 			prices: [
 				{name: "necrocorn", val: 1}
 			],
+			effects: {
+				"smallDebtPunishmentExemption":   5,
+				"repayDebtOnNecrocornGeneration": 1
+			},
 			blockedBy: ["feedingFrenzy", "upfrontPayment"]
 		}, {
 			name: "upfrontPayment",
 			prices: [
 				{name: "necrocorn", val: 1}
 			],
+			effects: {
+				"pactNecrocornConsumption": 5e-5,
+				"pactNecrocornUpfrontCost": 2
+			},
 			blockedBy: ["siphoning", "feedingFrenzy"]
 		}, {
 			name: "feedingFrenzy",
 			prices: [
 				{name: "necrocorn", val: 1}
 			],
+			effects: {
+				"feedEldersEfficiencyRatio":       0,
+				"necrocornCorruptionInterference": -0.1
+			},
 			blockedBy: ["siphoning", "upfrontPayment"]
 		}/*, {
 			name: "spaceBasedTerraforming",
