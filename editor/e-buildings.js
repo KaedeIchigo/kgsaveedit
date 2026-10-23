@@ -102,7 +102,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 					stageName: "hydroplant",
 					prices: [
 						{name: "titanium", val: 2500},
-						{name: "concrate", val: 100}
+						{name: "concrate", val: 100},
+						{name: "gear",     val: 5}
 					],
 					priceRatio: 1.15,
 					stageUnlocked: false,
@@ -197,8 +198,9 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 				}, {
 					stageName: "dataCenter",
 					prices: [
-						{name: "steel",    val: 100},
-						{name: "concrate", val: 10}
+						{name: "steel",     val: 100},
+						{name: "concrate",  val: 10},
+						{name: "microchip", val: 5}
 					],
 					stageUnlocked: false,
 					stageRequires: {tech: ["electronics"]},
@@ -319,7 +321,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			prices: [
 				{name: "science", val: 1500},
 				{name: "slab",    val: 100},
-				{name: "alloy",   val: 25}
+				{name: "alloy",   val: 25},
+				{name: "plastic", val: 15}
 			],
 			priceRatio: 1.10,
 			requires: {tech: ["biology"]},
@@ -1413,7 +1416,8 @@ dojo.declare("classes.KGSaveEdit.BuildingsManager", [classes.KGSaveEdit.UI.Tab, 
 			description: "buildings.aicore.desc",
 			prices: [
 				{name: "antimatter", val: 125},
-				{name: "science",    val: 500000}
+				{name: "science",    val: 500000},
+				{name: "microchip",  val: 25}
 			],
 			priceRatio: 1.15,
 			unlockRatio: 0.01,

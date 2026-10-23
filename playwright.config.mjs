@@ -2,7 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 // 127.0.0.1 rather than localhost so the dev-mode default is exercised; individual
 // tests force the deployed code path with "?dev=0".
-const BASE_URL = "http://127.0.0.1:8080";
+// KG_PORT lets a run move off 8080 when something else already holds it.
+const PORT = process.env.KG_PORT || "8080";
+const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
 	testDir: "./tests",
@@ -28,7 +30,7 @@ export default defineConfig({
 	webServer: {
 		// The editor fetches its locale JSON over XHR, so it must be served over
 		// HTTP - opening editor.html as a file:// URL will not work.
-		command: "npx http-server . -p 8080 -c-1 --silent",
+		command: `npx http-server . -p ${PORT} -c-1 --silent`,
 		url: `${BASE_URL}/editor.html`,
 		reuseExistingServer: !process.env.CI,
 		timeout: 60_000

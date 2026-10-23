@@ -1766,7 +1766,7 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			prices: [
 				{name: "plastic", val: 50},
 				{name: "gold",    val: 1000},
-				{name: "spice",   val: 1000}
+				{name: "spice",   val: 750}
 			],
 			unlocked: false,
 			requires: {tech: ["electronics"]},
@@ -1793,8 +1793,8 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 		}, {
 			name: "compedium",
 			prices: [
-				{name: "science",    val: 10000},
-				{name: "manuscript", val: 50}
+				{name: "science",    val: 9000},
+				{name: "manuscript", val: 55}
 			],
 			unlocked: false,
 			requires: {tech: ["philosophy"]},
@@ -1870,6 +1870,28 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 			],
 			requires: {buildings: ["brewery"]}
 		}, {
+			//Added to the public game in 1.6.x; previously beta-only, which is why
+			//these three used to show up as unhandled save data.
+			name: "zebraTrappers",
+			prices: [
+				{name: "science",  val: 1000},
+				{name: "alloy",    val: 100},
+				{name: "tMythril", val: 10}
+			],
+			effects: {
+				"preparationRatio": 1
+			},
+			upgrades: {buildings: ["zebraOutpost"]}
+		}, {
+			name: "reforgedOutposts",
+			prices: [
+				{name: "science",    val: 1500},
+				{name: "coal",       val: 10000},
+				{name: "bloodstone", val: 50},
+				{name: "tMythril",   val: 10}
+			],
+			upgrades: {buildings: ["zebraForge"]}
+		}, {
 			name: "whispers",
 			prices: [
 				{name: "tMythril", val: 5}
@@ -1893,6 +1915,16 @@ dojo.declare("classes.KGSaveEdit.WorkshopManager", [classes.KGSaveEdit.UI.Tab, c
 				{name: "bloodstone", val: 25},
 				{name: "tMythril",   val: 10}
 			]
+		}, {
+			//Gated behind bloodstoneInstitute plus the railgun upgrade, which is
+			//an evaluateLocks check the editor does not model - toggled by hand.
+			name: "rangefinders",
+			prices: [
+				{name: "science",   val: 100000},
+				{name: "tMythril",  val: 50},
+				{name: "microchip", val: 25}
+			],
+			upgrades: {buildings: ["zebraForge"]}
 		}
 	],
 

@@ -1089,6 +1089,16 @@ dojo.declare("classes.KGSaveEdit.EffectsManager", null, {
 				calculation: "constant"
 			},
 
+			//---- added in Kittens Game 1.6.x (Iron Will expansion) ----
+			"preparationRatio": {
+				type: "ratio"
+			},
+
+			"missingZebraPreparations": {
+				type: "fixed",
+				calculation: "nonProportional"
+			},
+
 			//---- ported from game.js effectMeta (Kittens Game 1.5.0.3) ----
 			//Effects the editor knew nothing about rendered as raw identifiers in
 			//tooltips. Titles resolve via "effectsMgr.statics.<name>.title".
@@ -1377,7 +1387,7 @@ dojo.declare("classes.KGSaveEdit.SaveEdit", classes.KGSaveEdit.core, {
 		},
 		DARK_PARACOSM: {
 			beta: true,
-			main: false
+			main: true
 		}
 	},
 
