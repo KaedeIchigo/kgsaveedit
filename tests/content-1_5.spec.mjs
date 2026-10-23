@@ -160,6 +160,6 @@ test.describe("Kittens Game 1.5 content", () => {
 	test("declared target version matches the ported content", async ({ page }) => {
 		await openEditor(page, "?dev=0");
 		const version = await page.evaluate(() => window.editorVersion);
-		expect(version).toBe("1.5.0.3");
+		expect(version).toBe("1.6.1.6");
 	});
 });

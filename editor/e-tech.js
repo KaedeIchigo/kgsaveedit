@@ -420,8 +420,9 @@ dojo.declare("classes.KGSaveEdit.ScienceManager", [classes.KGSaveEdit.UI.Tab, cl
 		}, {
 			name: "antimatter",
 			prices: [
-				{name: "science", val: 500000},
-				{name: "relic",   val: 1}
+				{name: "science",    val: 500000},
+				{name: "relic",      val: 1},
+				{name: "antimatter", val: 1}
 			],
 			// unlocks: {tech: ["terraformation"], upgrades: ["amReactors", "amBases", "amDrive", "amFission"]},
 			requires: {tech: ["superconductors"]}

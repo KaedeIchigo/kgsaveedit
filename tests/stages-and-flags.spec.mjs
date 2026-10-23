@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { openEditor } from "./helpers.mjs";
 
 /**
- * Feature flag values as shipped in Kittens Game 1.5.0.3 (game.js featureFlags).
+ * Feature flag values as shipped in Kittens Game 1.6.1.6 (game.js featureFlags).
  *
  * These are asserted as *data* rather than through getFeatureFlag(), on purpose.
  * getFeatureFlag() short-circuits to true for localhost/127.0.0.1/file:, and the
@@ -18,7 +18,7 @@ const EXPECTED_FLAGS = {
 	QUEUE: { beta: true, main: true },
 	QUEUE_REDSHIFT: { beta: true, main: true },
 	UNICORN_TEARS_CHALLENGE: { beta: true, main: true },
-	DARK_PARACOSM: { beta: true, main: false }
+	DARK_PARACOSM: { beta: true, main: true }
 };
 
 test.describe("feature flags", () => {
