@@ -37,16 +37,17 @@ takes precedence and this fork will defer to it.
 
 ## Status
 
-Currently targets Kittens Game version **1.5.0.3** (July 2026). Upstream left the
-editor at 1.4.9.0.r674 (July 2023); the content added across 1.4.9.4, 1.5.0.0,
-1.5.0.1, 1.5.0.2 and 1.5.0.3 has since been ported in.
+Currently targets Kittens Game version **1.6.1.6** (August 2026). Upstream left the
+editor at 1.4.9.0.r674 (July 2023); everything added through 1.4.9.4, the 1.5.0.x
+series and 1.6.1.x has since been ported in.
 
-The save format itself is unchanged across that range — the game and the editor both
+The save format is unchanged across that whole range — the game and the editor both
 use `saveVersion: 15` — so saves from any of those versions load and round-trip.
 
-The target version is declared in one place — the `#gameVersionSpan` element in
-[`editor.html`](editor.html) — and is read at runtime into `window.editorVersion`,
-which also drives cache-busting for module and locale fetches.
+Content parity is checked against the game's own source rather than by hand: every
+data list, price list and feature flag is diffed, which is how the remaining balance
+drift (Bio Lab's plastic cost, Data Center microchips, the compendium price change)
+was found.
 
 ## Running it locally
 
@@ -86,6 +87,25 @@ The source files already carried `/* global ... */` directives but no committed 
 config, so one has been added in [`eslint.config.mjs`](eslint.config.mjs) to match how
 the code is actually written. Indentation rules are deliberately left to
 [`.editorconfig`](.editorconfig).
+
+### Parity audit
+
+```bash
+git clone https://github.com/nuclear-unicorn/kittensgame.git ../kittensgame
+npm run audit -- ../kittensgame
+```
+
+Diffs this editor against a checkout of the game itself: every data list, every
+price list (including per-stage prices), feature flags, the effect table, which
+achievements are starred, which buildings have stages, the console filters, the
+shape of the saved `game` block, and `saveVersion`. Exits non-zero on any
+divergence.
+
+This exists because the editor hand-duplicates the game's data and maths, so an
+upstream balance change is invisible until someone notices their numbers are
+wrong. The audit turns that into something you can run. It found the Bio Lab
+plastic cost, the Data Center microchip cost, the compendium price change and
+the Spaceport starchart ratio, none of which had been reported.
 
 ### Tests
 
